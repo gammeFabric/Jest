@@ -28,18 +28,12 @@ public class SuitCard extends Card {
 
     @Override
     public int getFaceValue() {
-        switch (faces) {
-            case ACE:
-                return 1;
-            case TWO:
-                return 2;
-            case THREE:
-                return 3;
-            case FOUR:
-                return 4;
-            default:
-                return 0;
-        }
+        return faces.getFaceValue();
+    }
+
+
+    public int getSuitValue(){
+        return suit.getStrength();
     }
 
 

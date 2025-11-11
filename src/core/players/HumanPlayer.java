@@ -38,8 +38,115 @@ public class HumanPlayer extends Player {
         hand.clear();
         return playerOffer;
     }
+//
+//    public Card chooseCard(ArrayList<Offer> availableOffers) {
+//        System.out.println(name + ", please choose a card from other players' offers: ");
+//        System.out.println("Available offers (you can't take from your own offer): ");
+//
+//
+//        // We get all the complete offer including a player's offer who chooses a card
+//        ArrayList<Offer> completeOffers = new ArrayList<>();
+//        for (Offer offer : availableOffers) {
+//            if (offer != null && offer.isComplete()) {
+//                completeOffers.add(offer);
+//            }
+//        }
+//
+//        // Check if we have available offer
+//        if (completeOffers.isEmpty()) {
+//            System.out.println("No available offers to choose from.");
+//            return null;
+//        }
+//
+//        // We make a list with selectableOffers
+//        ArrayList<Offer> selectableOffers = new ArrayList<>();
+//        for (Offer offer : completeOffers) {
+//            if (offer.getOwner() != this) {
+//                selectableOffers.add(offer);
+//            }
+//        }
+//
+//        // Check if no others offers - so you have to take from your own offer
+//        if (selectableOffers.isEmpty()) {
+//            for (Offer offer : completeOffers) {
+//                if (offer.getOwner() == this) {
+//                    selectableOffers.add(offer);
+//                    System.out.println("You are the last player — you must take a card from your own offer!");
+//                    break;
+//                }
+//            }
+//        }
+//
+//        // Bug when we don't have any offer available to select from
+//        if  (selectableOffers.isEmpty()) {
+//            System.out.println("No available offers to choose from.");
+//            return null;
+//        }
+//
+//        // Available offers print info
+//        System.out.println("Available offers:");
+//        for (int i = 0; i < selectableOffers.size(); i++) {
+//            Offer offer = selectableOffers.get(i);
+//            System.out.printf("%d) Offer by %s - Face up: %s, Face down: [hidden]%n",
+//                    i + 1,
+//                    offer.getOwner().getName(),
+//                    offer.getFaceUpCard());
+//        }
+//
+//        // User makes a choice of an offer
+//
+//        int choice = -1;
+//
+//        while (choice < 0 || choice > selectableOffers.size()) {
+//            System.out.print("Please choose the number of the offer to choose from: ");
+//            try {
+//                choice = scanner.nextInt();
+//            } catch (InputMismatchException e) {
+//                scanner.nextLine();
+//                System.out.println("Please enter a valid number");
+//            }
+//        }
+//
+//        Offer chosenOffer = selectableOffers.get(choice - 1);
+//        Player chosenOwner = chosenOffer.getOwner();
+//        this.nextPlayer = chosenOwner;
+//
+//
+//        // User makes a choice of a card
+//
+//        int cardChoice = 0;
+//        Card takenCard = null;
+//        boolean isFaceUp = false;
+//
+//        while (cardChoice != 1 && cardChoice != 2){
+//            System.out.print("Take 1) Face-up card or 2) Face-down card?");
+//            try{
+//                cardChoice = scanner.nextInt();
+//            } catch (InputMismatchException e) {
+//                scanner.nextLine();
+//                System.out.println("Please enter 1 or 2.");
+//            }
+//        }
+//
+//        if (cardChoice == 1) {
+//            isFaceUp = true;
+//        }
+//
+//        takenCard = (cardChoice == 1) ? chosenOffer.getFaceUpCard() : chosenOffer.getFaceDownCard();
+//
+//        if (takenCard == null) {
+//            System.out.println("No such card available.");
+//            return null;
+//        }
+//
+//        chosenOffer.takeCard(isFaceUp);
+//        this.jest.addCard(takenCard);
+//
+//        return takenCard;
+//
+//    }
 
-    public Card chooseCard(ArrayList<Offer> availableOffers) {
+    public void chooseCard(ArrayList<Offer> availableOffers) {
         System.out.println(name + ", please choose a card from other players' offers: ");
         System.out.println("Available offers (you can't take from your own offer): ");
 
@@ -55,7 +162,6 @@ public class HumanPlayer extends Player {
         // Check if we have available offer
         if (completeOffers.isEmpty()) {
             System.out.println("No available offers to choose from.");
-            return null;
         }
 
         // We make a list with selectableOffers
@@ -78,9 +184,8 @@ public class HumanPlayer extends Player {
         }
 
         // Bug when we don't have any offer available to select from
-        if  (selectableOffers.isEmpty()) {
+        if (selectableOffers.isEmpty()) {
             System.out.println("No available offers to choose from.");
-            return null;
         }
 
         // Available offers print info
@@ -118,9 +223,9 @@ public class HumanPlayer extends Player {
         Card takenCard = null;
         boolean isFaceUp = false;
 
-        while (cardChoice != 1 && cardChoice != 2){
+        while (cardChoice != 1 && cardChoice != 2) {
             System.out.print("Take 1) Face-up card or 2) Face-down card?");
-            try{
+            try {
                 cardChoice = scanner.nextInt();
             } catch (InputMismatchException e) {
                 scanner.nextLine();
@@ -136,13 +241,9 @@ public class HumanPlayer extends Player {
 
         if (takenCard == null) {
             System.out.println("No such card available.");
-            return null;
         }
 
         chosenOffer.takeCard(isFaceUp);
         this.jest.addCard(takenCard);
-
-        return takenCard;
-
     }
-}
+    }

@@ -11,6 +11,11 @@ public class Joker extends Card {
     }
 
     @Override
+    public int getSuitValue() {
+        return 0;
+    }
+
+    @Override
     public String toString() {
         return "Joker";
     }

@@ -19,4 +19,5 @@ public abstract class Card {
 
     public abstract int getFaceValue();
 
+    public abstract int getSuitValue();
 }

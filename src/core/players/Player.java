@@ -59,6 +59,7 @@ public abstract class Player {
     }
 
     public abstract Offer makeOffer();
+    public abstract void chooseCard(ArrayList<Offer> availableOffers);
 
 
     // nextPlayer test
@@ -73,6 +74,10 @@ public abstract class Player {
 
     public void addToHand(Card card){
         this.hand.add(card);
+    }
+
+    public Card getLastCard(){
+        return this.jest.getCards().getLast();
     }
 
 }
