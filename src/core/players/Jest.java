@@ -20,5 +20,10 @@ public class Jest {
 
     public void accept(ScoreVisitor visitor) {
         visitor.visit(this);
-    }    
+    }
+
+    @Override
+    public String toString() {
+        return cards.toString();
+    }
 }

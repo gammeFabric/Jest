@@ -1,6 +1,7 @@
 package core.players;
 
 import core.cards.Card;
+import java.util.ArrayList;
 
 public class Offer {
     private Player owner;
@@ -31,5 +32,30 @@ public class Offer {
 
     public boolean isComplete() {
         return faceUpCard != null && faceDownCard != null;
+    }
+
+
+    public Card getFaceUpCard() {return faceUpCard;}
+
+    public Card getFaceDownCard() {return faceDownCard;}
+
+    public void setFaceUpCard(Card faceUpCard) {
+        this.faceUpCard = faceUpCard;
+    }
+
+    public void setFaceDownCard(Card faceDownCard) {
+        this.faceDownCard = faceDownCard;
+    }
+
+    public ArrayList<Card> getOfferedCard(){
+        ArrayList<Card> cards = new ArrayList<>();
+        cards.add(faceUpCard);
+        cards.add(faceDownCard);
+        return cards;
+    }
+
+    @Override
+    public String toString() {
+        return faceUpCard + " and one hidden card";
     }
 }
