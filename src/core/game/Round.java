@@ -14,12 +14,21 @@ public class Round {
     private Player currentPlayer;
     private boolean isOver;
     private Deck deck;
+    private static int roundCounter = 0;
+
+    // test
+    private ArrayList<Player> alreadyPlayed;
 
 
     public Round(ArrayList<Player> players,  Deck deck) {
         this.players = players;
         this.deck = deck;
         this.offers = new ArrayList<>();
+        roundCounter++;
+    }
+
+    public static int getRoundCounter() {
+        return roundCounter;
     }
 
     public ArrayList<Offer> getAvailableOffers() {
@@ -32,8 +41,12 @@ public class Round {
         return availableOffers;
     }
 
-    public void StartRound(){
+    public void playRound(){
         System.out.println("Round Started");
+            if (deck.getTrophies().size() != 2) {
+                deck.chooseTrophies(players.size());
+                deck.trophiesInfo();
+            }
 
         System.out.println("Deal cards to players");
         dealCards();
@@ -42,11 +55,12 @@ public class Round {
         makeOffers();
 
         System.out.println("Determine starting player");
-        determineStartingPlayer();
+        Player startingPlayer  = determineStartingPlayer();
 
+        System.out.println("Playing choosing phase");
+        playChoosingPhase(startingPlayer);
 
-
-
+        endRound();
 
     }
 
@@ -86,34 +100,118 @@ public class Round {
 
     public void playChoosingPhase(Player startingPlayer){
         System.out.println("\n--- CHOOSING CARDS PHASE ---");
-
         Player currentPlayer = startingPlayer;
         int turns = 0;
         int maxTurns = players.size();
+        alreadyPlayed = new ArrayList<>();
         while (turns < maxTurns) {
             System.out.println("\nIt's " + currentPlayer.getName() + "'s turn to choose a card.");
-            currentPlayer.chooseCard(getAvailableOffers());
-            Player nextPlayer = currentPlayer.getNextPlayer();
-
-            // need to realise what to do if nextPlayer == null
-            //if (nextPlayer == null) {
-            //    nextPlayer = players.get(0);
-            //}
-
-            System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() +
-                    " → next player: " + nextPlayer.getName());
-            currentPlayer = nextPlayer;
+            Offer takenOffer = currentPlayer.chooseCard(getAvailableOffers());
+            alreadyPlayed.add(currentPlayer);
+            if (alreadyPlayed.size() <= maxTurns - 1) {
+                Player nextPlayer = getNextPlayer(alreadyPlayed, takenOffer);
+                System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() +
+                        " → next player: " + nextPlayer.getName());
+                currentPlayer = nextPlayer;
+            }
+            else{
+                isOver = true;
+                System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() +
+                        " → from: " + takenOffer.getOwner().getName());
+            }
             turns++;
         }
     }
+
+    private Player getNextPlayer(ArrayList<Player> alreadyPlayed, Offer takenOffer){
+        Player nextPlayer = takenOffer.getOwner();
+        if (alreadyPlayed.contains(nextPlayer)) {
+            nextPlayer = compareFaceUpCards(alreadyPlayed);
+        }
+        return nextPlayer;
+    }
+
+    private Player compareFaceUpCards(ArrayList<Player> players){
+        ArrayList<Player> playersToCompare = new ArrayList<>(this.players);
+        ArrayList<Offer> offersToCompare = new ArrayList<>();
+        for (Player player : players) {
+            if (this.alreadyPlayed.contains(player)) {
+                playersToCompare.remove(player);
+            }
+            else
+                offersToCompare.add(player.getOffer());
+        }
+
+        Offer bestOffer = offersToCompare.stream()
+                .filter(offer -> offer.getFaceUpCard() != null)
+                .max(Comparator
+                        .comparingInt((Offer offer) -> offer.getFaceUpCard().getFaceValue()) // value comparator
+                        .thenComparingInt(offer -> offer.getFaceUpCard().getSuitValue()) // tie-breaking by Suit
+                )
+                .orElse(null);
+
+        if (bestOffer == null) {
+            System.out.println("No valid offers found. Defaulting to first player available.");
+            return playersToCompare.getFirst();
+        }
+
+        return bestOffer.getOwner();
+
+    }
+
+    public void returnRemainingCardsToDeck(){
+        for (Offer offer : offers) {
+            if (offer.isComplete()) {
+                continue;
+            }
+            if (offer.getFaceUpCard() != null) {
+                deck.addCard(offer.getFaceUpCard());
+                offer.setFaceUpCard(null);
+            }
+            if (offer.getFaceDownCard() != null) {
+                deck.addCard(offer.getFaceDownCard());
+                offer.setFaceDownCard(null);
+            }
+        }
+
+    }
+
+    public void endRound(){
+        returnRemainingCardsToDeck();
+        System.out.println("Round has ended");
+        isOver = true;
+    }
+}
+
+
+    // Надо пофиксит выбор следующего игрока (мб добавить флаг проверки взяли ли у игрока карту)
+//    public void playChoosingPhase(Player startingPlayer){
+//        System.out.println("\n--- CHOOSING CARDS PHASE ---");
+//
+//        Player currentPlayer = startingPlayer;
+//        int turns = 0;
+//        int maxTurns = players.size();
+//        while (turns < maxTurns) {
+//            System.out.println("\nIt's " + currentPlayer.getName() + "'s turn to choose a card.");
+//            currentPlayer.chooseCard(getAvailableOffers());
+//            Player nextPlayer = currentPlayer.getNextPlayer();
+//
+//            // need to realise what to do if nextPlayer == null
+//            //if (nextPlayer == null) {
+//            //    nextPlayer = players.get(0);
+//            //}
+//
+//            System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() +
+//                    " → next player: " + nextPlayer.getName());
+//            currentPlayer = nextPlayer;
+//            turns++;
+//        }
+//    }
 
 
 //    public void nextTurn();
 //    public boolean isRoundComplete();
 //    public Player getCurrentPlayer() {}
-//    public Player getNextPlayer(Player currentPlayer, Player takenFrom);
 //    public void endRound();
-//    public void dealCards(Deck deck, ArrayList<Player> players);
 
 
-}

@@ -1,5 +1,5 @@
 package core.players;
 
 public interface ScoreVisitor {
-    int visit(Jest jest);
+    void visit(Jest jest);
 }

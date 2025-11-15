@@ -2,11 +2,19 @@ package core.cards;
 
 import core.players.Player;
 
+import java.util.ArrayList;
+
 public abstract class Card {
     protected boolean isTrophy;
+    protected TrophyType trophyType;
+    protected Suit trophySuit;
+    protected Faces trophyFace;
 
     public Card(boolean isTrophy) {
         this.isTrophy = isTrophy;
+        this.trophyType = TrophyType.NONE;
+        this.trophyFace = null;
+        this.trophySuit = null;
     }
 
     public boolean isTrophy(){
@@ -15,6 +23,58 @@ public abstract class Card {
 
     public void setTrophy(boolean isTrophy){
         this.isTrophy = isTrophy;
+    }
+
+    public TrophyType getTrophyType(){
+        return trophyType;
+    }
+
+    public void setTrophyType(TrophyType trophy){
+        this.trophyType = trophy;
+    }
+
+    public void setTrophySuit(Suit suit){
+        this.trophySuit = suit;
+    }
+
+    public void setTrophyFace(Faces trophyFace){
+        this.trophyFace = trophyFace;
+    }
+
+    private boolean hasTrophySuit() {
+        return trophySuit != null;
+    }
+    private boolean hasTrophyFace() {
+        return trophyFace != null;
+    }
+
+    public String trophyInfo() {
+        if (trophyType == null || trophyType == TrophyType.NONE) {
+            return "Not a trophy";
+        }
+        if (hasTrophySuit()) {
+            return trophyType + " of " + trophySuit;
+        }
+
+        if (hasTrophyFace()) {
+            return trophyType + " of " + trophyFace;
+        }
+
+        return trophyType.toString();
+
+    }
+
+    public void assignTrophyType(){
+        if (this instanceof Joker) {
+            this.trophyType = TrophyType.BEST_JEST;
+        }
+        if (this instanceof SuitCard) {
+            ArrayList<Card> group1 = new ArrayList<>();
+            ArrayList<Card> group2 = new ArrayList<>();
+            ArrayList<Card> group3 = new ArrayList<>();
+
+
+        }
     }
 
     public abstract int getFaceValue();

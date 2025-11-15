@@ -13,8 +13,9 @@ public class VirtualPlayer extends Player {
     }
 
     @Override
-    public void chooseCard(ArrayList<Offer> availableOffers) {
+    public Offer chooseCard(ArrayList<Offer> availableOffers) {
         System.out.println("Test");
+        return null;
     }
 
 

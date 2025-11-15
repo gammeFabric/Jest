@@ -146,7 +146,7 @@ public class HumanPlayer extends Player {
 //
 //    }
 
-    public void chooseCard(ArrayList<Offer> availableOffers) {
+    public Offer chooseCard(ArrayList<Offer> availableOffers) {
         System.out.println(name + ", please choose a card from other players' offers: ");
         System.out.println("Available offers (you can't take from your own offer): ");
 
@@ -213,8 +213,6 @@ public class HumanPlayer extends Player {
         }
 
         Offer chosenOffer = selectableOffers.get(choice - 1);
-        Player chosenOwner = chosenOffer.getOwner();
-        this.nextPlayer = chosenOwner;
 
 
         // User makes a choice of a card
@@ -245,5 +243,6 @@ public class HumanPlayer extends Player {
 
         chosenOffer.takeCard(isFaceUp);
         this.jest.addCard(takenCard);
+        return chosenOffer;
     }
     }

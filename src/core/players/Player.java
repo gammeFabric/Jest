@@ -13,7 +13,7 @@ public abstract class Player {
     protected int score;
 
     // nextPlayer test
-    protected Player nextPlayer;
+//    protected Player nextPlayer;
 
     public Player(String name, boolean isVirtual) {
         this.name = name;
@@ -23,7 +23,7 @@ public abstract class Player {
         this.isVirtual = isVirtual;
         this.score = 0;
         // nextPlayer test
-        this.nextPlayer = null;
+//        this.nextPlayer = null;
     }
 
     public String getName() {
@@ -59,18 +59,18 @@ public abstract class Player {
     }
 
     public abstract Offer makeOffer();
-    public abstract void chooseCard(ArrayList<Offer> availableOffers);
+    public abstract Offer chooseCard(ArrayList<Offer> availableOffers);
 
 
     // nextPlayer test
 
-    public void setNextPlayer(Player nextPlayer) {
-        this.nextPlayer = nextPlayer;
-    }
-
-    public Player getNextPlayer() {
-        return nextPlayer;
-    }
+//    public void setNextPlayer(Player nextPlayer) {
+//        this.nextPlayer = nextPlayer;
+//    }
+//
+//    public Player getNextPlayer() {
+//        return nextPlayer;
+//    }
 
     public void addToHand(Card card){
         this.hand.add(card);

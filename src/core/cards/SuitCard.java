@@ -42,4 +42,15 @@ public class SuitCard extends Card {
         return this.faces + " " + this.suit;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SuitCard suitCard = (SuitCard) o;
+
+        return suit == suitCard.suit &&
+                faces == suitCard.faces;
+    }
+
 }
