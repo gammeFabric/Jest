@@ -49,8 +49,9 @@ public class Offer {
 
     public ArrayList<Card> getOfferedCard(){
         ArrayList<Card> cards = new ArrayList<>();
-        cards.add(faceUpCard);
-        cards.add(faceDownCard);
+        // test for get offered cards
+        if (faceUpCard != null) cards.add(faceUpCard);
+        if (faceDownCard != null) cards.add(faceDownCard);
         return cards;
     }
 

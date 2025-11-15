@@ -43,7 +43,7 @@ public class Round {
 
     public void playRound(){
         System.out.println("Round Started");
-            if (deck.getTrophies().size() != 2) {
+            if (deck.getTrophies().isEmpty()) {
                 deck.chooseTrophies(players.size());
                 deck.trophiesInfo();
             }
@@ -60,7 +60,12 @@ public class Round {
         System.out.println("Playing choosing phase");
         playChoosingPhase(startingPlayer);
 
-        endRound();
+        if (deck.isEmpty()){
+            System.out.println("Deck is empty, finalizing round...");
+        }
+        else{
+            endRound();
+        }
 
     }
 
@@ -180,6 +185,14 @@ public class Round {
         returnRemainingCardsToDeck();
         System.out.println("Round has ended");
         isOver = true;
+    }
+
+    public boolean isOver(){
+        return isOver;
+    }
+
+    public Deck getDeck(){
+        return deck;
     }
 }
 

@@ -80,4 +80,19 @@ public abstract class Player {
         return this.jest.getCards().getLast();
     }
 
+    public void takeRemainingOfferCard(){
+        Card faceUp = offer.getFaceUpCard();
+        Card faceDown = offer.getFaceDownCard();
+
+        if (faceUp != null) {
+            jest.addCard(faceUp);
+            offer.setFaceUpCard(null);
+        }
+
+        if (faceDown != null) {
+            jest.addCard(faceDown);
+            offer.setFaceDownCard(null);
+        }
+    }
+
 }

@@ -106,7 +106,7 @@ public class Game {
     }
 
     public void playGame() {
-        while (!deck.isEmpty()){
+        while (!deck.isEmpty()) {
             currentRound = new Round(players, deck);
             System.out.println("\n=========================");
             System.out.println("      ROUND " + Round.getRoundCounter());
@@ -114,12 +114,17 @@ public class Game {
 
             currentRound.playRound();
             rounds.add(currentRound);
+            if (currentRound.getDeck().isEmpty())
+                break;
         }
         endGame();
     }
 
     public void endGame() {
-
+        for (Player player : players) {
+            player.takeRemainingOfferCard();
+        }
+        System.out.println("Game ended successfully.");
     }
 
     // test assigning Trophies and choose best players
