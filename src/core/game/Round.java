@@ -115,7 +115,8 @@ public class Round {
             alreadyPlayed.add(currentPlayer);
             if (alreadyPlayed.size() <= maxTurns - 1) {
                 Player nextPlayer = getNextPlayer(alreadyPlayed, takenOffer);
-                System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() +
+                // переместить выше sout так как если следующий игрок не тот у кого взяли может быть ошибка с выводом
+                System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() + " from " + takenOffer.getOwner().getName() +
                         " → next player: " + nextPlayer.getName());
                 currentPlayer = nextPlayer;
             }
@@ -131,20 +132,21 @@ public class Round {
     private Player getNextPlayer(ArrayList<Player> alreadyPlayed, Offer takenOffer){
         Player nextPlayer = takenOffer.getOwner();
         if (alreadyPlayed.contains(nextPlayer)) {
-            nextPlayer = compareFaceUpCards(alreadyPlayed);
+            nextPlayer = compareFaceUpCards();
         }
         return nextPlayer;
     }
 
-    private Player compareFaceUpCards(ArrayList<Player> players){
+    private Player compareFaceUpCards(){
         ArrayList<Player> playersToCompare = new ArrayList<>(this.players);
         ArrayList<Offer> offersToCompare = new ArrayList<>();
         for (Player player : players) {
             if (this.alreadyPlayed.contains(player)) {
                 playersToCompare.remove(player);
             }
-            else
+            else{
                 offersToCompare.add(player.getOffer());
+            }
         }
 
         Offer bestOffer = offersToCompare.stream()
@@ -155,6 +157,8 @@ public class Round {
                 )
                 .orElse(null);
 
+
+        // if it's last player and only one offer to compare it prints this
         if (bestOffer == null) {
             System.out.println("No valid offers found. Defaulting to first player available.");
             return playersToCompare.getFirst();
@@ -196,30 +200,6 @@ public class Round {
     }
 }
 
-
-    // Надо пофиксит выбор следующего игрока (мб добавить флаг проверки взяли ли у игрока карту)
-//    public void playChoosingPhase(Player startingPlayer){
-//        System.out.println("\n--- CHOOSING CARDS PHASE ---");
-//
-//        Player currentPlayer = startingPlayer;
-//        int turns = 0;
-//        int maxTurns = players.size();
-//        while (turns < maxTurns) {
-//            System.out.println("\nIt's " + currentPlayer.getName() + "'s turn to choose a card.");
-//            currentPlayer.chooseCard(getAvailableOffers());
-//            Player nextPlayer = currentPlayer.getNextPlayer();
-//
-//            // need to realise what to do if nextPlayer == null
-//            //if (nextPlayer == null) {
-//            //    nextPlayer = players.get(0);
-//            //}
-//
-//            System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() +
-//                    " → next player: " + nextPlayer.getName());
-//            currentPlayer = nextPlayer;
-//            turns++;
-//        }
-//    }
 
 
 //    public void nextTurn();

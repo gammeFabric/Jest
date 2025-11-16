@@ -63,6 +63,8 @@ public class ScoreVisitorImpl implements ScoreVisitor {
     private void applyAceRule() {
         // if we have solo Ace with solo suit in Jest, he turns into 5 points (1 + 4)
         for (Suit suit : Suit.values()) {
+            // check if a player has a Joker to apply heart rules
+            if (suit == Suit.HEARTS && !hasJoker) continue;
             List<Faces> faces = suitMap.get(suit);
             if (faces.contains(Faces.ACE) && faces.size() == 1) {
                 totalScore += 4; // add 4 because visitor has already added 1 for an Ace

@@ -127,6 +127,9 @@ public class Game {
 
         assignTrophies();
         calculateAllScores();
+        for (Player player : players) {
+            System.out.println(player.getName() + " has " + player.getScore() + " points.");
+        }
         Player winner = getWinner();
         if (winner != null) {
             System.out.println("Winner is " + winner.getName());
