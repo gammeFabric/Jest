@@ -19,7 +19,12 @@ public class Jest {
     }
 
     public void accept(ScoreVisitor visitor) {
-        visitor.visit(this);
+        for (Card card : cards) {
+            visitor.visit(card);
+        }
+        if (visitor instanceof ScoreVisitorImpl) {
+            ((ScoreVisitorImpl) visitor).countJestScore(this);
+        }
     }
 
     @Override

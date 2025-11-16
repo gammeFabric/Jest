@@ -1,10 +1,8 @@
 package core.game;
 
-import core.cards.Card;
-import core.cards.Deck;
-import core.players.HumanPlayer;
-import core.players.Player;
-import core.players.VirtualPlayer;
+import core.cards.*;
+import core.players.*;
+
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -125,20 +123,270 @@ public class Game {
             player.takeRemainingOfferCard();
         }
         System.out.println("Game ended successfully.");
+        System.out.println("We can assign all trophies to get the winner");
+
+        assignTrophies();
+        calculateAllScores();
+        Player winner = getWinner();
+        if (winner != null) {
+            System.out.println("Winner is " + winner.getName());
+        }
+        else  {
+            System.out.println("There is no winner");
+        }
+
+    }
+
+    private Player getWinner(){
+        int maxScore = -999;
+        Player winner = null;
+        for (Player player : players) {
+            int score = player.getScore();
+            if (score > maxScore) {
+                maxScore = score;
+                winner = player;
+            }
+        }
+        return winner;
+    }
+
+    private void calculateAllScores() {
+        ScoreVisitorImpl visitor = new ScoreVisitorImpl();
+        for (Player player : players) {
+            visitor.resetScore();
+            player.calculateScore(visitor);
+        }
     }
 
     // test assigning Trophies and choose best players
 
-//    private void assignTrophies() {
-//        if (trophies == null || trophies.isEmpty()) return;
-//
-//        for (Card trophy : trophies) {
-//            Player winner = determineTrophyWinner(trophy);
-//            if (winner != null) {
-//                winner.getJest().addCard(trophy);
-//            }
-//        }
-//    }
+    private void assignTrophies() {
+        if (trophies == null || trophies.isEmpty()) return;
+
+        for (Card trophy : trophies) {
+            Player winner = determineTrophyWinner(trophy);
+            if (winner != null) {
+                winner.getJest().addCard(trophy);
+            }
+        }
+    }
+
+    private Player determineTrophyWinner(Card trophy) {
+        TrophyType tType  = trophy.getTrophyType();
+        return switch (tType) {
+            case HIGHEST_FACE -> evaluateHighestFace(trophy.getTrophySuit());
+            case LOWEST_FACE -> evaluateLowestFace(trophy.getTrophySuit());
+            case MAJORITY_FACE_VALUE -> evaluateMajorityFaceValue(trophy.getTrophyFace());
+            case JOKER -> evaluateJokerTrophy();
+            case BEST_JEST -> evaluateBestJest();
+            case BEST_JEST_NO_JOKER -> evaluateBestJestWithoutJoker();
+            default -> null;
+        };
+    }
+
+    // test to check who is trophy winner
+
+    private Player evaluateHighestFace(Suit suit) {
+        int bestFaceValue = 0;
+        Player best = null;
+        ArrayList<Player> ties = new ArrayList<>();
+        for (Player player : players) {
+            for (Card card: player.getJest().getCards()){
+                // МОЖЕТ БЫТЬ ОШИБКА + функционал если у нас будет больше карт
+                if (suit.getStrength() == card.getSuitValue()){
+                    int val = card.getFaceValue();
+                    if (val > bestFaceValue) {
+                        bestFaceValue = val;
+                        best = player;
+                        ties.clear();
+                        ties.add(player);
+                    }
+                    else if (val == bestFaceValue){
+                        if(!ties.contains(player)){
+                            ties.add(player);
+                        }
+                    }
+                }
+            }
+        }
+        if (ties.isEmpty()) return null;
+        if (ties.size() == 1) return ties.getFirst();
+
+        // can be enhanced by adding more functionalities to break ties
+        return ties.getFirst();
+    }
+
+    private Player evaluateLowestFace(Suit suit) {
+        // 4 because it's max in faceValues in Faces enum
+        int lowestFaceValue = 4;
+        ArrayList<Player> ties = new ArrayList<>();
+        for (Player player : players) {
+            for (Card card: player.getJest().getCards()){
+                if (suit.getStrength() == card.getSuitValue()){
+                    int val = card.getFaceValue();
+                    if (val < lowestFaceValue) {
+                        lowestFaceValue = val;
+                        ties.clear();
+                        ties.add(player);
+                    }
+                    else if (val == lowestFaceValue){
+                        if(!ties.contains(player)){
+                            ties.add(player);
+                        }
+                    }
+                }
+            }
+        }
+        if (ties.isEmpty()) return null;
+        if (ties.size() == 1) return ties.getFirst();
+
+        // can be enhanced by adding more functionalities to break ties
+        return ties.getFirst();
+    }
+
+    private Player evaluateMajorityFaceValue(Faces face) {
+        int cardsCount = 0;
+        int maxCardsCount = -1;
+        ArrayList<Player> ties = new ArrayList<>();
+        for (Player player : players) {
+            for (Card card: player.getJest().getCards()){
+                if(card.getFaceValue() == face.getFaceValue()){
+                    cardsCount++;
+                }
+            }
+            if (cardsCount > maxCardsCount){
+                maxCardsCount = cardsCount;
+                ties.clear();
+                ties.add(player);
+            }
+            else if (cardsCount == maxCardsCount){
+                if(!ties.contains(player)){
+                    ties.add(player);
+                }
+            }
+        }
+        if (ties.isEmpty()) return null;
+        if (ties.size() == 1) return ties.getFirst();
+
+        return breakTieByStrongestSuitAmongFaceValue(ties, face);
+    }
+
+    private Player evaluateJokerTrophy() {
+        for (Player player: players){
+            for (Card card: player.getJest().getCards()) {
+                if (card instanceof Joker)
+                    return player;
+            }
+        }
+        return null;
+    }
+
+    private Player evaluateBestJest() {
+        ArrayList<Player> ties = new ArrayList<>();
+        calculateAllScores();
+        int maxScore = -999;
+        for (Player player : players) {
+            if (player.getScore() > maxScore) {
+                maxScore = player.getScore();
+                ties.clear();
+                ties.add(player);
+            }
+            else if (player.getScore() == maxScore){
+                if (!ties.contains(player)){
+                    ties.add(player);
+                }
+            }
+
+        }
+
+        if (ties.isEmpty()) return null;
+        if (ties.size() == 1) return ties.getFirst();
+
+
+        return breakTieByHighestFaceValue(ties);
+    }
+
+    private Player evaluateBestJestWithoutJoker(){
+        // test method maybe after add flag to check if player has a Joker or not
+        ArrayList<Player> ties = new ArrayList<>();
+        ArrayList<Player> candidates = new ArrayList<>(players);
+        calculateAllScores();
+        int maxScore = -999;
+        for (Player player : players) {
+            for (Card card: player.getJest().getCards()){
+                if (card instanceof Joker){
+                    candidates.remove(player);
+                    break;
+                }
+            }
+        }
+        for (Player player : candidates){
+            if (player.getScore() > maxScore) {
+                maxScore = player.getScore();
+                ties.clear();
+                ties.add(player);
+            }
+            else if (player.getScore() == maxScore){
+                if (!ties.contains(player)){
+                    ties.add(player);
+                }
+            }
+
+        }
+
+        if (ties.isEmpty()) return null;
+        if (ties.size() == 1) return ties.getFirst();
+
+
+        return breakTieByHighestFaceValue(ties);
+    }
+
+    private Player breakTieByHighestFaceValue(ArrayList<Player> ties) {
+        Player best = null;
+        int bestFaceValue = -1;
+        int bestSuitValue = -1;
+        for (Player player : ties) {
+            for (Card card: player.getJest().getCards()){
+                if (card instanceof SuitCard){
+                    int fv = card.getFaceValue();
+                    int sv = card.getSuitValue();
+                    if (fv > bestFaceValue || (fv == bestFaceValue && sv > bestSuitValue)) {
+                        bestFaceValue = fv;
+                        bestSuitValue = sv;
+                        best = player;
+                    }
+                }
+            }
+        }
+
+
+        return best;
+    }
+
+    private Player breakTieByStrongestSuitAmongFaceValue(ArrayList<Player> ties,  Faces face) {
+        Player best = null;
+        int bestStrength = -1;
+        for (Player player : ties) {
+            int playerBestRank = -1;
+            for (Card card: player.getJest().getCards()){
+                if (card instanceof SuitCard && ((SuitCard)card).getFaceValue() == face.getFaceValue()) {
+                    int rank = card.getSuitValue();
+                    playerBestRank = Math.max(playerBestRank, rank);
+                }
+            }
+            if (playerBestRank > bestStrength) {
+                best = player;
+                bestStrength = playerBestRank;
+            }
+            // maybe if we have the same suits we can check for this
+            else if (playerBestRank == bestStrength) {
+                continue;
+            }
+        }
+        return best;
+    }
+
+
 
 
 

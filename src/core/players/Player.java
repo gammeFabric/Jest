@@ -95,4 +95,11 @@ public abstract class Player {
         }
     }
 
+    public void calculateScore(ScoreVisitor visitor) {
+        jest.accept(visitor);
+        if (visitor instanceof ScoreVisitorImpl) {
+            score = ((ScoreVisitorImpl) visitor).getTotalScore();
+        }
+    }
+
 }

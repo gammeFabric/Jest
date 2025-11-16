@@ -1,5 +1,7 @@
 package core.players;
 
+import core.cards.Card;
+
 public interface ScoreVisitor {
-    void visit(Jest jest);
+    int visit(Card card);
 }

@@ -41,6 +41,14 @@ public abstract class Card {
         this.trophyFace = trophyFace;
     }
 
+    public Suit getTrophySuit(){
+        return trophySuit;
+    }
+
+    public Faces getTrophyFace(){
+        return trophyFace;
+    }
+
     private boolean hasTrophySuit() {
         return trophySuit != null;
     }
