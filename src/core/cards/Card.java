@@ -72,19 +72,6 @@ public abstract class Card {
 
     }
 
-    public void assignTrophyType(){
-        if (this instanceof Joker) {
-            this.trophyType = TrophyType.BEST_JEST;
-        }
-        if (this instanceof SuitCard) {
-            ArrayList<Card> group1 = new ArrayList<>();
-            ArrayList<Card> group2 = new ArrayList<>();
-            ArrayList<Card> group3 = new ArrayList<>();
-
-
-        }
-    }
-
     public abstract int getFaceValue();
 
     public abstract int getSuitValue();

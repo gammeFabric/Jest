@@ -43,12 +43,12 @@ public class ScoreVisitorImpl implements ScoreVisitor {
 
     public void countJestScore(Jest jest) {
         resetScore();
-        for (Card c : jest.getCards()) {
-            int val = visit(c);
+        for (Card card : jest.getCards()) {
+            int val = visit(card);
 
             // Diamonds decrease points
-            if (c instanceof SuitCard) {
-                SuitCard sc = (SuitCard) c;
+            if (card instanceof SuitCard) {
+                SuitCard sc = (SuitCard) card;
                 if (sc.getSuit() == Suit.DIAMONDS) val *= -1;
             }
             totalScore += val;
