@@ -72,6 +72,20 @@ public abstract class Card {
 
     }
 
+    public int getCardStrength(){
+        int value = 0;
+        if (this instanceof SuitCard) {
+            value = this.getFaceValue();
+            value += this.getSuitValue();
+        }
+        if (this instanceof Joker){
+            value = 4;
+            value += 4;
+        }
+
+        return value;
+    }
+
     public abstract int getFaceValue();
 
     public abstract int getSuitValue();

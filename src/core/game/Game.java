@@ -4,6 +4,7 @@ import consoleUI.GameView;
 import consoleUI.RoundView;
 import core.cards.*;
 import core.players.*;
+import core.players.strategies.StrategyType;
 
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class Game {
     }
 
     public void addVirtualPlayer(String name) {
-        Player player = new VirtualPlayer(name, true);
+        Player player = new VirtualPlayer(name, true, StrategyType.CAUTIOUS);
         players.add(player);
     }
 

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class HumanView {
+public class HumanView extends PlayerView {
     private final Scanner scanner;
 
     public HumanView() {
@@ -76,6 +76,7 @@ public class HumanView {
     }
 
     // Show a message
+    @Override
     public void showMessage(String message) {
         System.out.println(message);
     }

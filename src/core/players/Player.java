@@ -1,5 +1,6 @@
 package core.players;
 
+import consoleUI.PlayerView;
 import core.cards.Card;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ public abstract class Player {
     protected boolean isVirtual;
     protected int score;
 
+    public PlayerView view;
 
 
     public Player(String name, boolean isVirtual) {
@@ -44,7 +46,7 @@ public abstract class Player {
         return isVirtual;
     }
 
-    protected ArrayList<Card> getHand() {
+    public ArrayList<Card> getHand() {
         return hand;
     }
 
@@ -60,6 +62,10 @@ public abstract class Player {
 
     public void addToHand(Card card){
         this.hand.add(card);
+    }
+
+    public void setOffer(Offer offer) {
+        this.offer = offer;
     }
 
     public void takeRemainingOfferCard(){
