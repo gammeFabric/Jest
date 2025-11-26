@@ -39,7 +39,7 @@ public class VirtualPlayer extends Player {
 
     @Override
     public Offer chooseCard(ArrayList<Offer> availableOffers) {
-        // Implémentation basée sur la stratégie
+        strategy.updateJest(this.jest);
         return strategy.chooseCard(availableOffers);
     }
 

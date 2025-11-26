@@ -36,7 +36,7 @@ public class Game {
     }
 
     public void addVirtualPlayer(String name) {
-        Player player = new VirtualPlayer(name, StrategyType.CAUTIOUS);
+        Player player = new VirtualPlayer(name, StrategyType.RANDOM);
         players.add(player);
     }
 
