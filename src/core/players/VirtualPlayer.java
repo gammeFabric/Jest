@@ -1,19 +1,32 @@
 package core.players;
 
+import consoleUI.VirtualView;
+import core.players.strategies.*;
+
+
 import java.util.ArrayList;
 
 import core.cards.Card;
 import core.players.strategies.PlayStrategy;
 
 public class VirtualPlayer extends Player {
-    private PlayStrategy strategy;
 
-    public VirtualPlayer(String name) {
+    private PlayStrategy strategy;
+    private final VirtualView view;
+
+    public VirtualPlayer(String name, StrategyType type) {
         super(name, true);
+        setStrategy(type);
+        this.view = new VirtualView();
     }
 
-    public void setStrategy(PlayStrategy strategy) {
-        this.strategy = strategy;
+    public void setStrategy(StrategyType type) {
+        switch (type) {
+            case RANDOM -> strategy = new RandomStrategy();
+            case AGGRESSIVE -> strategy = new AggressiveStrategy();
+            case CAUTIOUS -> strategy = new CautiousStrategy();
+            default -> strategy = new RandomStrategy();
+        }
     }
     
     @Override

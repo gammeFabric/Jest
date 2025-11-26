@@ -1,5 +1,6 @@
 package core.players;
 
+import consoleUI.PlayerView;
 import core.cards.Card;
 
 import java.util.ArrayList;
@@ -12,8 +13,8 @@ public abstract class Player {
     protected boolean isVirtual;
     protected int score;
 
-    // nextPlayer test
-//    protected Player nextPlayer;
+    public PlayerView view;
+
 
     public Player(String name, boolean isVirtual) {
         this.name = name;
@@ -22,10 +23,9 @@ public abstract class Player {
         this.offer = null;
         this.isVirtual = isVirtual;
         this.score = 0;
-        // nextPlayer test
-//        this.nextPlayer = null;
     }
 
+    // getters
     public String getName() {
         return name;
     }
@@ -38,46 +38,34 @@ public abstract class Player {
         return offer;
     }
 
-    public boolean isVirtual() {
-        return isVirtual;
-    }
-
     public int getScore() {
         return score;
     }
 
-    public void setScore(int score) {
-        this.score = score;
+    public boolean isVirtual() {
+        return isVirtual;
     }
 
-    protected ArrayList<Card> getHand() {
+    public ArrayList<Card> getHand() {
         return hand;
     }
 
-    public Card takeCardFromOffer(Offer offer, boolean takeFaceUp) {
-        return offer.takeCard(takeFaceUp);
+    public Card getLastCard(){
+
+        return this.jest.getCards().getLast();
     }
 
-    public abstract Offer makeOffer();
-    public abstract Offer chooseCard(ArrayList<Offer> availableOffers);
-
-
-    // nextPlayer test
-
-//    public void setNextPlayer(Player nextPlayer) {
-//        this.nextPlayer = nextPlayer;
-//    }
-//
-//    public Player getNextPlayer() {
-//        return nextPlayer;
-//    }
+    // setters
+    public void setScore(int score) {
+        this.score = score;
+    }
 
     public void addToHand(Card card){
         this.hand.add(card);
     }
 
-    public Card getLastCard(){
-        return this.jest.getCards().getLast();
+    public void setOffer(Offer offer) {
+        this.offer = offer;
     }
 
     public void takeRemainingOfferCard(){
@@ -102,4 +90,7 @@ public abstract class Player {
         }
     }
 
+    // abstract methods
+    public abstract Offer makeOffer();
+    public abstract Offer chooseCard(ArrayList<Offer> availableOffers);
 }

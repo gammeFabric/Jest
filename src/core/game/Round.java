@@ -1,5 +1,6 @@
 package core.game;
 
+import consoleUI.RoundView;
 import core.cards.Deck;
 import core.players.Offer;
 import core.players.Player;
@@ -18,12 +19,14 @@ public class Round {
 
     // test
     private ArrayList<Player> alreadyPlayed;
+    private RoundView view;
 
 
-    public Round(ArrayList<Player> players,  Deck deck) {
+    public Round(ArrayList<Player> players,  Deck deck, RoundView view) {
         this.players = players;
         this.deck = deck;
         this.offers = new ArrayList<>();
+        this.view = view;
         roundCounter++;
     }
 
@@ -42,26 +45,26 @@ public class Round {
     }
 
     public void playRound(){
-        System.out.println("Round Started");
+            view.showRoundStart();
             if (deck.getTrophies().isEmpty()) {
                 deck.chooseTrophies(players.size());
                 deck.trophiesInfo();
             }
 
-        System.out.println("Deal cards to players");
+        view.showDealCards();
         dealCards();
 
-        System.out.println("Players make offers");
+        view.showMakeOffers();
         makeOffers();
 
-        System.out.println("Determine starting player");
+        view.showDetermineStartingPlayer();
         Player startingPlayer  = determineStartingPlayer();
 
-        System.out.println("Playing choosing phase");
+
         playChoosingPhase(startingPlayer);
 
         if (deck.isEmpty()){
-            System.out.println("Deck is empty, finalizing round...");
+            view.showDeckEmpty();
         }
         else{
             endRound();
@@ -84,46 +87,51 @@ public class Round {
     }
 
     public Player determineStartingPlayer(){
-        Offer bestOffer = offers.stream()
-                .filter(offer -> offer.getFaceUpCard() != null)
-                .max(Comparator
-                        .comparingInt((Offer offer) -> offer.getFaceUpCard().getFaceValue()) // value comparator
-                        .thenComparingInt(offer -> offer.getFaceUpCard().getSuitValue()) // tie-breaking by Suit
-                )
-                .orElse(null);
+//        Offer bestOffer = offers.stream()
+//                .filter(offer -> offer.getFaceUpCard() != null)
+//                .max(Comparator
+//                        .comparingInt((Offer offer) -> offer.getFaceUpCard().getFaceValue()) // value comparator
+//                        .thenComparingInt(offer -> offer.getFaceUpCard().getSuitValue()) // tie-breaking by Suit
+//                )
+//                .orElse(null);
 
+
+        Offer bestOffer = findBestOffer(offers);
         if (bestOffer == null) {
-            System.out.println("No valid offers found. Defaulting to first player.");
+            view.showNoOffers();
             return players.getFirst();
         }
 
         Player startingPlayer = bestOffer.getOwner();
-        System.out.println("First to play: " + startingPlayer.getName() +
-                " (face-up card: " + bestOffer.getFaceUpCard() + ")");
+        view.showStartingPlayer(startingPlayer,  bestOffer.getFaceUpCard());
         return startingPlayer;
     }
 
     public void playChoosingPhase(Player startingPlayer){
-        System.out.println("\n--- CHOOSING CARDS PHASE ---");
+        view.showChoosingPhaseStart();
         Player currentPlayer = startingPlayer;
         int turns = 0;
         int maxTurns = players.size();
         alreadyPlayed = new ArrayList<>();
         while (turns < maxTurns) {
-            System.out.println("\nIt's " + currentPlayer.getName() + "'s turn to choose a card.");
+            view.showTurn(currentPlayer);
             Offer takenOffer = currentPlayer.chooseCard(getAvailableOffers());
             alreadyPlayed.add(currentPlayer);
             if (alreadyPlayed.size() <= maxTurns - 1) {
                 Player nextPlayer = getNextPlayer(alreadyPlayed, takenOffer);
                 // переместить выше sout так как если следующий игрок не тот у кого взяли может быть ошибка с выводом
-                System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() + " from " + takenOffer.getOwner().getName() +
-                        " → next player: " + nextPlayer.getName());
+//                System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() + " from " + takenOffer.getOwner().getName() +
+//                        " → next player: " + nextPlayer.getName());
+
+                view.showCardTaken(currentPlayer, takenOffer, nextPlayer);
                 currentPlayer = nextPlayer;
             }
             else{
                 isOver = true;
-                System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() +
-                        " → from: " + takenOffer.getOwner().getName());
+//                System.out.println(currentPlayer.getName() + " took " + currentPlayer.getLastCard() +
+//                        " → from: " + takenOffer.getOwner().getName());
+
+                view.showLastCardTaken(currentPlayer, takenOffer);
             }
             turns++;
         }
@@ -149,23 +157,35 @@ public class Round {
             }
         }
 
-        Offer bestOffer = offersToCompare.stream()
-                .filter(offer -> offer.getFaceUpCard() != null)
-                .max(Comparator
-                        .comparingInt((Offer offer) -> offer.getFaceUpCard().getFaceValue()) // value comparator
-                        .thenComparingInt(offer -> offer.getFaceUpCard().getSuitValue()) // tie-breaking by Suit
-                )
-                .orElse(null);
+//        Offer bestOffer = offersToCompare.stream()
+//                .filter(offer -> offer.getFaceUpCard() != null)
+//                .max(Comparator
+//                        .comparingInt((Offer offer) -> offer.getFaceUpCard().getFaceValue()) // value comparator
+//                        .thenComparingInt(offer -> offer.getFaceUpCard().getSuitValue()) // tie-breaking by Suit
+//                )
+//                .orElse(null);
 
+        Offer bestOffer = findBestOffer(offersToCompare);
 
         // if it's last player and only one offer to compare it prints this
         if (bestOffer == null) {
-            System.out.println("No valid offers found. Defaulting to first player available.");
+            view.showNoOffers();
             return playersToCompare.getFirst();
         }
 
         return bestOffer.getOwner();
 
+    }
+
+
+    public static Offer findBestOffer(ArrayList<Offer> offers){
+        return offers.stream()
+                .filter(offer -> offer.getFaceUpCard() != null)
+                .max(Comparator
+                        .comparingInt((Offer o) -> o.getFaceUpCard().getFaceValue())
+                        .thenComparingInt(o -> o.getFaceUpCard().getSuitValue())
+                )
+                .orElse(null);
     }
 
     public void returnRemainingCardsToDeck(){
@@ -187,7 +207,7 @@ public class Round {
 
     public void endRound(){
         returnRemainingCardsToDeck();
-        System.out.println("Round has ended");
+        view.showRoundEnd();
         isOver = true;
     }
 

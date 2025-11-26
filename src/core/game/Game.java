@@ -1,21 +1,24 @@
 package core.game;
 
+import consoleUI.GameView;
+import consoleUI.RoundView;
 import core.cards.*;
 import core.players.*;
+import core.players.strategies.StrategyType;
+
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Game {
-    private Deck deck;
-    private Round currentRound;
-    private ArrayList<Player> players;
-    private ArrayList<Round> rounds;
-    private Scanner scanner = new Scanner(System.in);
+    private final Deck deck;
+    private final ArrayList<Player> players;
+    private final ArrayList<Round> rounds;
 
     // test that Game knows about cards
-    private ArrayList<Card> trophies;
+    private final ArrayList<Card> trophies;
 
+    // test GameView
+    private final GameView view;
 
     public Game() {
         this.deck = new Deck();
@@ -23,6 +26,7 @@ public class Game {
         this.rounds = new ArrayList<>();
         // test cards
         this.trophies = new ArrayList<>();
+        this.view = new GameView();
     }
 
     // add players
@@ -32,7 +36,7 @@ public class Game {
     }
 
     public void addVirtualPlayer(String name) {
-        Player player = new VirtualPlayer(name);
+        Player player = new VirtualPlayer(name, StrategyType.CAUTIOUS);
         players.add(player);
     }
 
@@ -40,53 +44,19 @@ public class Game {
         return players;
     }
 
-    public void addPlayers() {
-        ArrayList<Player> players = new ArrayList<>();
-        int playerCount = 0;
-
-        // Step 1: ask for number of players
-        while (true) {
-            System.out.print("Enter the number of players (3-4): ");
-            String input = scanner.nextLine();
-            try {
-                playerCount = Integer.parseInt(input);
-                if (playerCount >= 3 && playerCount <= 4) {
-                    break;
-                } else {
-                    System.out.println("Please enter a number between 3 and 4.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-            }
-        }
-
-        // Step 2: ask for each player's name and type
+    public void addPlayers(){
+        int playerCount = view.askNumberOfPlayers();
         for (int i = 1; i <= playerCount; i++) {
-            System.out.print("Enter name for player " + i + ": ");
-            String name = scanner.nextLine().trim();
-            if (name.isEmpty()) {
-                name = "Player" + i;
-            }
-
-            String type = "";
-            while (true) {
-                System.out.print("Is " + name + " a Human or Virtual player? (H/V): ");
-                type = scanner.nextLine().trim().toUpperCase();
-                if (type.equals("H") || type.equals("V")) {
-                    break;
-                }
-                System.out.println("Please enter 'H' for Human or 'V' for Virtual.");
-            }
-
-            // Step 3: create the correct type of player
-            if (type.equals("H")) {
+            String name = view.askPlayerName(i);
+            boolean isHuman = view.isHumanPlayer(name);
+            if  (isHuman) {
                 addHumanPlayer(name);
-            } else {
+            }
+            else {
                 addVirtualPlayer(name);
             }
         }
-
-        System.out.println("Players added: " + this.players.size());
+        view.showPlayers(players);
     }
 
     public void startGame(){
@@ -95,8 +65,7 @@ public class Game {
             throw new IllegalStateException("Jest supports 3 or 4 players only.");
         }
         deck.chooseTrophies(players.size());
-        System.out.println("Trophies selected: ");
-        deck.trophiesInfo();
+        view.showTrophies(deck.trophiesInfo());
 
         playGame();
 
@@ -104,11 +73,8 @@ public class Game {
 
     public void playGame() {
         while (!deck.isEmpty()) {
-            currentRound = new Round(players, deck);
-            System.out.println("\n=========================");
-            System.out.println("      ROUND " + Round.getRoundCounter());
-            System.out.println("=========================");
-
+            Round currentRound = new Round(players, deck, new RoundView());
+            view.showRound(Round.getRoundCounter());
             currentRound.playRound();
             rounds.add(currentRound);
             if (currentRound.getDeck().isEmpty())
@@ -121,21 +87,19 @@ public class Game {
         for (Player player : players) {
             player.takeRemainingOfferCard();
         }
-        System.out.println("Game ended successfully.");
-        System.out.println("We can assign all trophies to get the winner");
 
+        view.showEndRoundMessage();
         assignTrophies();
         calculateAllScores();
+
         for (Player player : players) {
-            System.out.println(player.getName() + " has " + player.getScore() + " points.");
+            view.showScore(player);
         }
-        Player winner = getWinner();
-        if (winner != null) {
-            System.out.println("Winner is " + winner.getName());
-        }
-        else  {
-            System.out.println("There is no winner");
-        }
+
+//        Player winner = getWinner();
+//        view.showWinner(winner);
+        ArrayList<Player> winners = getWinners();
+        view.showWinners(winners);
 
     }
 
@@ -151,6 +115,29 @@ public class Game {
         }
         return winner;
     }
+
+    private ArrayList<Player> getWinners() {
+        int maxScore = Integer.MIN_VALUE;
+        ArrayList<Player> winners = new ArrayList<>();
+
+        // Find the max score
+        for (Player player : players) {
+            int score = player.getScore();
+            if (score > maxScore) {
+                maxScore = score;
+            }
+        }
+
+        // Collect all players with the max score
+        for (Player player : players) {
+            if (player.getScore() == maxScore) {
+                winners.add(player);
+            }
+        }
+
+        return winners;
+    }
+
 
     private void calculateAllScores() {
         ScoreVisitorImpl visitor = new ScoreVisitorImpl();

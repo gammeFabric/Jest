@@ -177,11 +177,19 @@ public class Deck {
         return cards;
     }
 
-    public void trophiesInfo() {
+//    public void trophiesInfo(){
+//        for (Card card : trophies){
+//            System.out.print(card + ": ");
+//            System.out.println(card.trophyInfo());
+//        }
+//    }
+
+    public String trophiesInfo() {
+        StringBuilder sb = new StringBuilder();
         for (Card card : trophies) {
-            System.out.print(card + ": ");
-            System.out.println(card.trophyInfo());
+            sb.append(card).append(": ").append(card.trophyInfo()).append("\n");
         }
+        return sb.toString();
     }
 
     // functions test
