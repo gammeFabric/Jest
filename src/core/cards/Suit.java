@@ -1,8 +1,8 @@
 package core.cards;
 
 public enum Suit {
-    HEARTS(1),
-    DIAMONDS(2),
+    DIAMONDS(1),
+    HEARTS(2),
     CLUBS(3),
     SPADES(4);
 
