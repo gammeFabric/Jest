@@ -9,8 +9,6 @@ public enum TrophyType {
     BEST_JEST("Best Jest"),
     BEST_JEST_NO_JOKER("Best Jest without Joker");
 
-
-
     private String name;
 
     TrophyType(String name) {
@@ -26,8 +24,5 @@ public enum TrophyType {
         return name;
 
     }
-
-
-
 
 }

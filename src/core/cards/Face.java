@@ -1,6 +1,6 @@
 package core.cards;
 
-public enum Faces {
+public enum Face {
     ACE(1),
     TWO(2),
     THREE(3),
@@ -8,7 +8,7 @@ public enum Faces {
 
     private final int faceValue;
 
-    Faces(int faceValue) {
+    Face(int faceValue) {
         this.faceValue = faceValue;
     }
 

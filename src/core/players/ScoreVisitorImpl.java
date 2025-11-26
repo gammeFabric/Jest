@@ -2,7 +2,7 @@ package core.players;
 
 import java.util.*;
 import core.cards.Suit;
-import core.cards.Faces;
+import core.cards.Face;
 import core.cards.Card;
 import core.cards.SuitCard;
 import core.cards.Joker;
@@ -11,7 +11,7 @@ public class ScoreVisitorImpl implements ScoreVisitor {
     private int totalScore;
     private boolean hasJoker;
     private int heartCount;
-    private Map<Suit, List<Faces>> suitMap; // for black pairs and Aces
+    private Map<Suit, List<Face>> suitMap; // for black pairs and Aces
 
     public ScoreVisitorImpl() {
         resetScore();
@@ -34,7 +34,7 @@ public class ScoreVisitorImpl implements ScoreVisitor {
             return 0; // Joker is 0, bonus will be added later
         } else if (card instanceof SuitCard) {
             SuitCard suitCard = (SuitCard) card;
-            suitMap.get(suitCard.getSuit()).add(suitCard.getFaces());
+            suitMap.get(suitCard.getSuit()).add(suitCard.getFace());
             if (suitCard.getSuit() == Suit.HEARTS) heartCount++;
             return suitCard.getFaceValue(); // default card value
         }
@@ -65,8 +65,8 @@ public class ScoreVisitorImpl implements ScoreVisitor {
         for (Suit suit : Suit.values()) {
             // check if a player has a Joker to apply heart rules
             if (suit == Suit.HEARTS && !hasJoker) continue;
-            List<Faces> faces = suitMap.get(suit);
-            if (faces.contains(Faces.ACE) && faces.size() == 1) {
+            List<Face> faces = suitMap.get(suit);
+            if (faces.contains(Face.ACE) && faces.size() == 1) {
                 totalScore += 4; // add 4 because visitor has already added 1 for an Ace
             }
         }
@@ -75,9 +75,9 @@ public class ScoreVisitorImpl implements ScoreVisitor {
     // Verified
     private void applyBlackPairBonus() {
         // Spade + Club with the same Face = +2
-        List<Faces> spades = suitMap.get(Suit.SPADES);
-        List<Faces> clubs = suitMap.get(Suit.CLUBS);
-        for (Faces face: spades) {
+        List<Face> spades = suitMap.get(Suit.SPADES);
+        List<Face> clubs = suitMap.get(Suit.CLUBS);
+        for (Face face: spades) {
             if (clubs.contains(face)) {
                 totalScore += 2;
             }
@@ -86,19 +86,19 @@ public class ScoreVisitorImpl implements ScoreVisitor {
 
     // Verified
     private void applyJokerBonus() {
-        List<Faces> hearts = suitMap.get(Suit.HEARTS);
+        List<Face> hearts = suitMap.get(Suit.HEARTS);
         if (hasJoker) {
             if (heartCount == 0) totalScore += 4; // bonus +4 if no Hearts
             else if (heartCount >= 1 && heartCount <= 3){ // 1, 2, 3 Hearts it reduces jest by face value of each card
                 int heartsValue = 0;
-                for (Faces face: hearts) {
+                for (Face face: hearts) {
                     heartsValue += face.getFaceValue();
                 }
                 totalScore -= heartsValue;
             }
             else if (heartCount == 4) { // 4 hearts increase jest by face value of each card
                 int heartsValue = 0;
-                for (Faces face: hearts) {
+                for (Face face: hearts) {
                     heartsValue += face.getFaceValue();
                 }
                 totalScore += heartsValue;
@@ -106,7 +106,7 @@ public class ScoreVisitorImpl implements ScoreVisitor {
         }
         // subtract Face value of each Heart if we don't have a Joker
         if (!hasJoker) {
-            for (Faces face : suitMap.get(Suit.HEARTS)) {
+            for (Face face : suitMap.get(Suit.HEARTS)) {
                 totalScore -= face.getFaceValue();
             }
         }

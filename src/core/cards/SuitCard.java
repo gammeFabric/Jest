@@ -2,25 +2,25 @@ package core.cards;
 
 public class SuitCard extends Card {
     private Suit suit;
-    private Faces faces;
+    private Face face;
 
 
-    public SuitCard(boolean isTrophy, Suit suit, Faces faces) {
+    public SuitCard(boolean isTrophy, Suit suit, Face face) {
         super(isTrophy);
         this.suit = suit;
-        this.faces = faces;
+        this.face = face;
     }
 
     public Suit getSuit() {
         return suit;
     }
 
-    public Faces getFaces() {
-        return faces;
+    public Face getFace() {
+        return face;
     }
 
     public boolean isAce() {
-        return faces == Faces.ACE;
+        return face == Face.ACE;
     }
     public boolean isBlack() {
         return suit == Suit.CLUBS || suit == Suit.SPADES;
@@ -28,7 +28,7 @@ public class SuitCard extends Card {
 
     @Override
     public int getFaceValue() {
-        return faces.getFaceValue();
+        return face.getFaceValue();
     }
 
 
@@ -39,7 +39,7 @@ public class SuitCard extends Card {
 
     @Override
     public String toString() {
-        return this.faces + " " + this.suit;
+        return this.face + " " + this.suit;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class SuitCard extends Card {
         SuitCard suitCard = (SuitCard) o;
 
         return suit == suitCard.suit &&
-                faces == suitCard.faces;
+                face == suitCard.face;
     }
 
 }

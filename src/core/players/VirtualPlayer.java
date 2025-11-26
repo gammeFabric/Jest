@@ -2,20 +2,32 @@ package core.players;
 
 import java.util.ArrayList;
 
+import core.cards.Card;
+import core.players.strategies.PlayStrategy;
+
 public class VirtualPlayer extends Player {
-    public VirtualPlayer(String name, boolean isVirtual) {
-        super(name, isVirtual);
+    private PlayStrategy strategy;
+
+    public VirtualPlayer(String name) {
+        super(name, true);
     }
 
+    public void setStrategy(PlayStrategy strategy) {
+        this.strategy = strategy;
+    }
+    
     @Override
     public Offer makeOffer() {
-        return null;
+        // Implémentation basée sur la stratégie
+        Card[] offeredCards = strategy.setCardsToOffer(this.hand);
+        Card faceUpCard = offeredCards[0], faceDownCard = offeredCards[1];
+        return new Offer(this, faceUpCard, faceDownCard);
     }
 
     @Override
     public Offer chooseCard(ArrayList<Offer> availableOffers) {
-        System.out.println("Test");
-        return null;
+        // Implémentation basée sur la stratégie
+        return strategy.chooseCard(availableOffers);
     }
 
 

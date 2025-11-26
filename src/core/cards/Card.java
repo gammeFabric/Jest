@@ -1,14 +1,12 @@
 package core.cards;
 
-import core.players.Player;
-
 import java.util.ArrayList;
 
 public abstract class Card {
     protected boolean isTrophy;
     protected TrophyType trophyType;
     protected Suit trophySuit;
-    protected Faces trophyFace;
+    protected Face trophyFace;
 
     public Card(boolean isTrophy) {
         this.isTrophy = isTrophy;
@@ -29,24 +27,24 @@ public abstract class Card {
         return trophyType;
     }
 
-    public void setTrophyType(TrophyType trophy){
-        this.trophyType = trophy;
+    public Suit getTrophySuit(){
+        return trophySuit;
+    }
+
+    public Face getTrophyFace(){
+        return trophyFace;
+    }
+
+    public void setTrophyType(TrophyType trophyType){
+        this.trophyType = trophyType;
     }
 
     public void setTrophySuit(Suit suit){
         this.trophySuit = suit;
     }
 
-    public void setTrophyFace(Faces trophyFace){
+    public void setTrophyFace(Face trophyFace){
         this.trophyFace = trophyFace;
-    }
-
-    public Suit getTrophySuit(){
-        return trophySuit;
-    }
-
-    public Faces getTrophyFace(){
-        return trophyFace;
     }
 
     private boolean hasTrophySuit() {
@@ -70,19 +68,6 @@ public abstract class Card {
 
         return trophyType.toString();
 
-    }
-
-    public void assignTrophyType(){
-        if (this instanceof Joker) {
-            this.trophyType = TrophyType.BEST_JEST;
-        }
-        if (this instanceof SuitCard) {
-            ArrayList<Card> group1 = new ArrayList<>();
-            ArrayList<Card> group2 = new ArrayList<>();
-            ArrayList<Card> group3 = new ArrayList<>();
-
-
-        }
     }
 
     public abstract int getFaceValue();

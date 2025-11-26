@@ -8,8 +8,8 @@ import java.util.Scanner;
 
 public class HumanPlayer extends Player {
     private Scanner scanner = new Scanner(System.in);
-    public HumanPlayer(String name, boolean isVirtual) {
-        super(name, isVirtual);
+    public HumanPlayer(String name) {
+        super(name, false);
     }
 
     public Offer makeOffer(){
@@ -33,10 +33,9 @@ public class HumanPlayer extends Player {
         Card faceDownCard = hand.get(faceDownIndex);
         System.out.println("Thank you. You have chosen " + hand.get(faceUpIndex) + " as a faceUp card and " + hand.get(faceDownIndex) + " as a faceDown card" );
 
-        Offer playerOffer = new Offer(this, faceUpCard, faceDownCard);
-        offer = playerOffer;
+        this.offer = new Offer(this, faceUpCard, faceDownCard);
         hand.clear();
-        return playerOffer;
+        return offer;
     }
 //
 //    public Card chooseCard(ArrayList<Offer> availableOffers) {

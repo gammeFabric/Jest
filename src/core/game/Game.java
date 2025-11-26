@@ -3,7 +3,6 @@ package core.game;
 import core.cards.*;
 import core.players.*;
 
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -28,12 +27,12 @@ public class Game {
 
     // add players
     public void addHumanPlayer(String name) {
-        Player player = new HumanPlayer(name, false);
+        Player player = new HumanPlayer(name);
         players.add(player);
     }
 
     public void addVirtualPlayer(String name) {
-        Player player = new VirtualPlayer(name, false);
+        Player player = new VirtualPlayer(name);
         players.add(player);
     }
 
@@ -247,7 +246,7 @@ public class Game {
         return ties.getFirst();
     }
 
-    private Player evaluateMajorityFaceValue(Faces face) {
+    private Player evaluateMajorityFaceValue(Face face) {
         int cardsCount = 0;
         int maxCardsCount = -1;
         ArrayList<Player> ties = new ArrayList<>();
@@ -366,7 +365,7 @@ public class Game {
         return best;
     }
 
-    private Player breakTieByStrongestSuitAmongFaceValue(ArrayList<Player> ties,  Faces face) {
+    private Player breakTieByStrongestSuitAmongFaceValue(ArrayList<Player> ties,  Face face) {
         Player best = null;
         int bestStrength = -1;
         for (Player player : ties) {
