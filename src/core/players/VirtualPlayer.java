@@ -11,8 +11,8 @@ public class VirtualPlayer extends Player {
     private PlayStrategy strategy;
     private final VirtualView view;
 
-    public VirtualPlayer(String name, boolean isVirtual, StrategyType type) {
-        super(name, isVirtual);
+    public VirtualPlayer(String name, StrategyType type) {
+        super(name, true);
         setStrategy(type);
         this.view = new VirtualView();
 

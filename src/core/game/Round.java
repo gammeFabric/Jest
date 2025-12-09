@@ -12,20 +12,19 @@ import java.util.Comparator;
 public class Round {
     private ArrayList<Offer> offers;
     private ArrayList<Player> players;
-    private Player currentPlayer;
     private boolean isOver;
-    private Deck deck;
     private static int roundCounter = 0;
+    private final Deck deck;
 
     // test
     private ArrayList<Player> alreadyPlayed;
     private RoundView view;
 
 
-    public Round(ArrayList<Player> players,  Deck deck, RoundView view) {
+    public Round(ArrayList<Player> players, Deck deck, RoundView view) {
         this.players = players;
-        this.deck = deck;
         this.offers = new ArrayList<>();
+        this.deck = deck;
         this.view = view;
         roundCounter++;
     }
@@ -45,11 +44,11 @@ public class Round {
     }
 
     public void playRound(){
-            view.showRoundStart();
-            if (deck.getTrophies().isEmpty()) {
-                deck.chooseTrophies(players.size());
-                deck.trophiesInfo();
-            }
+        view.showRoundStart();
+//            if (deck.getTrophies().isEmpty()) {
+//                deck.chooseTrophies(players.size());
+//                deck.trophiesInfo();
+//            }
 
         view.showDealCards();
         dealCards();

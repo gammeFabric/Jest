@@ -12,10 +12,11 @@ import java.util.ArrayList;
 public class Game {
     private final Deck deck;
     private final ArrayList<Player> players;
+// saving rounds has no logic here because they reference the same object each time so we capture not info this way
     private final ArrayList<Round> rounds;
 
     // test that Game knows about cards
-    private final ArrayList<Card> trophies;
+    private ArrayList<Card> trophies;
 
     // test GameView
     private final GameView view;
@@ -36,7 +37,7 @@ public class Game {
     }
 
     public void addVirtualPlayer(String name) {
-        Player player = new VirtualPlayer(name, true, StrategyType.CAUTIOUS);
+        Player player = new VirtualPlayer(name, StrategyType.CAUTIOUS);
         players.add(player);
     }
 
@@ -64,8 +65,8 @@ public class Game {
         if (players.size() < 3 || players.size() > 4) {
             throw new IllegalStateException("Jest supports 3 or 4 players only.");
         }
-        deck.chooseTrophies(players.size());
-        view.showTrophies(deck.trophiesInfo());
+        this.trophies =  chooseTrophies(players.size());
+        view.showTrophies(trophiesInfo());
 
         playGame();
 
@@ -150,9 +151,9 @@ public class Game {
     // test assigning Trophies and choose best players
 
     private void assignTrophies() {
-        if (trophies == null || trophies.isEmpty()) return;
+        if (this.trophies == null || this.trophies.isEmpty()) return;
 
-        for (Card trophy : trophies) {
+        for (Card trophy : this.trophies) {
             Player winner = determineTrophyWinner(trophy);
             if (winner != null) {
                 winner.getJest().addCard(trophy);
@@ -373,6 +374,123 @@ public class Game {
             }
         }
         return best;
+    }
+
+    public Deck getDeck(){
+        return deck;
+    }
+
+
+    public void assignTrophyType() {
+        for (Card trophy : trophies) {
+            if (trophy instanceof Joker) {
+                trophy.setTrophyType(TrophyType.BEST_JEST);
+            }
+            if (trophy instanceof SuitCard) {
+                // Сердечки
+                if (((SuitCard) trophy).getSuit() == Suit.HEARTS) {
+                    trophy.setTrophyType(TrophyType.JOKER);
+                }
+                // Червы
+                else if (((SuitCard) trophy).getSuit() == Suit.CLUBS) {
+                    if (((SuitCard) trophy).getFaces() != Faces.TWO && ((SuitCard) trophy).getFaces() != Faces.THREE) {
+                        if (((SuitCard) trophy).getFaces() == Faces.FOUR) {
+                            TrophyType type = TrophyType.LOWEST_FACE;
+                            trophy.setTrophySuit(Suit.SPADES);
+//                            type.setSuit(Suit.SPADES);
+                            trophy.setTrophyType(type);
+                        } else {
+                            TrophyType type = TrophyType.HIGHEST_FACE;
+                            trophy.setTrophySuit(Suit.SPADES);
+//                            type.setSuit(Suit.SPADES);
+                            trophy.setTrophyType(type);
+                        }
+                    } else {
+                        if (((SuitCard) trophy).getFaces() == Faces.THREE) {
+                            TrophyType type = TrophyType.HIGHEST_FACE;
+                            trophy.setTrophySuit(Suit.HEARTS);
+//                            type.setSuit(Suit.HEARTS);
+                            trophy.setTrophyType(type);
+                        } else {
+                            TrophyType type = TrophyType.LOWEST_FACE;
+                            trophy.setTrophySuit(Suit.HEARTS);
+//                            type.setSuit(Suit.HEARTS);
+                            trophy.setTrophyType(type);
+                        }
+                    }
+                    // Пики
+                } else if (((SuitCard) trophy).getSuit() == Suit.SPADES) {
+                    if (((SuitCard) trophy).getFaces() != Faces.THREE && ((SuitCard) trophy).getFaces() != Faces.TWO) {
+                        if (((SuitCard) trophy).getFaces() == Faces.FOUR) {
+                            TrophyType type = TrophyType.LOWEST_FACE;
+                            trophy.setTrophySuit(Suit.CLUBS);
+//                            type.setSuit(Suit.CLUBS);
+                            trophy.setTrophyType(type);
+                        } else {
+                            TrophyType type = TrophyType.HIGHEST_FACE;
+                            trophy.setTrophySuit(Suit.CLUBS);
+//                            type.setSuit(Suit.CLUBS);
+                            trophy.setTrophyType(type);
+                        }
+                    } else {
+                        if (((SuitCard) trophy).getFaces() == Faces.THREE) {
+                            TrophyType type = TrophyType.MAJORITY_FACE_VALUE;
+                            trophy.setTrophyFace(Faces.TWO);
+//                            type.setFace(Faces.TWO);
+                            trophy.setTrophyType(type);
+                        } else {
+                            TrophyType type = TrophyType.MAJORITY_FACE_VALUE;
+                            trophy.setTrophyFace(Faces.THREE);
+//                            type.setFace(Faces.THREE);
+                            trophy.setTrophyType(type);
+                        }
+                    }
+                }
+                // Бубна
+                else {
+                    if (((SuitCard) trophy).getFaces() == Faces.FOUR) {
+                        trophy.setTrophyType(TrophyType.BEST_JEST_NO_JOKER);
+                    } else if (((SuitCard) trophy).getFaces() == Faces.ACE) {
+                        TrophyType type = TrophyType.MAJORITY_FACE_VALUE;
+                        trophy.setTrophyFace(Faces.FOUR);
+//                        type.setFace(Faces.FOUR);
+                        trophy.setTrophyType(type);
+                    } else {
+                        if (((SuitCard) trophy).getFaces() == Faces.TWO) {
+                            TrophyType type = TrophyType.HIGHEST_FACE;
+                            trophy.setTrophySuit(Suit.DIAMONDS);
+//                            type.setSuit(Suit.DIAMONDS);
+                            trophy.setTrophyType(type);
+                        } else {
+                            TrophyType type = TrophyType.LOWEST_FACE;
+                            trophy.setTrophySuit(Suit.DIAMONDS);
+//                            type.setSuit(Suit.DIAMONDS);
+                            trophy.setTrophyType(type);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public ArrayList<Card> chooseTrophies(int playerCount){
+        int trophiesCount = (playerCount == 3) ? 2 : 1;
+        for (int i = 0; i < trophiesCount; i++) {
+            Card trophy = deck.dealCard();
+            trophy.setTrophy(true);
+            trophies.add(trophy);
+        }
+        assignTrophyType();
+        return trophies;
+    }
+
+
+    public String trophiesInfo() {
+        StringBuilder sb = new StringBuilder();
+        for (Card card : trophies) {
+            sb.append(card).append(": ").append(card.trophyInfo()).append("\n");
+        }
+        return sb.toString();
     }
 
 
