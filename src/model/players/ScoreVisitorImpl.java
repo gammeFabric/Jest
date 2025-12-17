@@ -1,7 +1,6 @@
 package model.players;
 
 import model.cards.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,10 @@ public class ScoreVisitorImpl implements ScoreVisitor {
     private int totalScore;
     private boolean hasJoker;
     private int heartCount;
-    private Map<Suit, List<Face>> suitMap; // for black pairs and Aces
+    private Map<Suit, List<Face>> suitMap;
+    
+    // Système de Flags générique (remplace les booleans spécifiques comme hasShield)
+    private Map<String, Boolean> flags; 
 
     public ScoreVisitorImpl() {
         resetScore();
@@ -22,99 +24,121 @@ public class ScoreVisitorImpl implements ScoreVisitor {
         hasJoker = false;
         heartCount = 0;
         suitMap = new HashMap<>();
+        flags = new HashMap<>(); // Reset des flags
         for (Suit suit : Suit.values()) {
             suitMap.put(suit, new ArrayList<>());
         }
     }
 
+    // --- Méthodes pour les effets (API publique pour CardEffect) ---
+    
+    public void setFlag(String flagName, boolean active) {
+        flags.put(flagName, active);
+    }
+
+    public boolean hasFlag(String flagName) {
+        return flags.getOrDefault(flagName, false);
+    }
+    
+    public boolean hasJoker() { return hasJoker; }
+    public int getHeartCount() { return heartCount; }
+    // -------------------------------------------------------------
+
     @Override
     public int visit(Card card) {
         if (card instanceof Joker) {
             hasJoker = true;
-            return 0; // Joker is 0, bonus will be added later
+            return 0;
         } else if (card instanceof SuitCard) {
             SuitCard suitCard = (SuitCard) card;
             suitMap.get(suitCard.getSuit()).add(suitCard.getFace());
             if (suitCard.getSuit() == Suit.HEARTS) heartCount++;
-            return suitCard.getFaceValue(); // default card value
+            return suitCard.getFaceValue();
+        } else if (card instanceof ExtensionCard) {
+            // EXTENSIBILITÉ : On délègue la logique à la carte !
+            ((ExtensionCard) card).getEffect().applyOnVisit(this);
+            return ((ExtensionCard) card).getFaceValue();
         }
         return 0;
     }
 
     public void countJestScore(Jest jest) {
         resetScore();
-        for (Card card : jest.getCards()) {
-            int val = visit(card);
 
-            // Diamonds decrease points
+        // 1. Recensement (active les flags via applyOnVisit)
+        for (Card card : jest.getCards()) {
+            visit(card);
+        }
+
+        // 2. Calcul standard
+        for (Card card : jest.getCards()) {
             if (card instanceof SuitCard) {
                 SuitCard sc = (SuitCard) card;
-                if (sc.getSuit() == Suit.DIAMONDS) val *= -1;
+                int effectiveValue = sc.getFaceValue();
+                
+                if (isSoloAce(sc)) effectiveValue = 5;
+                
+                applyColorRule(sc, effectiveValue);
+            } 
+            else if (card instanceof ExtensionCard) {
+                // Ajout de la valeur faciale de base
+                totalScore += ((ExtensionCard) card).getFaceValue();
+                
+                // EXTENSIBILITÉ : Calcul des bonus spécifiques
+                totalScore += ((ExtensionCard) card).getEffect().calculateBonus(this);
             }
-            totalScore += val;
         }
-        applyAceRule();
+
         applyBlackPairBonus();
         applyJokerBonus();
-        // we can add other rules here
     }
 
-    // Verified
-    private void applyAceRule() {
-        // if we have solo Ace with solo suit in Jest, he turns into 5 points (1 + 4)
-        for (Suit suit : Suit.values()) {
-            // check if a player has a Joker to apply heart rules
-            if (suit == Suit.HEARTS && !hasJoker) continue;
-            List<Face> faces = suitMap.get(suit);
-            if (faces.contains(Face.ACE) && faces.size() == 1) {
-                totalScore += 4; // add 4 because visitor has already added 1 for an Ace
+    private boolean isSoloAce(SuitCard sc) {
+        if (sc.getFace() == Face.ACE) {
+            List<Face> facesOfThisSuit = suitMap.get(sc.getSuit());
+            return facesOfThisSuit.size() == 1;
+        }
+        return false;
+    }
+
+    private void applyColorRule(SuitCard sc, int value) {
+        Suit suit = sc.getSuit();
+
+        if (suit == Suit.SPADES || suit == Suit.CLUBS) {
+            totalScore += value;
+        } else if (suit == Suit.DIAMONDS) {
+            // Vérification générique : Est-ce qu'un flag interdit les carreaux négatifs ?
+            if (!hasFlag("NO_NEGATIVE_DIAMONDS")) { 
+                totalScore -= value;
             }
+        } else if (suit == Suit.HEARTS) {
+            totalScore += calculateIndividualHeartValue(value);
         }
     }
-
-    // Verified
+    
+    private int calculateIndividualHeartValue(int value) {
+        if (!hasJoker) return 0;
+        
+        if (heartCount == 4) {
+            return value;
+        } else {
+            // Vérification générique : Est-ce qu'un flag interdit les coeurs négatifs ?
+            if (hasFlag("NO_NEGATIVE_HEARTS")) return 0;
+            return -value;
+        }
+    }
+    
     private void applyBlackPairBonus() {
-        // Spade + Club with the same Face = +2
         List<Face> spades = suitMap.get(Suit.SPADES);
         List<Face> clubs = suitMap.get(Suit.CLUBS);
-        for (Face face: spades) {
-            if (clubs.contains(face)) {
-                totalScore += 2;
-            }
+        for (Face face : spades) {
+            if (clubs.contains(face)) totalScore += 2;
         }
     }
 
-    // Verified
     private void applyJokerBonus() {
-        List<Face> hearts = suitMap.get(Suit.HEARTS);
-        if (hasJoker) {
-            if (heartCount == 0) totalScore += 4; // bonus +4 if no Hearts
-            else if (heartCount >= 1 && heartCount <= 3){ // 1, 2, 3 Hearts it reduces jest by face value of each card
-                int heartsValue = 0;
-                for (Face face: hearts) {
-                    heartsValue += face.getFaceValue();
-                }
-                totalScore -= heartsValue;
-            }
-            else if (heartCount == 4) { // 4 hearts increase jest by face value of each card
-                int heartsValue = 0;
-                for (Face face: hearts) {
-                    heartsValue += face.getFaceValue();
-                }
-                totalScore += heartsValue;
-            }
-        }
-        // subtract Face value of each Heart if we don't have a Joker
-        if (!hasJoker) {
-            for (Face face : suitMap.get(Suit.HEARTS)) {
-                totalScore -= face.getFaceValue();
-            }
-        }
+        if (hasJoker && heartCount == 0) totalScore += 4;
     }
-
-
-
-    public int getTotalScore() {;
-        return totalScore;
-    }
+    
+    public int getTotalScore() { return totalScore; }
 }

@@ -31,6 +31,25 @@ public class Deck {
         cards.add(new Joker(false));
         shuffle();
     }
+
+    /**
+     * Méthode pour ajouter les cartes de l'extension au deck existant.
+     * Cette méthode doit être appelée par le contrôleur si le joueur choisit l'option.
+     */
+    public void addExtensions(ArrayList<ExtensionCard> selectedExtensions) {
+        if (selectedExtensions == null || selectedExtensions.isEmpty()) {
+            return;
+        }
+
+        // Ajout des cartes choisies
+        this.cards.addAll(selectedExtensions);
+        
+        // Remélanger pour les intégrer au jeu
+        shuffle();
+        
+        System.out.println(selectedExtensions.size() + " cartes d'extension ajoutées au paquet.");
+    }
+
     public Card dealCard() {
         if (cards.isEmpty()) {
             throw new IllegalStateException("Le deck est vide");
@@ -52,47 +71,12 @@ public class Deck {
         else if(card == null)
             System.out.println("You cannot add null card");
         else{
-//            System.out.println("You have added " + card + " to the deck");
             cards.add(card);
         }
     }
 
-
-
-        // test for cards
+    // test for cards
     public ArrayList<Card> getCards(){
         return cards;
     }
-
-
-
-
-    // functions test
-    public static void main(String[] args) {
-        Deck deck = new Deck();
-//        deck.chooseTrophies(3);
-
-//        ArrayList<Card> cards = deck.getTrophies();
-//        for (Card card : cards){
-//            System.out.print(card + ": ");
-//            System.out.println(card.trophyInfo());
-//        }
-//        System.out.println("Deck has " + deck.getRemainingCount() + " cards.");
-//
-//        ArrayList<Card> trophies = deck.chooseTrophies(3);
-//        System.out.println("Chosen trophies:");
-//        trophies.forEach(System.out::println);
-//        System.out.println("\n");
-//        for (Card card : deck.cards) {
-//            System.out.println(card);
-//        }
-//
-//        Card card = deck.dealCard();
-//        System.out.println("Card given: " + card);
-//        System.out.println("Cards left in the deck: " + deck.getRemainingCount());
-//        Card card1 =  new SuitCard(false, Suit.HEARTS, Faces.ACE);
-//        deck.addCard(card1);
-    }
-
-
 }

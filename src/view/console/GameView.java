@@ -1,8 +1,10 @@
 package view.console;
 
+import model.cards.ExtensionCard; // N'oubliez pas cet import !
 import model.players.Player;
 import model.players.strategies.StrategyType;
 
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -43,8 +45,57 @@ public class GameView {
         return name;
     }
 
-    //Ask Strategy type for VirtualPlayer
+    // Ask for extensions to add
+    public List<Integer> askForExtensions(List<ExtensionCard> availableExtensions) {
+        System.out.println("\n--- MENU EXTENSIONS ---");
+        System.out.println("Available extensions:");
+        
+        for (int i = 0; i < availableExtensions.size(); i++) {
+            ExtensionCard ext = availableExtensions.get(i);
+            
+            // Ligne 1 : Nom et Valeur Faciale uniquement (Le bonus est expliqué dans la description)
+            System.out.println((i + 1) + ". " + ext.getName() + " [Val: " + ext.getFaceValue() + "]");
+            
+            // Ligne 2 : Description de l'effet
+            System.out.println("   Description: " + ext.getDescription());
+            System.out.println(); // Ligne vide pour aérer
+        }
+        
+        System.out.println("Enter the numbers of the extensions you want to add, separated by spaces (e.g., '1 3').");
+        System.out.println("Press Enter to play without extensions.");
+        System.out.print("> ");
 
+        String input = scanner.nextLine();
+        List<Integer> choices = new ArrayList<>();
+
+        if (input.trim().isEmpty()) {
+            return choices; 
+        }
+
+        String[] tokens = input.split("\\s+");
+        for (String token : tokens) {
+            try {
+                int index = Integer.parseInt(token) - 1;
+                if (index >= 0 && index < availableExtensions.size()) {
+                    choices.add(index);
+                } else {
+                    System.out.println("Warning: " + token + " is not a valid option number (Ignored).");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Warning: '" + token + "' is not a number (Ignored).");
+            }
+        }
+        return choices;
+    }
+
+    public void showInvalidExtensionMessage(String message) {
+        System.out.println("\n========================================");
+        System.out.println(" ⚠️  CONFIGURATION INVALIDE");
+        System.out.println(" " + message);
+        System.out.println("========================================\n");
+    }
+
+    // Ask Strategy type for VirtualPlayer
     public StrategyType askStrategy(String name) {
         System.out.println("Choose strategy for " + name + ":");
         for (StrategyType strategy : StrategyType.values()) {
@@ -56,6 +107,9 @@ public class GameView {
             System.out.print("Choose the number of the strategy: ");
             try {
                 choice = scanner.nextInt();
+                // IMPORTANT : Consommer le retour à la ligne restant après nextInt()
+                // Sinon la prochaine méthode nextLine() (comme extensions) sera sautée.
+                scanner.nextLine(); 
             } catch (InputMismatchException e) {
                 scanner.nextLine(); // clear invalid input
                 System.out.println("Please enter a valid number.");
@@ -63,7 +117,6 @@ public class GameView {
         }
         return StrategyType.values()[choice - 1];
     }
-
 
     // Ask for player type
     public boolean isHumanPlayer(String name) {

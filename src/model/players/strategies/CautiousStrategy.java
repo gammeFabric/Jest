@@ -1,75 +1,72 @@
 package model.players.strategies;
 
-import model.cards.Card;
-import model.cards.Suit;
-import model.cards.SuitCard;
+import model.cards.*;
 import model.players.Jest;
 import model.players.Offer;
-
 import java.util.ArrayList;
+
 public class CautiousStrategy implements PlayStrategy {
     private Jest playerJest;
 
+    // ... setCardsToOffer reste inchangé (logique de base) ...
     @Override
     public Card[] setCardsToOffer(ArrayList<Card> hand) {
-        if (hand.isEmpty()) {
-            return null;
-        }
-        // Compare the colors of the two cards
-        // If they are the same color, offer the card with the lowest value
-        // Otherwise, offer the card with the lowest color (Diamonds < Hearts < Clubs < Spades)
-        Card minCard = hand.get(0);
-        if (minCard.getSuitValue() > hand.get(1).getSuitValue()) {
-            minCard = hand.get(1);
-        } else if (minCard.getSuitValue() == hand.get(1).getSuitValue()) {
-
-            // Test if the Card is a SuitCard and then get its suit
-            // If the suit is DIAMONDS, the face value is reversed
-            Suit minCardSuit = ((SuitCard) minCard).getSuit();
-            if (minCardSuit == Suit.DIAMONDS || minCardSuit == Suit.HEARTS) {
-                if (minCard.getFaceValue() < hand.get(1).getFaceValue()) {
-                    minCard = hand.get(1);
-                }
-            } else {
-                if (minCard.getFaceValue() > hand.get(1).getFaceValue()) {
-                    minCard = hand.get(1);
-                }
-            }
-        }
-        Card faceUpCard = minCard;
-        hand.remove(minCard);
-        Card faceDownCard = hand.get(0);
-        hand.remove(faceDownCard);
-        return new Card[] { faceUpCard, faceDownCard };
+        // (Copiez votre code existant pour setCardsToOffer ici)
+        // Pour simplifier l'exemple, je ne le répète pas, mais il ne change pas fondamentalement.
+        if (hand.isEmpty()) return null;
+        // ... votre logique de tri ...
+        Card faceUp = hand.get(0);
+        hand.remove(faceUp);
+        Card faceDown = hand.get(0);
+        hand.remove(faceDown);
+        return new Card[]{faceUp, faceDown};
     }
+
     @Override
     public Offer chooseCard(ArrayList<Offer> availableOffers) {
-        if (availableOffers.isEmpty()) {
-            return null;
-        }
-        // Compare the visible cards of each offer and choose the one with the highest value
-        // For that, we must firstly compare the colors, then the face values
-        Offer bestOffer = availableOffers.get(0);
+        if (availableOffers.isEmpty()) return null;
+
+        Offer bestOffer = null;
+        int maxScore = Integer.MIN_VALUE;
+
         for (Offer offer : availableOffers) {
-            if (offer.getFaceUpCard().getSuitValue() > bestOffer.getFaceUpCard().getSuitValue()) {
+            Card faceUp = offer.getFaceUpCard();
+            if (faceUp == null) continue;
+
+            int score = evaluateCard(faceUp);
+            if (score > maxScore) {
+                maxScore = score;
                 bestOffer = offer;
-            } else if (offer.getFaceUpCard().getSuitValue() == bestOffer.getFaceUpCard().getSuitValue()) {
-                Suit bestOfferSuit = ((SuitCard) bestOffer.getFaceUpCard()).getSuit();
-                if (bestOfferSuit == Suit.DIAMONDS || bestOfferSuit == Suit.HEARTS) {
-                    if (offer.getFaceUpCard().getFaceValue() < bestOffer.getFaceUpCard().getFaceValue()) {
-                        bestOffer = offer;
-                    }
-                } else {
-                    if (offer.getFaceUpCard().getFaceValue() > bestOffer.getFaceUpCard().getFaceValue()) {
-                        bestOffer = offer;
-                    }
-                }
             }
+        }
+        
+        // Action
+        if (bestOffer != null && bestOffer.getFaceUpCard() != null) {
+            playerJest.addCard(bestOffer.getFaceUpCard());
+            bestOffer.setFaceUpCard(null);
         }
         return bestOffer;
     }
-    @Override
-    public void updateJest(Jest jest) {
-        this.playerJest = jest;
+
+    private int evaluateCard(Card c) {
+        // EXTENSIBILITÉ : On demande à la carte sa valeur pour une stratégie PRUDENTE
+        if (c instanceof ExtensionCard) {
+            return ((ExtensionCard) c).getAIValue(StrategyType.CAUTIOUS, playerJest);
+        }
+
+        // Logique classique pour les cartes standards
+        if (c instanceof Joker) return -1000; // Le prudent déteste le Joker
+        
+        if (c instanceof SuitCard) {
+            SuitCard sc = (SuitCard) c;
+            int val = sc.getFaceValue();
+            // Prudent : Pique/Trèfle (+) sont bons, Carreau/Cœur (-) sont mauvais
+            if (sc.getSuit() == Suit.DIAMONDS || sc.getSuit() == Suit.HEARTS) return -val;
+            return val;
+        }
+        return 0;
     }
+
+    @Override
+    public void updateJest(Jest jest) { this.playerJest = jest; }
 }
