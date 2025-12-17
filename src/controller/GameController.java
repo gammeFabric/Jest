@@ -162,7 +162,23 @@ public class GameController {
                 continue; // Recommencer la sélection
             }
             validSelection = true;
+            
+            if (!selectedIndices.isEmpty()) {
+                ArrayList<ExtensionCard> cardsToAdd = new ArrayList<>();
+                System.out.println("Validation OK. Ajout des cartes au paquet :");
+                        
+                for (int index : selectedIndices) {
+                ExtensionCard card = availableExtensions.get(index);
+                cardsToAdd.add(card);
+                System.out.println(" [+] " + card.getName());
+                }
+                
+                model.getDeck().addExtensions(cardsToAdd);     
+            } else {
+                System.out.println("Aucune extension sélectionnée. Partie standard.");
+            }
         }
+        
     }
 
     public void playGame() {

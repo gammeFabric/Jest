@@ -114,18 +114,17 @@ public class AggressiveStrategy implements PlayStrategy {
     }
 
     private int evaluateCardPotential(Card card) {
-        // 1. EXTENSIBILITÉ
         if (card instanceof ExtensionCard) {
+            if (playerJest == null) return 0;
+            
             return ((ExtensionCard) card).getAIValue(StrategyType.AGGRESSIVE, playerJest);
         }
 
-        // 2. JOKER
+        // --- 2. LOGIQUE JOKER ---
         if (card instanceof Joker) {
-            // Si on n'a pas de cœur, c'est le jackpot
             if (!hasHearts) return 20;
-            // Si on a des cœurs, vérifier si le Grand Chelem est possible
-            if (isGrandSlamPossible()) return 15; // Oui, on le veut pour compléter
-            return 0; // Non, c'est risqué
+            if (playerJest != null && isGrandSlamPossible()) return 15; 
+            return 0; 
         }
 
         if (card instanceof SuitCard) {
@@ -133,27 +132,21 @@ public class AggressiveStrategy implements PlayStrategy {
             int val = suitCard.getFaceValue();
             Suit suit = suitCard.getSuit();
 
-            // 3. LOGIQUE INTELLIGENTE DES COEURS
+            // --- 3. LOGIQUE COEURS ---
             if (suit == Suit.HEARTS) {
                 if (hasJoker && hasHearts) {
-                    // On a commencé la collection. Est-ce qu'on peut la finir ?
-                    if (isGrandSlamPossible()) {
-                        return 50; // OUI ! Priorité MAXIMALE.
+                    // CORRECTION : Appel sécurisé
+                    if (playerJest != null && isGrandSlamPossible()) {
+                        return 50; 
                     } else {
-                        // NON. C'est foutu.
-                        // Chaque nouveau cœur est juste un malus supplémentaire.
-                        return -20; // On fuit.
+                        return -20; 
                     }
                 }
-                
-                // Si on a le Joker sans cœur : On fuit pour protéger le bonus Joker
                 if (hasJoker && !hasHearts) return -100;
-                
-                // Sinon standard
                 return -5;
             }
 
-            // 4. AUTRES COULEURS
+            // --- 4. AUTRES COULEURS ---
             if (val == 1) { 
                 if (isOnlyOfSuitInJest(suit)) return 6; 
                 return 2;
@@ -225,9 +218,12 @@ public class AggressiveStrategy implements PlayStrategy {
         return sc.getSuit().toString() + "-" + sc.getFaceValue();
     }
     
-    // ... canFormBlackPair, isOnlyOfSuitInJest inchangés ...
     private boolean canFormBlackPair(SuitCard card) {
+        if (playerJest == null) return false; 
+
+        // Cherche la carte complémentaire (Pique <-> Trèfle)
         Suit targetSuit = (card.getSuit() == Suit.SPADES) ? Suit.CLUBS : Suit.SPADES;
+        
         for (Card c : playerJest.getCards()) {
             if (c instanceof SuitCard) {
                 SuitCard existing = (SuitCard) c;
@@ -240,8 +236,13 @@ public class AggressiveStrategy implements PlayStrategy {
     }
 
     private boolean isOnlyOfSuitInJest(Suit suit) {
+        if (playerJest == null) return true; 
+
+        // Vérifie si on n'a AUCUNE carte de cette couleur dans le Jest pour l'instant
         for (Card c : playerJest.getCards()) {
-            if (c instanceof SuitCard && ((SuitCard) c).getSuit() == suit) return false; 
+            if (c instanceof SuitCard && ((SuitCard) c).getSuit() == suit) {
+                return false; 
+            }
         }
         return true; 
     }

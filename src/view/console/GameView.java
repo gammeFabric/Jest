@@ -72,6 +72,8 @@ public class GameView {
             return choices; 
         }
 
+        System.out.println("You entered: " + input);
+
         String[] tokens = input.split("\\s+");
         for (String token : tokens) {
             try {
@@ -85,6 +87,7 @@ public class GameView {
                 System.out.println("Warning: '" + token + "' is not a number (Ignored).");
             }
         }
+        System.out.println("Extensions chosen: " + choices);
         return choices;
     }
 
