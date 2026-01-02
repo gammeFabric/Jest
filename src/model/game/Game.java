@@ -8,13 +8,17 @@ import model.players.ScoreVisitorImpl;
 import model.players.VirtualPlayer;
 import model.players.strategies.StrategyType;
 
+ import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Game {
+public class Game implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final Deck deck;
     private final ArrayList<Player> players;
 // saving rounds has no logic here because they reference the same object each time so we capture not info this way
     private final ArrayList<Round> rounds;
+
+    private int savedRoundCounter;
 
     // test that Game knows about cards
     private ArrayList<Card> trophies;
@@ -25,6 +29,15 @@ public class Game {
         this.players = new ArrayList<>();
         this.rounds = new ArrayList<>();
         this.trophies = new ArrayList<>();
+        this.savedRoundCounter = 0;
+    }
+
+    public int getSavedRoundCounter() {
+        return savedRoundCounter;
+    }
+
+    public void setSavedRoundCounter(int savedRoundCounter) {
+        this.savedRoundCounter = savedRoundCounter;
     }
 
     // add players
@@ -144,7 +157,7 @@ public class Game {
     }
 
     private Player evaluateLowestFace(Suit suit) {
-        // 4 because it's max in faceValues in Face enum
+        // 4 because it's max in faceValues in Faces enum
         int lowestFaceValue = 4;
         ArrayList<Player> ties = new ArrayList<>();
         for (Player player : players) {
@@ -373,12 +386,12 @@ public class Game {
                         if (((SuitCard) trophy).getFace() == Face.THREE) {
                             TrophyType type = TrophyType.MAJORITY_FACE_VALUE;
                             trophy.setTrophyFace(Face.TWO);
-//                            type.setFace(Face.TWO);
+//                            type.setFace(Faces.TWO);
                             trophy.setTrophyType(type);
                         } else {
                             TrophyType type = TrophyType.MAJORITY_FACE_VALUE;
                             trophy.setTrophyFace(Face.THREE);
-//                            type.setFace(Face.THREE);
+//                            type.setFace(Faces.THREE);
                             trophy.setTrophyType(type);
                         }
                     }
@@ -390,7 +403,7 @@ public class Game {
                     } else if (((SuitCard) trophy).getFace() == Face.ACE) {
                         TrophyType type = TrophyType.MAJORITY_FACE_VALUE;
                         trophy.setTrophyFace(Face.FOUR);
-//                        type.setFace(Face.FOUR);
+//                        type.setFace(Faces.FOUR);
                         trophy.setTrophyType(type);
                     } else {
                         if (((SuitCard) trophy).getFace() == Face.TWO) {

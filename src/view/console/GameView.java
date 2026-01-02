@@ -1,15 +1,16 @@
 package view.console;
 
-import model.cards.ExtensionCard; // N'oubliez pas cet import !
+import model.cards.ExtensionCard;
 import model.players.Player;
 import model.players.strategies.StrategyType;
+import view.interfaces.IGameView;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
-public class GameView {
+public class GameView implements IGameView {
 
     private final Scanner scanner;
 
@@ -46,7 +47,8 @@ public class GameView {
     }
 
     // Ask for extensions to add
-    public List<Integer> askForExtensions(List<ExtensionCard> availableExtensions) {
+    @Override
+    public ArrayList<Integer> askForExtensions(ArrayList<ExtensionCard> availableExtensions) {
         System.out.println("\n--- MENU EXTENSIONS ---");
         System.out.println("Available extensions:");
         
@@ -66,7 +68,7 @@ public class GameView {
         System.out.print("> ");
 
         String input = scanner.nextLine();
-        List<Integer> choices = new ArrayList<>();
+        ArrayList<Integer> choices = new ArrayList<>();
 
         if (input.trim().isEmpty()) {
             return choices; 
@@ -188,4 +190,22 @@ public class GameView {
         System.out.println("Game ended successfully.");
         System.out.println("We can assign all trophies to get the winner");
     }
+
+    @Override
+    public boolean askSaveAfterRound() {
+        while (true) {
+            System.out.print("Save game now? (Y/N): ");
+            String input = scanner.nextLine().trim().toUpperCase();
+            if (input.equals("Y")) return true;
+            if (input.equals("N")) return false;
+            System.out.println("Please enter 'Y' or 'N'.");
+        }
+    }
+
+    @Override
+    public String askSaveName() {
+        System.out.print("Enter save name (optional, press Enter for timestamp): ");
+        return scanner.nextLine();
+    }
+
 }

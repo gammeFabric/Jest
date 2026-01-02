@@ -3,6 +3,7 @@ package model.players.strategies;
 import model.cards.*;
 import model.players.Jest;
 import model.players.Offer;
+
 import java.util.ArrayList;
 
 public class CautiousStrategy implements PlayStrategy {

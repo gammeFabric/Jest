@@ -2,9 +2,11 @@ package model.players;
 
 import model.cards.Card;
 
+ import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Offer {
+public class Offer implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Player owner;
     private Card faceUpCard;
     private Card faceDownCard;

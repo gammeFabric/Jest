@@ -3,9 +3,11 @@ package model.players;
 import view.console.PlayerView;
 import model.cards.Card;
 
+ import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class Player {
+public abstract class Player implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected String name;
     protected ArrayList<Card> hand;
     protected Jest jest;
@@ -13,7 +15,7 @@ public abstract class Player {
     protected boolean isVirtual;
     protected int score;
 
-    public PlayerView view;
+    public transient PlayerView view;
 
 
     public Player(String name, boolean isVirtual) {

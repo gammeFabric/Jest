@@ -2,9 +2,11 @@ package model.players;
 
 import model.cards.Card;
 
+ import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Jest {
+public class Jest implements Serializable {
+    private static final long serialVersionUID = 1L;
     private ArrayList<Card> cards;
 
     public Jest() {

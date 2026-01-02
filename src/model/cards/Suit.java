@@ -1,8 +1,8 @@
 package model.cards;
 
 public enum Suit {
-    DIAMONDS(1),
-    HEARTS(2),
+    HEARTS(1),
+    DIAMONDS(2),
     CLUBS(3),
     SPADES(4);
 

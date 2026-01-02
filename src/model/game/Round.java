@@ -4,10 +4,12 @@ import model.cards.Deck;
 import model.players.Offer;
 import model.players.Player;
 
+ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class Round {
+public class Round implements Serializable {
+    private static final long serialVersionUID = 1L;
     private ArrayList<Offer> offers;
     private ArrayList<Player> players;
     private boolean isOver;
@@ -27,6 +29,10 @@ public class Round {
 
     public static int getRoundCounter() {
         return roundCounter;
+    }
+
+    public static void setRoundCounter(int counter) {
+        roundCounter = counter;
     }
 
     public ArrayList<Offer> getAvailableOffers() {

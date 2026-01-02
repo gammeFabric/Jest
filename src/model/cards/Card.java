@@ -1,6 +1,9 @@
 package model.cards;
 
-public abstract class Card {
+ import java.io.Serializable;
+
+public abstract class Card implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected boolean isTrophy;
     protected TrophyType trophyType;
     protected Suit trophySuit;
@@ -25,16 +28,8 @@ public abstract class Card {
         return trophyType;
     }
 
-    public Suit getTrophySuit(){
-        return trophySuit;
-    }
-
-    public Face getTrophyFace(){
-        return trophyFace;
-    }
-
-    public void setTrophyType(TrophyType trophyType){
-        this.trophyType = trophyType;
+    public void setTrophyType(TrophyType trophy){
+        this.trophyType = trophy;
     }
 
     public void setTrophySuit(Suit suit){
@@ -43,6 +38,14 @@ public abstract class Card {
 
     public void setTrophyFace(Face trophyFace){
         this.trophyFace = trophyFace;
+    }
+
+    public Suit getTrophySuit(){
+        return trophySuit;
+    }
+
+    public Face getTrophyFace(){
+        return trophyFace;
     }
 
     private boolean hasTrophySuit() {

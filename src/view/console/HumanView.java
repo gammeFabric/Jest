@@ -2,12 +2,13 @@ package view.console;
 
 import model.cards.Card;
 import model.players.Offer;
+import view.interfaces.IHumanView;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class HumanView extends PlayerView {
+public class HumanView extends PlayerView implements IHumanView {
     private final Scanner scanner;
 
     public HumanView() {
