@@ -121,7 +121,7 @@ public class Round implements Serializable {
 
     public Offer findBestOffer(ArrayList<Offer> offers){
         return offers.stream()
-                .filter(offer -> offer.getFaceUpCard() != null)
+                .filter(offer -> offer != null && offer.getFaceUpCard() != null)
                 .max(Comparator
                         .comparingInt((Offer o) -> o.getFaceUpCard().getFaceValue())
                         .thenComparingInt(o -> o.getFaceUpCard().getSuitValue())

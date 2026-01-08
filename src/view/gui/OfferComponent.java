@@ -1,6 +1,5 @@
 package view.gui;
 
-import model.cards.Card;
 import model.players.Offer;
 
 import javax.swing.*;
@@ -8,7 +7,8 @@ import java.awt.*;
 
 public class OfferComponent extends JPanel {
     private final Offer offer;
-    private final boolean selectable;
+    @SuppressWarnings("unused")
+    private final boolean selectable; // Kept for potential future use
     private boolean selected;
     private CardButton faceUpButton;
     private CardButton faceDownButton;

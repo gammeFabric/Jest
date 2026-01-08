@@ -10,5 +10,8 @@ public interface IHumanView extends IPlayerView {
     Offer chooseOffer(String playerName, ArrayList<Offer> selectableOffers);
     boolean chooseFaceUpOrDown();
     void thankForChoosing(Card faceUpCard, Card faceDownCard);
+    
+    // New method for Full Hand variant - choose 2 cards from many
+    int[] chooseTwoCardsForOffer(String playerName, ArrayList<Card> hand);
 }
 

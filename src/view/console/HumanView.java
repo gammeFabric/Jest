@@ -27,7 +27,7 @@ public class HumanView extends PlayerView implements IHumanView {
         while (faceUpIndex < 0 || faceUpIndex >= hand.size()) {
             System.out.print("Please choose the number of the card to show face-up: ");
             try {
-                faceUpIndex = scanner.nextInt() - 1;
+                faceUpIndex = scanner.hasNextLine() ? scanner.nextInt() - 1 : 0;
             } catch (InputMismatchException e) {
                 scanner.nextLine(); // clear invalid input
                 System.out.println("Please enter a valid number.");
@@ -53,7 +53,7 @@ public class HumanView extends PlayerView implements IHumanView {
         while (choice < 1 || choice > selectableOffers.size()) {
             System.out.print("Choose the number of the offer: ");
             try {
-                choice = scanner.nextInt();
+                choice = scanner.hasNextLine() ? scanner.nextInt() : 1;
             } catch (InputMismatchException e) {
                 scanner.nextLine(); // clear invalid input
                 showMessage("Please enter a valid number.");
@@ -69,7 +69,7 @@ public class HumanView extends PlayerView implements IHumanView {
         while (cardChoice != 1 && cardChoice != 2) {
             System.out.print("Take 1) Face-up card or 2) Face-down card? ");
             try {
-                cardChoice = scanner.nextInt();
+                cardChoice = scanner.hasNextLine() ? scanner.nextInt() : 1;
             } catch (InputMismatchException e) {
                 scanner.nextLine();
                 System.out.println("Please enter 1 or 2.");
@@ -90,6 +90,46 @@ public class HumanView extends PlayerView implements IHumanView {
 
     public void thankForChoosing(Card faceUpCard, Card faceDownCard) {
         System.out.println("Thank you. You have chosen " + faceUpCard + " as a faceUp card and " + faceDownCard + " as a faceDown card" );
+    }
+    
+    @Override
+    public int[] chooseTwoCardsForOffer(String playerName, ArrayList<Card> hand) {
+        System.out.println(playerName + " has " + hand.size() + " cards to make an offer");
+        System.out.println("Choose two cards from your hand:");
+        for (int i = 0; i < hand.size(); i++) {
+            System.out.println((i + 1) + ": " + hand.get(i));
+        }
 
+        int[] selectedIndices = new int[2];
+        
+        // Choose first card
+        selectedIndices[0] = -1;
+        while (selectedIndices[0] < 0 || selectedIndices[0] >= hand.size()) {
+            System.out.print("Choose the number of the first card: ");
+            try {
+                selectedIndices[0] = scanner.hasNextLine() ? scanner.nextInt() - 1 : 0;
+            } catch (InputMismatchException e) {
+                scanner.nextLine();
+                System.out.println("Please enter a valid number.");
+            }
+        }
+        
+        // Choose second card
+        selectedIndices[1] = -1;
+        while (selectedIndices[1] < 0 || selectedIndices[1] >= hand.size() || selectedIndices[1] == selectedIndices[0]) {
+            System.out.print("Choose the number of the second card (different from first): ");
+            try {
+                selectedIndices[1] = scanner.hasNextLine() ? scanner.nextInt() - 1 : 0;
+                if (selectedIndices[1] == selectedIndices[0]) {
+                    System.out.println("Please choose a different card from the first one.");
+                    selectedIndices[1] = -1;
+                }
+            } catch (InputMismatchException e) {
+                scanner.nextLine();
+                System.out.println("Please enter a valid number.");
+            }
+        }
+        
+        return selectedIndices;
     }
 }

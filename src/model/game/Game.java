@@ -2,8 +2,10 @@ package model.game;
 
 
 import model.cards.*;
+import model.game.variants.StandardVariant;
 import model.players.HumanPlayer;
 import model.players.Player;
+import model.players.ScoreVisitor;
 import model.players.ScoreVisitorImpl;
 import model.players.VirtualPlayer;
 import model.players.strategies.StrategyType;
@@ -15,21 +17,26 @@ public class Game implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Deck deck;
     private final ArrayList<Player> players;
-// saving rounds has no logic here because they reference the same object each time so we capture not info this way
-    private final ArrayList<Round> rounds;
+    // Note: rounds field removed as it was not being used
+    // saving rounds has no logic here because they reference the same object each time so we capture not info this way
 
     private int savedRoundCounter;
 
     // test that Game knows about cards
     private ArrayList<Card> trophies;
 
+    // Game variant for different rule sets
+    private GameVariant variant;
+
 
     public Game() {
         this.deck = new Deck();
         this.players = new ArrayList<>();
-        this.rounds = new ArrayList<>();
         this.trophies = new ArrayList<>();
         this.savedRoundCounter = 0;
+        // Default to Standard variant
+        this.variant = new StandardVariant();
+        this.variant.setup(this);
     }
 
     public int getSavedRoundCounter() {
@@ -51,21 +58,6 @@ public class Game implements Serializable {
 
     public ArrayList<Player> getPlayers() {
         return players;
-    }
-
-
-
-    private Player getWinner(){
-        int maxScore = -999;
-        Player winner = null;
-        for (Player player : players) {
-            int score = player.getScore();
-            if (score > maxScore) {
-                maxScore = score;
-                winner = player;
-            }
-        }
-        return winner;
     }
 
     public ArrayList<Player> getWinners() {
@@ -91,10 +83,20 @@ public class Game implements Serializable {
     }
 
     public void calculateAllScores() {
-        ScoreVisitorImpl visitor = new ScoreVisitorImpl();
-        for (Player player : players) {
-            visitor.resetScore();
-            player.calculateScore(visitor);
+        ScoreVisitor visitor = variant.createScoreVisitor();
+        // Reset score for each player calculation
+        if (visitor instanceof ScoreVisitorImpl) {
+            ScoreVisitorImpl scoreVisitor = (ScoreVisitorImpl) visitor;
+            for (Player player : players) {
+                scoreVisitor.resetScore();
+                player.calculateScore(scoreVisitor);
+            }
+        } else {
+            // Fallback: create a new visitor for each player if not ScoreVisitorImpl
+            for (Player player : players) {
+                ScoreVisitor newVisitor = variant.createScoreVisitor();
+                player.calculateScore(newVisitor);
+            }
         }
     }
 
@@ -128,7 +130,6 @@ public class Game implements Serializable {
 
     private Player evaluateHighestFace(Suit suit) {
         int bestFaceValue = 0;
-        Player best = null;
         ArrayList<Player> ties = new ArrayList<>();
         for (Player player : players) {
             for (Card card: player.getJest().getCards()){
@@ -137,7 +138,6 @@ public class Game implements Serializable {
                     int val = card.getFaceValue();
                     if (val > bestFaceValue) {
                         bestFaceValue = val;
-                        best = player;
                         ties.clear();
                         ties.add(player);
                     }
@@ -441,5 +441,28 @@ public class Game implements Serializable {
             sb.append(card).append(": ").append(card.trophyInfo()).append("\n");
         }
         return sb.toString();
+    }
+
+    public ArrayList<Card> getTrophies() {
+        return trophies;
+    }
+
+    /**
+     * Sets the game variant and calls its setup method.
+     * @param variant the game variant to use
+     */
+    public void setVariant(GameVariant variant) {
+        this.variant = variant;
+        if (variant != null) {
+            variant.setup(this);
+        }
+    }
+
+    /**
+     * Gets the current game variant.
+     * @return the current game variant
+     */
+    public GameVariant getVariant() {
+        return variant;
     }
 }

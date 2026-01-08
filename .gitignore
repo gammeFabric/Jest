@@ -33,3 +33,6 @@ replay_pid*
 # IntelliJ IDEA
 .idea/
 *.iml
+
+# game saves
+saves/

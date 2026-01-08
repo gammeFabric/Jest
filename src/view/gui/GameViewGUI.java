@@ -1,6 +1,7 @@
 package view.gui;
 
 import model.cards.ExtensionCard;
+import model.game.GameVariant;
 import model.players.Player;
 import model.players.strategies.StrategyType;
 import app.GameLauncher;
@@ -16,9 +17,14 @@ import java.util.List;
 public class GameViewGUI implements IGameView {
     private final JFrame mainFrame;
     private final JTextArea outputArea;
-    private final JPanel cardPanel;
-    private String inputResult;
-    private boolean waitingForInput;
+    
+    @SuppressWarnings("unused")
+    private final JPanel cardPanel; // Kept for potential future use
+    private final GameWindow gameWindow;
+    @SuppressWarnings("unused")
+    private String inputResult; // Kept for potential future use
+    @SuppressWarnings("unused")
+    private boolean waitingForInput; // Kept for potential future use
 
     private final ArrayList<String> finalScoreLines = new ArrayList<>();
 
@@ -28,6 +34,15 @@ public class GameViewGUI implements IGameView {
         this.mainFrame = mainFrame;
         this.outputArea = outputArea;
         this.cardPanel = cardPanel;
+        this.gameWindow = null;
+        this.waitingForInput = false;
+    }
+
+    public GameViewGUI(JFrame mainFrame, JTextArea outputArea, JPanel cardPanel, GameWindow gameWindow) {
+        this.mainFrame = mainFrame;
+        this.outputArea = outputArea;
+        this.cardPanel = cardPanel;
+        this.gameWindow = gameWindow;
         this.waitingForInput = false;
     }
 
@@ -128,7 +143,10 @@ public class GameViewGUI implements IGameView {
         while (true) {
             String input = showInputDialog("Enter the number of players (3-4):", "Number of Players");
             if (input == null) {
-                System.exit(0);
+                // Dialog was closed or programmatically cancelled. Return a sentinel
+                // value so callers can decide how to proceed instead of exiting
+                // the whole application unconditionally.
+                return -1;
             }
             try {
                 int playerCount = Integer.parseInt(input);
@@ -194,6 +212,12 @@ public class GameViewGUI implements IGameView {
         appendOutput("\n=========================");
         appendOutput("      ROUND " + roundNumber);
         appendOutput("=========================");
+    }
+
+    public void updateHeader(int roundNumber, String variantName) {
+        if (gameWindow != null) {
+            gameWindow.updateHeader(roundNumber, variantName);
+        }
     }
 
     @Override
@@ -274,13 +298,23 @@ public class GameViewGUI implements IGameView {
             );
 
             if (choice == 0) {
-                try {
-                    mainFrame.dispose();
-                } finally {
-                    Thread t = new Thread(() -> GameLauncher.main(new String[0]), "Restart-GameLauncher");
-                    t.setDaemon(false);
-                    t.start();
-                }
+                // Clear all UI components for new game
+                SwingUtilities.invokeLater(() -> {
+                    outputArea.setText("");
+                    outputArea.repaint();
+                    
+                    // Clear all game panels if we have access to the game window
+                    if (gameWindow != null) {
+                        gameWindow.clearAllPanels();
+                    }
+                });
+                
+                // Save configuration for restart and restart in-place
+                // Note: This is a simplified approach. In a full implementation,
+                // you'd want to get the configuration from the GameController
+                Thread t = new Thread(() -> GameLauncher.restartGame(), "Restart-GameLauncher");
+                t.setDaemon(false);
+                t.start();
             } else {
                 System.exit(0);
             }
@@ -381,6 +415,38 @@ public class GameViewGUI implements IGameView {
     @Override
     public String askSaveName() {
         return showInputDialog("Enter save name (optional, blank for timestamp):", "Save Name");
+    }
+
+    @Override
+    public GameVariant askForVariant(List<GameVariant> availableVariants) {
+        if (availableVariants == null || availableVariants.isEmpty()) {
+            // Fallback: return Standard variant if no variants available
+            return new model.game.variants.StandardVariant();
+        }
+
+        String[] variantNames = new String[availableVariants.size()];
+        for (int i = 0; i < availableVariants.size(); i++) {
+            GameVariant variant = availableVariants.get(i);
+            variantNames[i] = variant.getName() + " (" + variant.getMinPlayers() + "-" + variant.getMaxPlayers() + " players)";
+        }
+
+        String message = "Select a game variant:\n\n";
+        for (int i = 0; i < availableVariants.size(); i++) {
+            GameVariant variant = availableVariants.get(i);
+            message += (i + 1) + ". " + variant.getName() + "\n";
+            message += "   " + variant.getRulesDescription().replace("\n", "\n   ") + "\n";
+            message += "   Players: " + variant.getMinPlayers() + "-" + variant.getMaxPlayers() + "\n\n";
+        }
+
+        int choice = showOptionDialog(message, "Select Game Variant", variantNames);
+        if (choice < 0 || choice >= availableVariants.size()) {
+            // Default to first variant
+            choice = 0;
+        }
+
+        GameVariant selected = availableVariants.get(choice);
+        appendOutput("Selected variant: " + selected.getName());
+        return selected;
     }
 
 }

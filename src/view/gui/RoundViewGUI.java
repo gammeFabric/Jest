@@ -8,28 +8,48 @@ import view.interfaces.IRoundView;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class RoundViewGUI implements IRoundView {
     private final JTextArea outputArea;
 
     private final JPanel offersPanel;
     private final JPanel handPanel;
+    @SuppressWarnings("unused") // Used via displayManager
+    private final JPanel botAreasPanel;
+    @SuppressWarnings("unused") // Used via displayManager
+    private final JPanel deckPanel;
+    @SuppressWarnings("unused") // Used via displayManager
+    private final JPanel trophiesPanel;
     private final GameDisplayManager displayManager;
+    private final boolean isHybridMode;
+    private boolean isInteractionPanelActive = false;
 
     private final ArrayList<OfferComponent> currentOfferComponents = new ArrayList<>();
 
     public RoundViewGUI(JTextArea outputArea) {
-        this.outputArea = outputArea;
-        this.offersPanel = null;
-        this.handPanel = null;
-        this.displayManager = null;
+        this(outputArea, null, null, null, null, null, false);
     }
 
     public RoundViewGUI(JTextArea outputArea, JPanel offersPanel, JPanel handPanel) {
+        this(outputArea, offersPanel, handPanel, null, null, null, false);
+    }
+
+    public RoundViewGUI(JTextArea outputArea, JPanel offersPanel, JPanel handPanel,
+                       JPanel botAreasPanel, JPanel deckPanel, JPanel trophiesPanel) {
+        this(outputArea, offersPanel, handPanel, botAreasPanel, deckPanel, trophiesPanel, false);
+    }
+    
+    public RoundViewGUI(JTextArea outputArea, JPanel offersPanel, JPanel handPanel,
+                       JPanel botAreasPanel, JPanel deckPanel, JPanel trophiesPanel, boolean isHybridMode) {
         this.outputArea = outputArea;
         this.offersPanel = offersPanel;
         this.handPanel = handPanel;
-        this.displayManager = new GameDisplayManager(offersPanel, handPanel);
+        this.botAreasPanel = botAreasPanel;
+        this.deckPanel = deckPanel;
+        this.trophiesPanel = trophiesPanel;
+        this.displayManager = new GameDisplayManager(offersPanel, handPanel, botAreasPanel, deckPanel, trophiesPanel, isHybridMode);
+        this.isHybridMode = isHybridMode;
     }
 
     private void appendOutput(String text) {
@@ -107,16 +127,24 @@ public class RoundViewGUI implements IRoundView {
             return;
         }
 
+        isInteractionPanelActive = true; // Set flag when interaction starts
+
         Runnable render = () -> {
-            // Update hand to the choosing player's hand (synchronously to avoid stale UI)
-            handPanel.removeAll();
-            if (choosingPlayer.getHand() != null) {
-                for (model.cards.Card card : choosingPlayer.getHand()) {
-                    handPanel.add(new CardComponent(card, true, false));
+            // Always clear the hand panel when entering the choosing context to avoid
+            // duplicated card components between the main game area and the interaction panel.
+            if (handPanel != null) {
+                handPanel.removeAll();
+                // Only re-populate the hand panel when interaction is NOT active
+                if (!isInteractionPanelActive) {
+                    if (choosingPlayer.getHand() != null) {
+                        for (model.cards.Card card : choosingPlayer.getHand()) {
+                            handPanel.add(new CardComponent(card, true, false));
+                        }
+                    }
                 }
+                handPanel.revalidate();
+                handPanel.repaint();
             }
-            handPanel.revalidate();
-            handPanel.repaint();
 
             offersPanel.removeAll();
             currentOfferComponents.clear();
@@ -183,6 +211,10 @@ public class RoundViewGUI implements IRoundView {
         }
     }
 
+    public void resetInteractionFlag() {
+        isInteractionPanelActive = false;
+    }
+
     public void highlightChosenOffer(Offer chosenOffer) {
         if (displayManager == null || chosenOffer == null) {
             return;
@@ -212,6 +244,24 @@ public class RoundViewGUI implements IRoundView {
             timer.setRepeats(false);
             timer.start();
         });
+    }
+
+    public void displayBots(List<Player> bots, List<Offer> offers) {
+        if (displayManager != null) {
+            displayManager.displayBots(bots, offers);
+        }
+    }
+
+    public void displayTrophies(List<Card> trophies) {
+        if (displayManager != null) {
+            displayManager.displayTrophies(trophies);
+        }
+    }
+
+    public void displayDeck(int deckSize) {
+        if (displayManager != null) {
+            displayManager.displayDeck(deckSize);
+        }
     }
 }
 

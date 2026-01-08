@@ -1,6 +1,8 @@
 package view.hybrid;
 
 import model.cards.ExtensionCard;
+import model.game.GameVariant;
+import model.game.variants.StandardVariant;
 import model.players.Player;
 import model.players.strategies.StrategyType;
 import view.console.GameView;
@@ -8,8 +10,8 @@ import view.gui.GameViewGUI;
 import view.interfaces.IGameView;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,13 +23,11 @@ public class GameViewHybrid implements IGameView {
 
     private static final class Choice<T> {
         private final Object lock = new Object();
-        private boolean resolved;
+        private volatile boolean resolved;
         private T value;
 
         boolean isResolved() {
-            synchronized (lock) {
-                return resolved;
-            }
+            return resolved;
         }
 
         void resolve(T value) {
@@ -59,34 +59,55 @@ public class GameViewHybrid implements IGameView {
     static String readLineNonBlocking(Choice<?> choice, String prompt) {
         if (prompt != null && !prompt.isEmpty()) {
             System.out.print(prompt);
+            System.out.flush();
         }
 
         while (!choice.isResolved()) {
             try {
                 if (CONSOLE_READER.ready()) {
-                    return CONSOLE_READER.readLine();
+                    String line = CONSOLE_READER.readLine();
+                    if (line != null) {
+                        return line;
+                    }
                 }
             } catch (IOException e) {
                 return null;
             }
 
-            synchronized (choice.lock) {
-                if (choice.isResolved()) {
-                    return null;
-                }
-                try {
-                    choice.lock.wait(75);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return null;
-                }
+            if (choice.isResolved()) {
+                return null;
+            }
+            
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return null;
             }
         }
         return null;
     }
 
     private static void runGuiAsync(String threadName, Runnable action) {
-        Thread t = new Thread(action, threadName);
+        Thread t = new Thread(() -> {
+            try {
+                action.run();
+            } catch (Exception e) {
+                System.err.println("GUI thread error in " + threadName + ": " + e.getMessage());
+            }
+        }, threadName);
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private static void runConsoleAsync(String threadName, Runnable action) {
+        Thread t = new Thread(() -> {
+            try {
+                action.run();
+            } catch (Exception e) {
+                System.err.println("Console thread error in " + threadName + ": " + e.getMessage());
+            }
+        }, threadName);
         t.setDaemon(true);
         t.start();
     }
@@ -102,10 +123,15 @@ public class GameViewHybrid implements IGameView {
 
         runGuiAsync("Hybrid-GUI-AskNumberOfPlayers", () -> {
             int result = guiView.askNumberOfPlayers();
-            choice.resolve(result);
+            // guiView.askNumberOfPlayers() returns -1 when the dialog was closed
+            // programmatically (we shouldn't exit the JVM in that case). Only
+            // resolve the choice when the GUI provides a valid player count.
+            if (result >= 3 && result <= 4) {
+                choice.resolve(result);
+            }
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-AskNumberOfPlayers", () -> {
             while (!choice.isResolved()) {
                 String line = readLineNonBlocking(choice, "Enter the number of players (3-4): ");
                 if (line == null) {
@@ -124,9 +150,7 @@ public class GameViewHybrid implements IGameView {
                     System.out.println("Invalid input. Please enter a number.");
                 }
             }
-        }, "Hybrid-Console-AskNumberOfPlayers");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
 
         return choice.await();
     }
@@ -140,7 +164,7 @@ public class GameViewHybrid implements IGameView {
             choice.resolve(result);
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-AskPlayerName", () -> {
             while (!choice.isResolved()) {
                 String line = readLineNonBlocking(choice, "Enter name for player " + playerNumber + ": ");
                 if (line == null) {
@@ -154,9 +178,7 @@ public class GameViewHybrid implements IGameView {
                 guiView.cancelActiveDialog();
                 return;
             }
-        }, "Hybrid-Console-AskPlayerName");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
 
         return choice.await();
     }
@@ -170,7 +192,7 @@ public class GameViewHybrid implements IGameView {
             choice.resolve(result);
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-AskStrategy", () -> {
             StrategyType[] values = StrategyType.values();
             System.out.println("Choose strategy for " + name + ":");
             for (StrategyType strategy : values) {
@@ -193,9 +215,7 @@ public class GameViewHybrid implements IGameView {
                 }
                 System.out.println("Please enter a valid number.");
             }
-        }, "Hybrid-Console-AskStrategy");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
 
         return choice.await();
     }
@@ -209,7 +229,7 @@ public class GameViewHybrid implements IGameView {
             choice.resolve(result);
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-IsHumanPlayer", () -> {
             while (!choice.isResolved()) {
                 String line = readLineNonBlocking(choice, "Is " + name + " a Human or Virtual player? (H/V): ");
                 if (line == null) {
@@ -228,9 +248,7 @@ public class GameViewHybrid implements IGameView {
                 }
                 System.out.println("Please enter 'H' for Human or 'V' for Virtual.");
             }
-        }, "Hybrid-Console-IsHumanPlayer");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
 
         return choice.await();
     }
@@ -244,7 +262,7 @@ public class GameViewHybrid implements IGameView {
             choice.resolve(result);
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-AskForExtensions", () -> {
             if (availableExtensions == null || availableExtensions.isEmpty()) {
                 choice.resolve(new ArrayList<>());
                 guiView.cancelActiveDialog();
@@ -290,16 +308,13 @@ public class GameViewHybrid implements IGameView {
                 guiView.cancelActiveDialog();
                 return;
             }
-        }, "Hybrid-Console-AskForExtensions");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
 
         return choice.await();
     }
 
     @Override
     public void showInvalidExtensionMessage(String message) {
-        // Show error in both console and GUI
         consoleView.showInvalidExtensionMessage(message);
         guiView.showInvalidExtensionMessage(message);
     }
@@ -355,7 +370,7 @@ public class GameViewHybrid implements IGameView {
             choice.resolve(result);
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-AskSaveAfterRound", () -> {
             while (!choice.isResolved()) {
                 String line = readLineNonBlocking(choice, "Save game now? (Y/N): ");
                 if (line == null) {
@@ -374,9 +389,7 @@ public class GameViewHybrid implements IGameView {
                 }
                 System.out.println("Please enter 'Y' or 'N'.");
             }
-        }, "Hybrid-Console-AskSaveAfterRound");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
 
         return choice.await();
     }
@@ -390,16 +403,72 @@ public class GameViewHybrid implements IGameView {
             choice.resolve(result);
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-AskSaveName", () -> {
             String line = readLineNonBlocking(choice, "Enter save name (optional, press Enter for timestamp): ");
             if (line == null) {
                 return;
             }
             choice.resolve(line);
             guiView.cancelActiveDialog();
-        }, "Hybrid-Console-AskSaveName");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
+
+        return choice.await();
+    }
+
+    @Override
+    public GameVariant askForVariant(List<GameVariant> availableVariants) {
+        Choice<GameVariant> choice = new Choice<>();
+
+        runGuiAsync("Hybrid-GUI-AskForVariant", () -> {
+            GameVariant result = guiView.askForVariant(availableVariants);
+            choice.resolve(result);
+        });
+
+        runConsoleAsync("Hybrid-Console-AskForVariant", () -> {
+            if (availableVariants == null || availableVariants.isEmpty()) {
+                choice.resolve(new StandardVariant());
+                guiView.cancelActiveDialog();
+                return;
+            }
+
+            System.out.println("\n--- SELECT GAME VARIANT ---");
+            System.out.println("Available game variants:");
+            for (int i = 0; i < availableVariants.size(); i++) {
+                GameVariant variant = availableVariants.get(i);
+                System.out.println((i + 1) + ". " + variant.getName());
+                System.out.println("   " + variant.getRulesDescription().replace("\n", "\n   "));
+                System.out.println("   Players: " + variant.getMinPlayers() + "-" + variant.getMaxPlayers());
+                System.out.println();
+            }
+
+            int choiceIdx = -1;
+            while (!choice.isResolved()) {
+                String line = readLineNonBlocking(choice, "Select a variant (1-" + availableVariants.size() + "): ");
+                if (line == null) {
+                    return;
+                }
+                String input = line.trim();
+                if (input.isEmpty()) {
+                    choiceIdx = 1; // default to first
+                } else {
+                    try {
+                        choiceIdx = Integer.parseInt(input);
+                        if (choiceIdx < 1 || choiceIdx > availableVariants.size()) {
+                            System.out.println("Please enter a number between 1 and " + availableVariants.size() + ".");
+                            continue;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid input. Please enter a number.");
+                        continue;
+                    }
+                }
+
+                GameVariant selected = availableVariants.get(choiceIdx - 1);
+                choice.resolve(selected);
+                guiView.cancelActiveDialog();
+                return;
+            }
+        });
 
         return choice.await();
     }

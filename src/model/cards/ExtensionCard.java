@@ -7,7 +7,6 @@ import model.players.strategies.StrategyType;
 
  import java.io.IOException;
  import java.io.ObjectInputStream;
- import java.io.Serializable;
 import java.util.function.BiFunction;
 
 public class ExtensionCard extends Card {

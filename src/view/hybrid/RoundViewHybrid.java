@@ -6,6 +6,8 @@ import model.players.Player;
 import view.console.RoundView;
 import view.gui.RoundViewGUI;
 import view.interfaces.IRoundView;
+import model.cards.Card;
+import java.util.List;
 
 import java.util.ArrayList;
 
@@ -100,6 +102,20 @@ public class RoundViewHybrid implements IRoundView {
 
     public void flashChosenOffer(Offer chosenOffer) {
         guiView.flashChosenOffer(chosenOffer);
+    }
+
+    // Expose some GUI-only display helpers so controllers using a hybrid
+    // round view can still request GUI-only rendering (bots, trophies, deck)
+    public void displayBots(List<Player> bots, List<Offer> offers) {
+        guiView.displayBots(bots, offers);
+    }
+
+    public void displayTrophies(List<Card> trophies) {
+        guiView.displayTrophies(trophies);
+    }
+
+    public void displayDeck(int deckSize) {
+        guiView.displayDeck(deckSize);
     }
 }
 

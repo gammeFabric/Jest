@@ -15,7 +15,8 @@ import java.awt.geom.Rectangle2D;
 public class CardComponent extends JPanel {
     private final Card card;
     private final boolean faceUp;
-    private final boolean selectable;
+    @SuppressWarnings("unused")
+    private final boolean selectable; // Kept for potential future use
     private boolean selected;
     private static final int CARD_WIDTH = 100;
     private static final int CARD_HEIGHT = 140;

@@ -1,6 +1,7 @@
 package view.interfaces;
 
 import model.cards.ExtensionCard;
+import model.game.GameVariant;
 import model.players.Player;
 import model.players.strategies.StrategyType;
 
@@ -21,6 +22,7 @@ public interface IGameView {
     void showEndRoundMessage();
     ArrayList<Integer> askForExtensions(ArrayList<ExtensionCard> availableExtensions);
     void showInvalidExtensionMessage(String message);
+    GameVariant askForVariant(List<GameVariant> availableVariants);
 
     boolean askSaveAfterRound();
     String askSaveName();

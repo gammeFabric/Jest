@@ -14,7 +14,9 @@ public class AggressiveStrategy implements PlayStrategy {
     private boolean hasJoker;
     private boolean hasHearts;
     private Jest playerJest;
-    private List<Card> trophies; // Ajout : connaissance des trophées
+    private boolean isFullHandVariant = false; // Track if playing Full Hand variant
+    @SuppressWarnings("unused")
+    private List<Card> trophies; // Kept for potential future use in strategy decisions
 
     public AggressiveStrategy() {
         this.seenCards = new HashSet<>();
@@ -36,6 +38,10 @@ public class AggressiveStrategy implements PlayStrategy {
     public Card[] setCardsToOffer(ArrayList<Card> hand) {
         if (hand.isEmpty()) return null;
 
+        // Detect if we're in Full Hand variant by checking hand size
+        // In Full Hand, players start with many cards (6-8) vs 2 in standard
+        isFullHandVariant = hand.size() > 4;
+
         Card bestCard = hand.get(0);
         int bestScore = Integer.MIN_VALUE;
 
@@ -49,8 +55,16 @@ public class AggressiveStrategy implements PlayStrategy {
 
         Card faceDownCard = bestCard;
         hand.remove(faceDownCard);
-        
-        Card faceUpCard = hand.get(0);
+
+        Card faceUpCard;
+        if (isFullHandVariant) {
+            // In Full Hand variant, be more strategic about face-up card
+            // Consider remaining hand size and game phase
+            faceUpCard = selectFaceUpCardForFullHand(hand);
+        } else {
+            // Standard variant: just take the next card
+            faceUpCard = hand.get(0);
+        }
         hand.remove(faceUpCard);
 
         return new Card[] { faceUpCard, faceDownCard };
@@ -71,8 +85,10 @@ public class AggressiveStrategy implements PlayStrategy {
 
             double score = evaluateCardPotential(visible);
             
-            // Logique de prise de risque (Bonus pour carte cachée si la visible est moyenne)
-            // ... (similaire à avant, simplifié ici pour la clarté) ...
+            // In Full Hand variant, consider game phase more carefully
+            if (isFullHandVariant) {
+                score = adjustScoreForFullHandPhase(score, offer);
+            }
 
             if (score > maxScore) {
                 maxScore = score;
@@ -245,5 +261,81 @@ public class AggressiveStrategy implements PlayStrategy {
             }
         }
         return true; 
+    }
+    
+    /**
+     * Selects the best face-up card for Full Hand variant considering strategy.
+     * In Full Hand, we need to be more strategic about which card to show face-up.
+     */
+    private Card selectFaceUpCardForFullHand(ArrayList<Card> hand) {
+        if (hand.isEmpty()) return null;
+        
+        Card bestCard = hand.get(0);
+        int bestScore = Integer.MIN_VALUE;
+        
+        for (Card c : hand) {
+            // For face-up, we want a card that's decent but not our best
+            int score = evaluateCardForFaceUp(c);
+            if (score > bestScore) {
+                bestScore = score;
+                bestCard = c;
+            }
+        }
+        
+        return bestCard;
+    }
+    
+    /**
+     * Evaluates a card specifically for face-up display in Full Hand variant.
+     */
+    private int evaluateCardForFaceUp(Card card) {
+        if (card instanceof ExtensionCard) {
+            return ((ExtensionCard) card).getAIValue(StrategyType.AGGRESSIVE, playerJest) / 2;
+        }
+        
+        if (card instanceof Joker) {
+            return 5; // Show Joker to intimidate, but not too high
+        }
+        
+        if (card instanceof SuitCard) {
+            SuitCard suitCard = (SuitCard) card;
+            int val = suitCard.getFaceValue();
+            Suit suit = suitCard.getSuit();
+            
+            // For face-up, we want to show decent cards but not our best
+            if (suit == Suit.HEARTS) {
+                if (hasJoker) return 8; // Show hearts if we have joker
+                return 3; // Otherwise, low value
+            }
+            
+            if (suit == Suit.DIAMONDS) return -val / 2; // Less negative for face-up
+            
+            // Black cards are good to show face-up
+            if (val >= 3) return val - 2; // High value but not the best
+            return val;
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Adjusts the score based on Full Hand variant game phase.
+     */
+    private double adjustScoreForFullHandPhase(double baseScore, Offer offer) {
+        // Consider how many cards we have left
+        int handSize = playerJest.getCards().size();
+        
+        // Early game: be more aggressive
+        if (handSize <= 2) {
+            return baseScore * 1.5; // More aggressive when we have few cards
+        }
+        
+        // Late game: be more conservative
+        if (handSize >= 4) {
+            return baseScore * 0.8; // More conservative when we have many cards
+        }
+        
+        // Mid game: normal strategy
+        return baseScore;
     }
 }

@@ -7,8 +7,8 @@ import view.gui.HumanViewGUI;
 import view.interfaces.IHumanView;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class HumanViewHybrid implements IHumanView {
@@ -19,13 +19,11 @@ public class HumanViewHybrid implements IHumanView {
 
     private static final class Choice<T> {
         private final Object lock = new Object();
-        private boolean resolved;
+        private volatile boolean resolved;
         private T value;
 
         boolean isResolved() {
-            synchronized (lock) {
-                return resolved;
-            }
+            return resolved;
         }
 
         void resolve(T value) {
@@ -57,34 +55,55 @@ public class HumanViewHybrid implements IHumanView {
     private static String readLineNonBlocking(Choice<?> choice, String prompt) {
         if (prompt != null && !prompt.isEmpty()) {
             System.out.print(prompt);
+            System.out.flush();
         }
 
         while (!choice.isResolved()) {
             try {
                 if (CONSOLE_READER.ready()) {
-                    return CONSOLE_READER.readLine();
+                    String line = CONSOLE_READER.readLine();
+                    if (line != null) {
+                        return line;
+                    }
                 }
             } catch (IOException e) {
                 return null;
             }
 
-            synchronized (choice.lock) {
-                if (choice.isResolved()) {
-                    return null;
-                }
-                try {
-                    choice.lock.wait(75);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return null;
-                }
+            if (choice.isResolved()) {
+                return null;
+            }
+            
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return null;
             }
         }
         return null;
     }
 
     private static void runGuiAsync(String threadName, Runnable action) {
-        Thread t = new Thread(action, threadName);
+        Thread t = new Thread(() -> {
+            try {
+                action.run();
+            } catch (Exception e) {
+                System.err.println("GUI thread error in " + threadName + ": " + e.getMessage());
+            }
+        }, threadName);
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private static void runConsoleAsync(String threadName, Runnable action) {
+        Thread t = new Thread(() -> {
+            try {
+                action.run();
+            } catch (Exception e) {
+                System.err.println("Console thread error in " + threadName + ": " + e.getMessage());
+            }
+        }, threadName);
         t.setDaemon(true);
         t.start();
     }
@@ -109,7 +128,7 @@ public class HumanViewHybrid implements IHumanView {
             choice.resolve(idx);
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-ChooseFaceUpCard", () -> {
             while (!choice.isResolved()) {
                 String line = readLineNonBlocking(choice, "Please choose the number of the card to show face-up: ");
                 if (line == null) {
@@ -126,9 +145,7 @@ public class HumanViewHybrid implements IHumanView {
                 }
                 consoleView.showMessage("Please enter a valid number.");
             }
-        }, "Hybrid-Console-ChooseFaceUpCard");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
 
         Integer resolved = choice.await();
         return resolved != null ? resolved : 0;
@@ -150,7 +167,7 @@ public class HumanViewHybrid implements IHumanView {
             choice.resolve(offer);
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-ChooseOffer", () -> {
             while (!choice.isResolved()) {
                 String line = readLineNonBlocking(choice, "Choose the number of the offer: ");
                 if (line == null) {
@@ -167,9 +184,7 @@ public class HumanViewHybrid implements IHumanView {
                 }
                 consoleView.showMessage("Please enter a valid number.");
             }
-        }, "Hybrid-Console-ChooseOffer");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
 
         Offer resolved = choice.await();
         return resolved != null ? resolved : selectableOffers.get(0);
@@ -186,7 +201,7 @@ public class HumanViewHybrid implements IHumanView {
             choice.resolve(result);
         });
 
-        Thread consoleThread = new Thread(() -> {
+        runConsoleAsync("Hybrid-Console-ChooseFaceUpOrDown", () -> {
             while (!choice.isResolved()) {
                 String line = readLineNonBlocking(choice, "Take 1) Face-up card or 2) Face-down card? ");
                 if (line == null) {
@@ -205,9 +220,7 @@ public class HumanViewHybrid implements IHumanView {
                 }
                 consoleView.showMessage("Please enter 1 or 2.");
             }
-        }, "Hybrid-Console-ChooseFaceUpOrDown");
-        consoleThread.setDaemon(true);
-        consoleThread.start();
+        });
 
         Boolean resolved = choice.await();
         return resolved != null ? resolved : true;
@@ -229,6 +242,66 @@ public class HumanViewHybrid implements IHumanView {
     public void thankForChoosing(Card faceUpCard, Card faceDownCard) {
         consoleView.thankForChoosing(faceUpCard, faceDownCard);
         guiView.thankForChoosing(faceUpCard, faceDownCard);
+    }
+    
+    @Override
+    public int[] chooseTwoCardsForOffer(String playerName, ArrayList<Card> hand) {
+        consoleView.showMessage(playerName + " has " + hand.size() + " cards to make an offer");
+        consoleView.showMessage("Choose two cards from your hand:");
+        for (int i = 0; i < hand.size(); i++) {
+            consoleView.showMessage((i + 1) + ": " + hand.get(i));
+        }
+
+        Choice<int[]> choice = new Choice<>();
+
+        // GUI Thread
+        runGuiAsync("Hybrid-GUI-ChooseTwoCards", () -> {
+            int[] result = guiView.chooseTwoCardsForOffer(playerName, hand);
+            choice.resolve(result);
+        });
+
+        runConsoleAsync("Hybrid-Console-ChooseTwoCards", () -> {
+            while (!choice.isResolved()) {
+                int[] selectedIndices = new int[2];
+                
+                // Choose first card
+                selectedIndices[0] = -1;
+                while (!choice.isResolved() && (selectedIndices[0] < 0 || selectedIndices[0] >= hand.size())) {
+                    String line = readLineNonBlocking(choice, "Choose the number of the first card: ");
+                    if (line == null) return;
+                    try {
+                        selectedIndices[0] = Integer.parseInt(line.trim()) - 1;
+                    } catch (NumberFormatException ignored) {
+                        consoleView.showMessage("Please enter a valid number.");
+                        continue;
+                    }
+                }
+                
+                // Choose second card
+                selectedIndices[1] = -1;
+                while (!choice.isResolved() && (selectedIndices[1] < 0 || selectedIndices[1] >= hand.size() || selectedIndices[1] == selectedIndices[0])) {
+                    String line = readLineNonBlocking(choice, "Choose the number of the second card (different from first): ");
+                    if (line == null) return;
+                    try {
+                        selectedIndices[1] = Integer.parseInt(line.trim()) - 1;
+                        if (selectedIndices[1] == selectedIndices[0]) {
+                            consoleView.showMessage("Please choose a different card from the first one.");
+                            selectedIndices[1] = -1;
+                            continue;
+                        }
+                    } catch (NumberFormatException ignored) {
+                        consoleView.showMessage("Please enter a valid number.");
+                        continue;
+                    }
+                }
+                
+                choice.resolve(selectedIndices);
+                guiView.cancelActiveDialog();
+            }
+        });
+
+        int[] resolved = choice.await();
+        return resolved != null ? resolved : new int[]{0, 1};
     }
 }
 

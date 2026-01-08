@@ -11,10 +11,28 @@ import java.util.List;
 public class GameDisplayManager {
     private final JPanel offersPanel;
     private final JPanel handPanel;
+    private final JPanel botAreasPanel;
+    private final JPanel deckPanel;
+    private final JPanel trophiesPanel;
+    private final boolean isHybridMode;
 
     public GameDisplayManager(JPanel offersPanel, JPanel handPanel) {
+        this(offersPanel, handPanel, null, null, null, false);
+    }
+
+    public GameDisplayManager(JPanel offersPanel, JPanel handPanel, 
+                             JPanel botAreasPanel, JPanel deckPanel, JPanel trophiesPanel) {
+        this(offersPanel, handPanel, botAreasPanel, deckPanel, trophiesPanel, false);
+    }
+    
+    public GameDisplayManager(JPanel offersPanel, JPanel handPanel, 
+                             JPanel botAreasPanel, JPanel deckPanel, JPanel trophiesPanel, boolean isHybridMode) {
         this.offersPanel = offersPanel;
         this.handPanel = handPanel;
+        this.botAreasPanel = botAreasPanel;
+        this.deckPanel = deckPanel;
+        this.trophiesPanel = trophiesPanel;
+        this.isHybridMode = isHybridMode;
     }
 
     public void displayOffers(List<Offer> offers) {
@@ -31,12 +49,83 @@ public class GameDisplayManager {
         });
     }
 
+    public void displayBots(List<Player> bots, List<Offer> offers) {
+        if (botAreasPanel == null) return;
+        
+        SwingUtilities.invokeLater(() -> {
+            botAreasPanel.removeAll();
+            for (Player bot : bots) {
+                // Find offer for this bot
+                Offer botOffer = null;
+                if (offers != null) {
+                    for (Offer offer : offers) {
+                        if (offer != null && offer.getOwner() == bot) {
+                            botOffer = offer;
+                            break;
+                        }
+                    }
+                }
+                BotAreaComponent botArea = new BotAreaComponent(bot, botOffer);
+                botAreasPanel.add(botArea);
+            }
+            botAreasPanel.revalidate();
+            botAreasPanel.repaint();
+        });
+    }
+
+    public void displayTrophies(List<Card> trophies) {
+        if (trophiesPanel == null) return;
+        
+        SwingUtilities.invokeLater(() -> {
+            trophiesPanel.removeAll();
+            if (trophies != null) {
+                for (Card trophy : trophies) {
+                    TrophyCardComponent trophyCard = new TrophyCardComponent(trophy);
+                    trophiesPanel.add(trophyCard);
+                }
+            }
+            trophiesPanel.revalidate();
+            trophiesPanel.repaint();
+        });
+    }
+
+    public void displayDeck(int deckSize) {
+        if (deckPanel == null) return;
+        
+        SwingUtilities.invokeLater(() -> {
+            deckPanel.removeAll();
+            
+            // Show deck as face-down cards
+            int cardsToShow = Math.min(deckSize, 10); // Show max 10 cards visually
+            for (int i = 0; i < cardsToShow; i++) {
+                CardComponent card = new CardComponent(null, false, false);
+                // Offset cards slightly to show stack effect
+                card.setBorder(BorderFactory.createEmptyBorder(0, 0, i * 2, 0));
+                deckPanel.add(card);
+            }
+            
+            deckPanel.revalidate();
+            deckPanel.repaint();
+        });
+    }
+
     public void displayPlayerHand(Player player, ArrayList<Card> hand) {
+        // In hybrid mode, don't display cards in hand panel to avoid duplication
+        // Cards will only be shown in the interaction panel for selection
+        if (isHybridMode) {
+            return;
+        }
+        
         SwingUtilities.invokeLater(() -> {
             handPanel.removeAll();
             if (hand != null) {
-                for (Card card : hand) {
+                // Display cards with slight rotation/fan effect
+                for (int i = 0; i < hand.size(); i++) {
+                    Card card = hand.get(i);
                     CardComponent cardComp = new CardComponent(card, true, false);
+                    // Add slight offset for fan effect
+                    int offset = (i - hand.size() / 2) * 3;
+                    cardComp.setBorder(BorderFactory.createEmptyBorder(0, Math.max(0, offset), 0, Math.max(0, -offset)));
                     handPanel.add(cardComp);
                 }
             }
@@ -60,5 +149,14 @@ public class GameDisplayManager {
             offersPanel.repaint();
         });
     }
-}
 
+    public void clearBots() {
+        if (botAreasPanel != null) {
+            SwingUtilities.invokeLater(() -> {
+                botAreasPanel.removeAll();
+                botAreasPanel.revalidate();
+                botAreasPanel.repaint();
+            });
+        }
+    }
+}

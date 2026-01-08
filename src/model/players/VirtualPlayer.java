@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 public class VirtualPlayer extends Player {
     private PlayStrategy strategy;
+    private StrategyType strategyType;
 
     public VirtualPlayer(String name, StrategyType type) {
         super(name, true);
@@ -14,12 +15,17 @@ public class VirtualPlayer extends Player {
     }
 
     public void setStrategy(StrategyType type) {
+        this.strategyType = type;
         switch (type) {
             case RANDOM -> strategy = new RandomStrategy();
             case AGGRESSIVE -> strategy = new AggressiveStrategy();
             case CAUTIOUS -> strategy = new CautiousStrategy();
             default -> strategy = new RandomStrategy();
         }
+    }
+    
+    public StrategyType getStrategy() {
+        return strategyType;
     }
     
     @Override
@@ -52,6 +58,10 @@ public class VirtualPlayer extends Player {
         // 3. IMPORTANT : On sauvegarde l'offre dans l'état du joueur
         // Sans cette ligne, `player.getOffer()` renvoie null plus tard dans le Round
         this.offer = newOffer; 
+        
+        // 4. Remove the offered cards from hand
+        this.hand.remove(faceUpCard);
+        this.hand.remove(faceDownCard);
         
         return newOffer;
     }

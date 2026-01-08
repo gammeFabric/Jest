@@ -9,7 +9,9 @@ import java.awt.event.MouseEvent;
 
 public class CardButton extends JPanel {
     private final CardComponent cardComponent;
+    @SuppressWarnings("unused") // Used in anonymous MouseAdapter
     private final int index;
+    @SuppressWarnings("unused") // Used in anonymous MouseAdapter
     private final CardSelectionListener listener;
     private boolean hovered;
 

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 public class CautiousStrategy implements PlayStrategy {
     private Jest playerJest;
+    private boolean isFullHandVariant = false; // Track if playing Full Hand variant
 
     // ... setCardsToOffer reste inchangé (logique de base) ...
     @Override
@@ -15,6 +16,9 @@ public class CautiousStrategy implements PlayStrategy {
         if (hand.isEmpty()) {
             return null;
         }
+        
+        // Detect if we're in Full Hand variant by checking hand size
+        isFullHandVariant = hand.size() > 4;
         
         // On garde la logique de base : offrir la carte la plus "faible" face visible.
         // On sécurise juste les comparaisons pour éviter les crashs avec les Extensions.
@@ -67,6 +71,12 @@ public class CautiousStrategy implements PlayStrategy {
             if (faceUp == null) continue;
 
             int score = evaluateCard(faceUp);
+            
+            // In Full Hand variant, be more cautious about game phase
+            if (isFullHandVariant) {
+                score = adjustScoreForFullHandPhase(score, offer);
+            }
+            
             if (score > maxScore) {
                 maxScore = score;
                 bestOffer = offer;
@@ -101,5 +111,28 @@ public class CautiousStrategy implements PlayStrategy {
     }
 
     @Override
-    public void updateJest(Jest jest) { this.playerJest = jest; }
+    public void updateJest(Jest jest) { 
+        this.playerJest = jest; 
+    }
+    
+    /**
+     * Adjusts the score based on Full Hand variant game phase for cautious strategy.
+     */
+    private int adjustScoreForFullHandPhase(int baseScore, Offer offer) {
+        // Cautious strategy becomes even more conservative in Full Hand
+        int handSize = playerJest.getCards().size();
+        
+        // Early game: be very cautious
+        if (handSize <= 2) {
+            return (int)(baseScore * 0.7); // Very conservative when we have few cards
+        }
+        
+        // Late game: be extremely cautious
+        if (handSize >= 4) {
+            return (int)(baseScore * 0.5); // Extremely conservative when we have many cards
+        }
+        
+        // Mid game: normal cautious strategy
+        return baseScore;
+    }
 }

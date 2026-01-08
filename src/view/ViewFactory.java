@@ -5,6 +5,7 @@ import model.players.Player;
 import view.console.HumanView;
 import view.console.VirtualView;
 import view.gui.HumanViewGUI;
+import view.gui.InteractionPanel;
 import view.hybrid.HumanViewHybrid;
 import view.interfaces.IPlayerView;
 
@@ -16,23 +17,23 @@ public class ViewFactory {
     }
 
     private final ViewMode mode;
-    private final JFrame mainFrame;
     private final JTextArea outputArea;
     private final JPanel cardPanel;
     private final JPanel handPanel;
     private final JPanel offersPanel;
+    private final InteractionPanel interactionPanel;
 
     public ViewFactory(ViewMode mode) {
         this(mode, null, null, null, null, null);
     }
 
-    public ViewFactory(ViewMode mode, JFrame mainFrame, JTextArea outputArea, JPanel cardPanel, JPanel handPanel, JPanel offersPanel) {
+    public ViewFactory(ViewMode mode, JTextArea outputArea, JPanel cardPanel, JPanel handPanel, JPanel offersPanel, InteractionPanel interactionPanel) {
         this.mode = mode;
-        this.mainFrame = mainFrame;
         this.outputArea = outputArea;
         this.cardPanel = cardPanel;
         this.handPanel = handPanel;
         this.offersPanel = offersPanel;
+        this.interactionPanel = interactionPanel;
     }
 
     public IPlayerView createPlayerView(Player player) {
@@ -41,10 +42,10 @@ public class ViewFactory {
                 case CONSOLE:
                     return new HumanView();
                 case GUI:
-                    return new HumanViewGUI(mainFrame, outputArea, cardPanel, handPanel, offersPanel);
+                    return new HumanViewGUI(outputArea, cardPanel, handPanel, offersPanel, interactionPanel);
                 case HYBRID:
                     return new HumanViewHybrid(new HumanView(), 
-                                              new HumanViewGUI(mainFrame, outputArea, cardPanel, handPanel, offersPanel));
+                                              new HumanViewGUI(outputArea, cardPanel, handPanel, offersPanel, interactionPanel, true));
                 default:
                     return new HumanView();
             }

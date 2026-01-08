@@ -1,6 +1,7 @@
 package view.console;
 
 import model.cards.ExtensionCard;
+import model.game.GameVariant;
 import model.players.Player;
 import model.players.strategies.StrategyType;
 import view.interfaces.IGameView;
@@ -8,6 +9,7 @@ import view.interfaces.IGameView;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class GameView implements IGameView {
@@ -22,7 +24,7 @@ public class GameView implements IGameView {
     public int askNumberOfPlayers() {
         while (true) {
             System.out.print("Enter the number of players (3-4): ");
-            String input = scanner.nextLine();
+            String input = scanner.hasNextLine() ? scanner.nextLine() : "3";
             try {
                 int playerCount = Integer.parseInt(input);
                 if (playerCount >= 3 && playerCount <= 4) {
@@ -39,7 +41,7 @@ public class GameView implements IGameView {
     // Ask for a player's name
     public String askPlayerName(int playerNumber) {
         System.out.print("Enter name for player " + playerNumber + ": ");
-        String name = scanner.nextLine().trim();
+        String name = scanner.hasNextLine() ? scanner.nextLine().trim() : "Player" + playerNumber;
         if (name.isEmpty()) {
             name = "Player" + playerNumber;
         }
@@ -67,7 +69,7 @@ public class GameView implements IGameView {
         System.out.println("Press Enter to play without extensions.");
         System.out.print("> ");
 
-        String input = scanner.nextLine();
+        String input = scanner.hasNextLine() ? scanner.nextLine() : "";
         ArrayList<Integer> choices = new ArrayList<>();
 
         if (input.trim().isEmpty()) {
@@ -127,7 +129,7 @@ public class GameView implements IGameView {
     public boolean isHumanPlayer(String name) {
         while (true) {
             System.out.print("Is " + name + " a Human or Virtual player? (H/V): ");
-            String type = scanner.nextLine().trim().toUpperCase();
+            String type = scanner.hasNextLine() ? scanner.nextLine().trim().toUpperCase() : "H";
             if (type.equals("H")) return true;
             if (type.equals("V")) return false;
             System.out.println("Please enter 'H' for Human or 'V' for Virtual.");
@@ -195,10 +197,16 @@ public class GameView implements IGameView {
     public boolean askSaveAfterRound() {
         while (true) {
             System.out.print("Save game now? (Y/N): ");
-            String input = scanner.nextLine().trim().toUpperCase();
-            if (input.equals("Y")) return true;
-            if (input.equals("N")) return false;
-            System.out.println("Please enter 'Y' or 'N'.");
+            try {
+                String input = scanner.nextLine().trim().toUpperCase();
+                if (input.equals("Y")) return true;
+                if (input.equals("N")) return false;
+                System.out.println("Please enter 'Y' or 'N'.");
+            } catch (NoSuchElementException | IllegalStateException e) {
+                // Handle cases where scanner is closed or input is not available
+                // During restart, default to not saving
+                return false;
+            }
         }
     }
 
@@ -206,6 +214,48 @@ public class GameView implements IGameView {
     public String askSaveName() {
         System.out.print("Enter save name (optional, press Enter for timestamp): ");
         return scanner.nextLine();
+    }
+
+    @Override
+    public GameVariant askForVariant(List<GameVariant> availableVariants) {
+        if (availableVariants == null || availableVariants.isEmpty()) {
+            // Fallback: return Standard variant if no variants available
+            return new model.game.variants.StandardVariant();
+        }
+
+        System.out.println("\n--- SELECT GAME VARIANT ---");
+        System.out.println("Available game variants:");
+        
+        for (int i = 0; i < availableVariants.size(); i++) {
+            GameVariant variant = availableVariants.get(i);
+            System.out.println((i + 1) + ". " + variant.getName());
+            System.out.println("   " + variant.getRulesDescription().replace("\n", "\n   "));
+            System.out.println("   Players: " + variant.getMinPlayers() + "-" + variant.getMaxPlayers());
+            System.out.println();
+        }
+
+        int choice = -1;
+        while (choice < 1 || choice > availableVariants.size()) {
+            System.out.print("Select a variant (1-" + availableVariants.size() + "): ");
+            try {
+                String input = scanner.hasNextLine() ? scanner.nextLine().trim() : "";
+                if (input.isEmpty()) {
+                    // Default to first variant if no input
+                    choice = 1;
+                    break;
+                }
+                choice = Integer.parseInt(input);
+                if (choice < 1 || choice > availableVariants.size()) {
+                    System.out.println("Please enter a number between 1 and " + availableVariants.size() + ".");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        }
+
+        GameVariant selected = availableVariants.get(choice - 1);
+        System.out.println("Selected variant: " + selected.getName() + "\n");
+        return selected;
     }
 
 }

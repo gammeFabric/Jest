@@ -2,6 +2,7 @@ package app;
 
 import controller.GameController;
 import model.game.Game;
+import model.game.GameConfiguration;
 import view.ViewFactory;
 import view.console.GameView;
 import view.console.RoundView;
@@ -13,11 +14,10 @@ import view.hybrid.RoundViewHybrid;
 import view.interfaces.IGameView;
 import view.interfaces.IRoundView;
 
- import java.util.List;
- import java.util.Scanner;
- import java.io.BufferedReader;
- import java.io.IOException;
- import java.io.InputStreamReader;
+import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import javax.swing.*;
 
@@ -26,12 +26,18 @@ public class GameLauncher {
         CONSOLE, GUI, HYBRID
     }
 
+    // Store current game mode for restart
+    private static GameMode currentMode;
+    private static GameWindow currentGameWindow;
+
     public static void main(String[] args) {
+        boolean isRestart = args.length > 0 && "--restart".equals(args[0]);
         GameMode mode = selectMode();
+        currentMode = mode; // Store current mode for restart
         
         System.out.println("--- Jest Card Game ---");
         if (mode == GameMode.GUI || mode == GameMode.HYBRID) {
-            System.out.println("Starting in " + mode + " mode...");
+            System.out.println("Starting in " + mode + " mode..." + (isRestart ? " (Restart)" : ""));
         }
 
         IGameView gameView;
@@ -47,31 +53,35 @@ public class GameLauncher {
                 break;
             case GUI:
                 gameWindow = new GameWindow();
+                currentGameWindow = gameWindow; // Store for restart
                 gameWindow.show();
-                gameView = new GameViewGUI(gameWindow.getFrame(), gameWindow.getOutputArea(), gameWindow.getCardPanel());
-                roundView = new RoundViewGUI(gameWindow.getOutputArea(), gameWindow.getOffersPanel(), gameWindow.getHandPanel());
+                gameView = new GameViewGUI(gameWindow.getFrame(), gameWindow.getOutputArea(), gameWindow.getCardPanel(), gameWindow);
+                roundView = new RoundViewGUI(gameWindow.getOutputArea(), gameWindow.getOffersPanel(), gameWindow.getHandPanel(),
+                                            gameWindow.getBotAreasPanel(), gameWindow.getDeckPanel(), gameWindow.getTrophiesPanel());
                 viewFactory = new ViewFactory(ViewFactory.ViewMode.GUI, 
-                                             gameWindow.getFrame(), 
                                              gameWindow.getOutputArea(), 
                                              gameWindow.getCardPanel(),
                                              gameWindow.getHandPanel(),
-                                             gameWindow.getOffersPanel());
+                                             gameWindow.getOffersPanel(),
+                                             gameWindow.getInteractionPanel());
                 break;
             case HYBRID:
                 gameWindow = new GameWindow();
+                currentGameWindow = gameWindow; // Store for restart
                 gameWindow.show();
                 GameView consoleGameView = new GameView();
-                GameViewGUI guiGameView = new GameViewGUI(gameWindow.getFrame(), gameWindow.getOutputArea(), gameWindow.getCardPanel());
+                GameViewGUI guiGameView = new GameViewGUI(gameWindow.getFrame(), gameWindow.getOutputArea(), gameWindow.getCardPanel(), gameWindow);
                 gameView = new GameViewHybrid(consoleGameView, guiGameView);
                 RoundView consoleRoundView = new RoundView();
-                RoundViewGUI guiRoundView = new RoundViewGUI(gameWindow.getOutputArea(), gameWindow.getOffersPanel(), gameWindow.getHandPanel());
+                RoundViewGUI guiRoundView = new RoundViewGUI(gameWindow.getOutputArea(), gameWindow.getOffersPanel(), gameWindow.getHandPanel(),
+                                                            gameWindow.getBotAreasPanel(), gameWindow.getDeckPanel(), gameWindow.getTrophiesPanel(), true);
                 roundView = new RoundViewHybrid(consoleRoundView, guiRoundView);
                 viewFactory = new ViewFactory(ViewFactory.ViewMode.HYBRID, 
-                                             gameWindow.getFrame(), 
                                              gameWindow.getOutputArea(), 
                                              gameWindow.getCardPanel(),
                                              gameWindow.getHandPanel(),
-                                             gameWindow.getOffersPanel());
+                                             gameWindow.getOffersPanel(),
+                                             gameWindow.getInteractionPanel());
                 break;
             default:
                 gameView = new GameView();
@@ -79,13 +89,61 @@ public class GameLauncher {
                 viewFactory = new ViewFactory(ViewFactory.ViewMode.CONSOLE);
         }
 
-        Game model = selectNewOrLoadGame(mode, gameWindow);
+        Game model = selectNewOrLoadGame(mode, gameWindow, isRestart);
 
         GameController controller = new GameController(model, gameView, roundView, viewFactory);
         controller.startGame();
+        
+        // Clean up configuration file after game ends (if not restart)
+        if (!isRestart) {
+            GameConfigurationManager.deleteConfiguration();
+        }
     }
 
-    private static Game selectNewOrLoadGame(GameMode mode, GameWindow gameWindow) {
+    /**
+     * Creates a new Game instance from a saved configuration.
+     * @param config the saved game configuration
+     * @return a new Game instance configured with the saved parameters
+     */
+    private static Game createGameFromConfiguration(GameConfiguration config) {
+        Game game = new Game();
+        
+        // Set the variant
+        game.setVariant(config.getVariant());
+        
+        // Add players according to the configuration
+        for (GameConfiguration.PlayerConfiguration playerConfig : config.getPlayerConfigs()) {
+            if (playerConfig.isHuman()) {
+                game.addHumanPlayer(playerConfig.getName());
+            } else {
+                game.addVirtualPlayer(playerConfig.getName(), playerConfig.getStrategy());
+            }
+        }
+        
+        // Add extensions to the deck
+        if (!config.getSelectedExtensions().isEmpty()) {
+            game.getDeck().addExtensions(config.getSelectedExtensions());
+        }
+        
+        // Choose trophies based on player count
+        game.chooseTrophies(config.getPlayerCount());
+        
+        return game;
+    }
+
+    private static Game selectNewOrLoadGame(GameMode mode, GameWindow gameWindow, boolean isRestart) {
+        if (isRestart) {
+            // Try to load saved configuration for restart
+            GameConfiguration config = GameConfigurationManager.loadConfiguration();
+            if (config != null) {
+                return createGameFromConfiguration(config);
+            } else {
+                // Fallback to new game if no configuration found
+                System.out.println("No saved configuration found. Starting new game.");
+                return new Game();
+            }
+        }
+        
         if (mode == GameMode.GUI) {
             String[] options = {"New Game", "Load Game"};
             int choice = JOptionPane.showOptionDialog(
@@ -105,8 +163,19 @@ public class GameLauncher {
         }
 
         if (mode == GameMode.HYBRID) {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
+            if (isRestart) {
+                // Try to load saved configuration for restart
+                GameConfiguration config = GameConfigurationManager.loadConfiguration();
+                if (config != null) {
+                    return createGameFromConfiguration(config);
+                } else {
+                    // Fallback to new game if no configuration found
+                    System.out.println("No saved configuration found. Starting new game.");
+                    return new Game();
+                }
+            }
+            
+            // HYBRID mode: complex logic with both GUI and console input
             final class Choice<T> {
                 private final Object lock = new Object();
                 private boolean resolved;
@@ -184,6 +253,7 @@ public class GameLauncher {
             guiThread.start();
 
             Thread consoleThread = new Thread(() -> {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                 System.out.println("1. Start new game");
                 System.out.println("2. Load saved game");
 
@@ -239,16 +309,34 @@ public class GameLauncher {
             return new Game();
         }
 
-        // CONSOLE or HYBRID: keep it simple and use console prompts
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("1. Start new game");
-        System.out.println("2. Load saved game");
-        System.out.print("Enter choice (1-2): ");
-
+        // CONSOLE: keep it simple and use console prompts
+        if (isRestart) {
+            // Try to load saved configuration for restart
+            GameConfiguration config = GameConfigurationManager.loadConfiguration();
+            if (config != null) {
+                return createGameFromConfiguration(config);
+            } else {
+                // Fallback to new game if no configuration found
+                System.out.println("No saved configuration found. Starting new game.");
+                return new Game();
+            }
+        }
+        
+        // Only execute this logic when NOT restarting
         int choice;
         try {
-            choice = Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
+            System.out.println("1. Start new game");
+            System.out.println("2. Load saved game");
+            System.out.print("Enter choice (1-2): ");
+
+            BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
+            String input = consoleReader.readLine();
+            try {
+                choice = Integer.parseInt(input.trim());
+            } catch (NumberFormatException e) {
+                choice = 1;
+            }
+        } catch (IOException e1) {
             choice = 1;
         }
 
@@ -270,8 +358,14 @@ public class GameLauncher {
 
         int idx;
         try {
-            idx = Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
+            BufferedReader saveReader = new BufferedReader(new InputStreamReader(System.in));
+            String saveInput = saveReader.readLine();
+            try {
+                idx = Integer.parseInt(saveInput.trim());
+            } catch (NumberFormatException e) {
+                idx = 1;
+            }
+        } catch (IOException e2) {
             idx = 1;
         }
         if (idx < 1 || idx > saves.size()) {
@@ -332,25 +426,103 @@ public class GameLauncher {
             };
         } else {
             // Console available, ask via console
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Select game mode:");
-            System.out.println("1. Console");
-            System.out.println("2. GUI");
-            System.out.println("3. Hybrid (Console + GUI)");
-            System.out.print("Enter choice (1-3): ");
+            try {
+                System.out.println("Select game mode:");
+                System.out.println("1. Console");
+                System.out.println("2. GUI");
+                System.out.println("3. Hybrid (Console + GUI)");
+                System.out.print("Enter choice (1-3): ");
 
-            String input = scanner.nextLine().trim().toLowerCase();
+                BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
+                String input = consoleReader.readLine();
+                if (input == null) input = "1";
+                input = input.trim().toLowerCase();
 
-            return switch (input) {
-                case "1", "console" -> GameMode.CONSOLE;
-                case "2", "gui" -> GameMode.GUI;
-                case "3", "hybrid" -> GameMode.HYBRID;
-                default -> {
-                    System.out.println("Invalid choice, defaulting to Console mode");
-                    yield GameMode.CONSOLE;
-                }
-            };
+                return switch (input) {
+                    case "1", "console" -> GameMode.CONSOLE;
+                    case "2", "gui" -> GameMode.GUI;
+                    case "3", "hybrid" -> GameMode.HYBRID;
+                    default -> {
+                        System.out.println("Invalid choice, defaulting to Console mode");
+                        yield GameMode.CONSOLE;
+                    }
+                };
+            } catch (IOException e3) {
+                return GameMode.CONSOLE;
+            }
         }
     }
-}
 
+    /**
+     * Restarts the game with the same mode and window (for GUI/HYBRID modes).
+     * This method is called from GameViewGUI to restart without closing the window.
+     */
+    public static void restartGame() {
+        if (currentMode == null) {
+            // Fallback to original behavior if no current mode is stored
+            main(new String[]{"--restart"});
+            return;
+        }
+
+        // Load the saved configuration
+        GameConfiguration config = GameConfigurationManager.loadConfiguration();
+        Game model;
+        if (config != null) {
+            model = createGameFromConfiguration(config);
+        } else {
+            System.out.println("No saved configuration found. Starting new game.");
+            model = new Game();
+        }
+
+        // Create new views and controller using the same mode and window
+        IGameView gameView;
+        IRoundView roundView;
+        ViewFactory viewFactory;
+
+        switch (currentMode) {
+            case CONSOLE:
+                gameView = new GameView();
+                roundView = new RoundView();
+                viewFactory = new ViewFactory(ViewFactory.ViewMode.CONSOLE);
+                break;
+            case GUI:
+                // Reuse the existing window
+                GameWindow gameWindow = currentGameWindow;
+                gameView = new GameViewGUI(gameWindow.getFrame(), gameWindow.getOutputArea(), gameWindow.getCardPanel(), gameWindow);
+                roundView = new RoundViewGUI(gameWindow.getOutputArea(), gameWindow.getOffersPanel(), gameWindow.getHandPanel(),
+                                            gameWindow.getBotAreasPanel(), gameWindow.getDeckPanel(), gameWindow.getTrophiesPanel());
+                viewFactory = new ViewFactory(ViewFactory.ViewMode.GUI, 
+                                             gameWindow.getOutputArea(), 
+                                             gameWindow.getCardPanel(),
+                                             gameWindow.getHandPanel(),
+                                             gameWindow.getOffersPanel(),
+                                             gameWindow.getInteractionPanel());
+                break;
+            case HYBRID:
+                // Reuse the existing window
+                GameWindow hybridWindow = currentGameWindow;
+                GameView consoleGameView = new GameView();
+                GameViewGUI guiGameView = new GameViewGUI(hybridWindow.getFrame(), hybridWindow.getOutputArea(), hybridWindow.getCardPanel(), hybridWindow);
+                gameView = new GameViewHybrid(consoleGameView, guiGameView);
+                RoundView consoleRoundView = new RoundView();
+                RoundViewGUI guiRoundView = new RoundViewGUI(hybridWindow.getOutputArea(), hybridWindow.getOffersPanel(), hybridWindow.getHandPanel(),
+                                                            hybridWindow.getBotAreasPanel(), hybridWindow.getDeckPanel(), hybridWindow.getTrophiesPanel(), true);
+                roundView = new RoundViewHybrid(consoleRoundView, guiRoundView);
+                viewFactory = new ViewFactory(ViewFactory.ViewMode.HYBRID, 
+                                             hybridWindow.getOutputArea(), 
+                                             hybridWindow.getCardPanel(),
+                                             hybridWindow.getHandPanel(),
+                                             hybridWindow.getOffersPanel(),
+                                             hybridWindow.getInteractionPanel());
+                break;
+            default:
+                gameView = new GameView();
+                roundView = new RoundView();
+                viewFactory = new ViewFactory(ViewFactory.ViewMode.CONSOLE);
+        }
+
+        // Start the new game
+        GameController controller = new GameController(model, gameView, roundView, viewFactory);
+        controller.startGame();
+    }
+}
