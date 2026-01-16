@@ -5,6 +5,19 @@ import model.players.Offer;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Composant GUI pour afficher une offre de deux cartes.
+ * 
+ * <p>Ce composant affiche visuellement une offre composée d'une carte
+ * face visible et d'une carte face cachée, avec support de sélection.</p>
+ * 
+ * <p><b>Fonctionnalités :</b></p>
+ * <ul>
+ *   <li>Affichage des deux cartes côte à côte</li>
+ *   <li>Support de sélection par le joueur</li>
+ *   <li>Feedback visuel de sélection</li>
+ * </ul>
+ */
 public class OfferComponent extends JPanel {
     private final Offer offer;
     @SuppressWarnings("unused")

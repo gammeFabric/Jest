@@ -21,6 +21,32 @@ import java.io.InputStreamReader;
 
 import javax.swing.*;
 
+/**
+ * Point d'entrée principal de l'application.
+ * 
+ * <p>Cette classe gère le lancement de l'application et la coordination entre
+ * les différents modes d'interface (Console, GUI, Hybrid).</p>
+ * 
+ * <p><b>Fonctionnalités principales :</b></p>
+ * <ul>
+ *   <li>Sélection du mode d'interface (console/GUI/hybride)</li>
+ *   <li>Création ou chargement d'une partie</li>
+ *   <li>Initialisation des vues et contrôleurs appropriés</li>
+ *   <li>Gestion du redémarrage de partie</li>
+ * </ul>
+ * 
+ * <p><b>Modes supportés :</b></p>
+ * <ul>
+ *   <li><b>CONSOLE</b> - Interface textuelle en ligne de commande</li>
+ *   <li><b>GUI</b> - Interface graphique complète</li>
+ *   <li><b>HYBRID</b> - Combinaison console + GUI permettant l'interaction par les deux moyens</li>
+ * </ul>
+ * 
+ * @see GameMode
+ * @see view.console.GameView
+ * @see view.gui.GameViewGUI
+ * @see view.hybrid.GameViewHybrid
+ */
 public class GameLauncher {
     public enum GameMode {
         CONSOLE, GUI, HYBRID
@@ -30,6 +56,15 @@ public class GameLauncher {
     private static GameMode currentMode;
     private static GameWindow currentGameWindow;
 
+    /**
+     * Point d'entrée de l'application.
+     *
+     * <p>Initialise le mode d'interface (console/GUI/hybride), instancie les vues correspondantes,
+     * crée (ou charge) le modèle de jeu et démarre le contrôleur principal.</p>
+     *
+     * @param args arguments de lancement ; l'option {@code --restart} redémarre une partie à partir
+     *             d'une configuration précédemment sauvegardée
+     */
     public static void main(String[] args) {
         boolean isRestart = args.length > 0 && "--restart".equals(args[0]);
         GameMode mode = selectMode();
@@ -450,6 +485,12 @@ public class GameLauncher {
     }
 
     
+    /**
+     * Redémarre une partie en réutilisant le dernier mode d'interface sélectionné.
+     *
+     * <p>Si une configuration de partie est disponible (joueurs/variante/extensions), elle est
+     * chargée afin de reconstruire un modèle de jeu cohérent. Sinon, une nouvelle partie est créée.</p>
+     */
     public static void restartGame() {
         if (currentMode == null) {
             

@@ -4,6 +4,25 @@ import model.cards.Card;
 
 import java.util.ArrayList;
 
+/**
+ * Représente un joueur humain.
+ * 
+ * <p>Cette classe implémente les méthodes de décision pour un joueur
+ * humain, déléguant les choix au contrôleur/vue approprié.</p>
+ * 
+ * <p><b>Méthodes spécifiques :</b></p>
+ * <ul>
+ *   <li><code>makeOffer(int, int)</code> - Crée une offre avec 2 indices</li>
+ *   <li><code>makeOffer(int[])</code> - Crée une offre avec un tableau d'indices (Full Hand)</li>
+ *   <li><code>chooseCard(..., Offer, boolean)</code> - Choisit une carte spécifique</li>
+ * </ul>
+ * 
+ * <p><b>Les méthodes abstraites sans paramètres</b> lèvent des exceptions
+ * car le contrôleur doit appeler les versions avec paramètres.</p>
+ * 
+ * @see model.players.Player
+ * @see controller.HumanPlayerController
+ */
 public class HumanPlayer extends Player {
     public HumanPlayer(String name, boolean isVirtual) {
         super(name, isVirtual);
@@ -14,20 +33,18 @@ public class HumanPlayer extends Player {
             return null;
         }
 
-        
         Card faceUpCard = hand.get(faceUpIndex);
         Card faceDownCard = hand.get(faceDownIndex);
 
         Offer playerOffer = new Offer(this, faceUpCard, faceDownCard);
         offer = playerOffer;
-        
-        
+
         int higherIndex = Math.max(faceUpIndex, faceDownIndex);
         int lowerIndex = Math.min(faceUpIndex, faceDownIndex);
-        
+
         hand.remove(higherIndex);
         hand.remove(lowerIndex);
-        
+
         return playerOffer;
     }
 
@@ -36,21 +53,19 @@ public class HumanPlayer extends Player {
             return null;
         }
 
-        
         Card faceUpCard = hand.get(selectedIndices[0]);
         Card faceDownCard = hand.get(selectedIndices[1]);
 
         Offer playerOffer = new Offer(this, faceUpCard, faceDownCard);
         offer = playerOffer;
-        
-        
+
         hand.remove(selectedIndices[0]);
         if (selectedIndices[1] > selectedIndices[0]) {
-            hand.remove(selectedIndices[1] - 1); 
+            hand.remove(selectedIndices[1] - 1);
         } else {
             hand.remove(selectedIndices[1]);
         }
-        
+
         return playerOffer;
     }
 
@@ -72,6 +87,7 @@ public class HumanPlayer extends Player {
 
     @Override
     public Offer chooseCard(ArrayList<Offer> availableOffers) {
-        throw new UnsupportedOperationException("Controller must call chooseCard(availableOffers, chosenOffer, isFaceUp).");
+        throw new UnsupportedOperationException(
+                "Controller must call chooseCard(availableOffers, chosenOffer, isFaceUp).");
     }
 }

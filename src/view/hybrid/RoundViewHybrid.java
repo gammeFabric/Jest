@@ -6,11 +6,23 @@ import model.players.Player;
 import view.console.RoundView;
 import view.gui.RoundViewGUI;
 import view.interfaces.IRoundView;
-import model.cards.Card;
-import java.util.List;
 
 import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Vue hybride (console + GUI) pour l'affichage d'un tour.
+ * 
+ * <p>Cette classe implémente l'interface IRoundView en combinant
+ * les vues console et GUI pour un affichage hybride d'un tour.</p>
+ * 
+ * <p><b>Stratégie hybride :</b></p>
+ * <ul>
+ *   <li>Affichage simultané ou alterné console/GUI</li>
+ *   <li>Synchronisation des deux vues</li>
+ *   <li>Flexibilité de présentation</li>
+ * </ul>
+ */
 public class RoundViewHybrid implements IRoundView {
     private final RoundView consoleView;
     private final RoundViewGUI guiView;

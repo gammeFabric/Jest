@@ -1,6 +1,5 @@
 package model.game;
 
-
 import model.cards.*;
 import model.game.variants.StandardVariant;
 import model.players.HumanPlayer;
@@ -10,31 +9,56 @@ import model.players.ScoreVisitorImpl;
 import model.players.VirtualPlayer;
 import model.players.strategies.StrategyType;
 
- import java.io.Serializable;
+import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Classe principale représentant une partie de Jest.
+ * 
+ * <p>Cette classe gère l'état global d'une partie, incluant les joueurs,
+ * le deck, les trophées et la variante de jeu en cours.</p>
+ * 
+ * <p><b>Responsabilités :</b></p>
+ * <ul>
+ *   <li>Gestion des joueurs (ajout humain/virtuel)</li>
+ *   <li>Sélection et tirage des trophées</li>
+ *   <li>Attribution finale des trophées selon critères</li>
+ *   <li>Calcul des scores via le visiteur approprié</li>
+ *   <li>Détermination du/des gagnant(s)</li>
+ *   <li>Application de la variante de jeu</li>
+ * </ul>
+ * 
+ * <p><b>Cycle de vie :</b></p>
+ * <ol>
+ *   <li>Création et configuration (variante, joueurs, extensions)</li>
+ *   <li>Tirage des trophées</li>
+ *   <li>Tours successifs (géré par GameController)</li>
+ *   <li>Attribution des trophées et calcul final</li>
+ * </ol>
+ * 
+ * <p><b>Sérialisable</b> pour permettre la sauvegarde/chargement.</p>
+ * 
+ * @see model.game.GameVariant
+ * @see model.players.Player
+ * @see model.cards.Deck
+ */
 public class Game implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Deck deck;
     private final ArrayList<Player> players;
-    
-    
 
     private int savedRoundCounter;
 
-    
     private ArrayList<Card> trophies;
 
-    
     private GameVariant variant;
-
 
     public Game() {
         this.deck = new Deck();
         this.players = new ArrayList<>();
         this.trophies = new ArrayList<>();
         this.savedRoundCounter = 0;
-        
+
         this.variant = new StandardVariant();
         this.variant.setup(this);
     }
@@ -47,7 +71,6 @@ public class Game implements Serializable {
         this.savedRoundCounter = savedRoundCounter;
     }
 
-    
     public void addHumanPlayer(String name) {
         players.add(new HumanPlayer(name, false));
     }
@@ -64,7 +87,6 @@ public class Game implements Serializable {
         int maxScore = Integer.MIN_VALUE;
         ArrayList<Player> winners = new ArrayList<>();
 
-        
         for (Player player : players) {
             int score = player.getScore();
             if (score > maxScore) {
@@ -72,7 +94,6 @@ public class Game implements Serializable {
             }
         }
 
-        
         for (Player player : players) {
             if (player.getScore() == maxScore) {
                 winners.add(player);
@@ -84,7 +105,7 @@ public class Game implements Serializable {
 
     public void calculateAllScores() {
         ScoreVisitor visitor = variant.createScoreVisitor();
-        
+
         if (visitor instanceof ScoreVisitorImpl) {
             ScoreVisitorImpl scoreVisitor = (ScoreVisitorImpl) visitor;
             for (Player player : players) {
@@ -92,7 +113,7 @@ public class Game implements Serializable {
                 player.calculateScore(scoreVisitor);
             }
         } else {
-            
+
             for (Player player : players) {
                 ScoreVisitor newVisitor = variant.createScoreVisitor();
                 player.calculateScore(newVisitor);
@@ -100,10 +121,9 @@ public class Game implements Serializable {
         }
     }
 
-    
-
     public void assignTrophies() {
-        if (this.trophies == null || this.trophies.isEmpty()) return;
+        if (this.trophies == null || this.trophies.isEmpty())
+            return;
 
         for (Card trophy : this.trophies) {
             Player winner = determineTrophyWinner(trophy);
@@ -114,7 +134,7 @@ public class Game implements Serializable {
     }
 
     private Player determineTrophyWinner(Card trophy) {
-        TrophyType tType  = trophy.getTrophyType();
+        TrophyType tType = trophy.getTrophyType();
         return switch (tType) {
             case HIGHEST_FACE -> evaluateHighestFace(trophy.getTrophySuit());
             case LOWEST_FACE -> evaluateLowestFace(trophy.getTrophySuit());
@@ -126,61 +146,59 @@ public class Game implements Serializable {
         };
     }
 
-    
-
     private Player evaluateHighestFace(Suit suit) {
         int bestFaceValue = 0;
         ArrayList<Player> ties = new ArrayList<>();
         for (Player player : players) {
-            for (Card card: player.getJest().getCards()){
-                
-                if (suit.getStrength() == card.getSuitValue()){
+            for (Card card : player.getJest().getCards()) {
+
+                if (suit.getStrength() == card.getSuitValue()) {
                     int val = card.getFaceValue();
                     if (val > bestFaceValue) {
                         bestFaceValue = val;
                         ties.clear();
                         ties.add(player);
-                    }
-                    else if (val == bestFaceValue){
-                        if(!ties.contains(player)){
+                    } else if (val == bestFaceValue) {
+                        if (!ties.contains(player)) {
                             ties.add(player);
                         }
                     }
                 }
             }
         }
-        if (ties.isEmpty()) return null;
-        if (ties.size() == 1) return ties.getFirst();
+        if (ties.isEmpty())
+            return null;
+        if (ties.size() == 1)
+            return ties.getFirst();
 
-        
         return ties.getFirst();
     }
 
     private Player evaluateLowestFace(Suit suit) {
-        
+
         int lowestFaceValue = 4;
         ArrayList<Player> ties = new ArrayList<>();
         for (Player player : players) {
-            for (Card card: player.getJest().getCards()){
-                if (suit.getStrength() == card.getSuitValue()){
+            for (Card card : player.getJest().getCards()) {
+                if (suit.getStrength() == card.getSuitValue()) {
                     int val = card.getFaceValue();
                     if (val < lowestFaceValue) {
                         lowestFaceValue = val;
                         ties.clear();
                         ties.add(player);
-                    }
-                    else if (val == lowestFaceValue){
-                        if(!ties.contains(player)){
+                    } else if (val == lowestFaceValue) {
+                        if (!ties.contains(player)) {
                             ties.add(player);
                         }
                     }
                 }
             }
         }
-        if (ties.isEmpty()) return null;
-        if (ties.size() == 1) return ties.getFirst();
+        if (ties.isEmpty())
+            return null;
+        if (ties.size() == 1)
+            return ties.getFirst();
 
-        
         return ties.getFirst();
     }
 
@@ -189,31 +207,32 @@ public class Game implements Serializable {
         int maxCardsCount = -1;
         ArrayList<Player> ties = new ArrayList<>();
         for (Player player : players) {
-            for (Card card: player.getJest().getCards()){
-                if(card.getFaceValue() == face.getFaceValue()){
+            for (Card card : player.getJest().getCards()) {
+                if (card.getFaceValue() == face.getFaceValue()) {
                     cardsCount++;
                 }
             }
-            if (cardsCount > maxCardsCount){
+            if (cardsCount > maxCardsCount) {
                 maxCardsCount = cardsCount;
                 ties.clear();
                 ties.add(player);
-            }
-            else if (cardsCount == maxCardsCount){
-                if(!ties.contains(player)){
+            } else if (cardsCount == maxCardsCount) {
+                if (!ties.contains(player)) {
                     ties.add(player);
                 }
             }
         }
-        if (ties.isEmpty()) return null;
-        if (ties.size() == 1) return ties.getFirst();
+        if (ties.isEmpty())
+            return null;
+        if (ties.size() == 1)
+            return ties.getFirst();
 
         return breakTieByStrongestSuitAmongFaceValue(ties, face);
     }
 
     private Player evaluateJokerTrophy() {
-        for (Player player: players){
-            for (Card card: player.getJest().getCards()) {
+        for (Player player : players) {
+            for (Card card : player.getJest().getCards()) {
                 if (card instanceof Joker)
                     return player;
             }
@@ -230,53 +249,53 @@ public class Game implements Serializable {
                 maxScore = player.getScore();
                 ties.clear();
                 ties.add(player);
-            }
-            else if (player.getScore() == maxScore){
-                if (!ties.contains(player)){
+            } else if (player.getScore() == maxScore) {
+                if (!ties.contains(player)) {
                     ties.add(player);
                 }
             }
 
         }
 
-        if (ties.isEmpty()) return null;
-        if (ties.size() == 1) return ties.getFirst();
-
+        if (ties.isEmpty())
+            return null;
+        if (ties.size() == 1)
+            return ties.getFirst();
 
         return breakTieByHighestFaceValue(ties);
     }
 
-    private Player evaluateBestJestWithoutJoker(){
-        
+    private Player evaluateBestJestWithoutJoker() {
+
         ArrayList<Player> ties = new ArrayList<>();
         ArrayList<Player> candidates = new ArrayList<>(players);
         calculateAllScores();
         int maxScore = -999;
         for (Player player : players) {
-            for (Card card: player.getJest().getCards()){
-                if (card instanceof Joker){
+            for (Card card : player.getJest().getCards()) {
+                if (card instanceof Joker) {
                     candidates.remove(player);
                     break;
                 }
             }
         }
-        for (Player player : candidates){
+        for (Player player : candidates) {
             if (player.getScore() > maxScore) {
                 maxScore = player.getScore();
                 ties.clear();
                 ties.add(player);
-            }
-            else if (player.getScore() == maxScore){
-                if (!ties.contains(player)){
+            } else if (player.getScore() == maxScore) {
+                if (!ties.contains(player)) {
                     ties.add(player);
                 }
             }
 
         }
 
-        if (ties.isEmpty()) return null;
-        if (ties.size() == 1) return ties.getFirst();
-
+        if (ties.isEmpty())
+            return null;
+        if (ties.size() == 1)
+            return ties.getFirst();
 
         return breakTieByHighestFaceValue(ties);
     }
@@ -286,8 +305,8 @@ public class Game implements Serializable {
         int bestFaceValue = -1;
         int bestSuitValue = -1;
         for (Player player : ties) {
-            for (Card card: player.getJest().getCards()){
-                if (card instanceof SuitCard){
+            for (Card card : player.getJest().getCards()) {
+                if (card instanceof SuitCard) {
                     int fv = card.getFaceValue();
                     int sv = card.getSuitValue();
                     if (fv > bestFaceValue || (fv == bestFaceValue && sv > bestSuitValue)) {
@@ -299,17 +318,16 @@ public class Game implements Serializable {
             }
         }
 
-
         return best;
     }
 
-    private Player breakTieByStrongestSuitAmongFaceValue(ArrayList<Player> ties,  Face face) {
+    private Player breakTieByStrongestSuitAmongFaceValue(ArrayList<Player> ties, Face face) {
         Player best = null;
         int bestStrength = -1;
         for (Player player : ties) {
             int playerBestRank = -1;
-            for (Card card: player.getJest().getCards()){
-                if (card instanceof SuitCard && ((SuitCard)card).getFaceValue() == face.getFaceValue()) {
+            for (Card card : player.getJest().getCards()) {
+                if (card instanceof SuitCard && ((SuitCard) card).getFaceValue() == face.getFaceValue()) {
                     int rank = card.getSuitValue();
                     playerBestRank = Math.max(playerBestRank, rank);
                 }
@@ -318,7 +336,7 @@ public class Game implements Serializable {
                 best = player;
                 bestStrength = playerBestRank;
             }
-            
+
             else if (playerBestRank == bestStrength) {
                 continue;
             }
@@ -326,10 +344,9 @@ public class Game implements Serializable {
         return best;
     }
 
-    public Deck getDeck(){
+    public Deck getDeck() {
         return deck;
     }
-
 
     public void assignTrophyType() {
         for (Card trophy : trophies) {
@@ -337,11 +354,11 @@ public class Game implements Serializable {
                 trophy.setTrophyType(TrophyType.BEST_JEST);
             }
             if (trophy instanceof SuitCard) {
-                
+
                 if (((SuitCard) trophy).getSuit() == Suit.HEARTS) {
                     trophy.setTrophyType(TrophyType.JOKER);
                 }
-                
+
                 else if (((SuitCard) trophy).getSuit() == Suit.CLUBS) {
                     if (((SuitCard) trophy).getFace() != Face.TWO && ((SuitCard) trophy).getFace() != Face.THREE) {
                         if (((SuitCard) trophy).getFace() == Face.FOUR) {
@@ -368,7 +385,7 @@ public class Game implements Serializable {
                             trophy.setTrophyType(type);
                         }
                     }
-                    
+
                 } else if (((SuitCard) trophy).getSuit() == Suit.SPADES) {
                     if (((SuitCard) trophy).getFace() != Face.THREE && ((SuitCard) trophy).getFace() != Face.TWO) {
                         if (((SuitCard) trophy).getFace() == Face.FOUR) {
@@ -396,7 +413,7 @@ public class Game implements Serializable {
                         }
                     }
                 }
-                
+
                 else {
                     if (((SuitCard) trophy).getFace() == Face.FOUR) {
                         trophy.setTrophyType(TrophyType.BEST_JEST_NO_JOKER);
@@ -423,7 +440,7 @@ public class Game implements Serializable {
         }
     }
 
-    public ArrayList<Card> chooseTrophies(int playerCount){
+    public ArrayList<Card> chooseTrophies(int playerCount) {
         int trophiesCount = (playerCount == 3) ? 2 : 1;
         for (int i = 0; i < trophiesCount; i++) {
             Card trophy = deck.dealCard();
@@ -433,7 +450,6 @@ public class Game implements Serializable {
         assignTrophyType();
         return trophies;
     }
-
 
     public String trophiesInfo() {
         StringBuilder sb = new StringBuilder();
@@ -447,7 +463,6 @@ public class Game implements Serializable {
         return trophies;
     }
 
-    
     public void setVariant(GameVariant variant) {
         this.variant = variant;
         if (variant != null) {
@@ -455,7 +470,6 @@ public class Game implements Serializable {
         }
     }
 
-    
     public GameVariant getVariant() {
         return variant;
     }

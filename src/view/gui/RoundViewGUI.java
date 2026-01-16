@@ -10,6 +10,21 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Vue GUI pour l'affichage d'un tour de jeu.
+ * 
+ * <p>Cette classe implémente l'interface IRoundView en affichant
+ * les informations d'un tour via l'interface graphique.</p>
+ * 
+ * <p><b>Affichages :</b></p>
+ * <ul>
+ *   <li>Début et fin du tour</li>
+ *   <li>Distribution des cartes</li>
+ *   <li>Offres des joueurs</li>
+ *   <li>Ordre de sélection</li>
+ *   <li>Cartes choisies</li>
+ * </ul>
+ */
 public class RoundViewGUI implements IRoundView {
     private final JTextArea outputArea;
 
@@ -22,7 +37,6 @@ public class RoundViewGUI implements IRoundView {
     @SuppressWarnings("unused") 
     private final JPanel trophiesPanel;
     private final GameDisplayManager displayManager;
-    private final boolean isHybridMode;
     private boolean isInteractionPanelActive = false;
 
     private final ArrayList<OfferComponent> currentOfferComponents = new ArrayList<>();
@@ -48,8 +62,7 @@ public class RoundViewGUI implements IRoundView {
         this.botAreasPanel = botAreasPanel;
         this.deckPanel = deckPanel;
         this.trophiesPanel = trophiesPanel;
-        this.displayManager = new GameDisplayManager(offersPanel, handPanel, botAreasPanel, deckPanel, trophiesPanel, isHybridMode);
-        this.isHybridMode = isHybridMode;
+        this.displayManager = new GameDisplayManager(botAreasPanel, deckPanel, trophiesPanel);
     }
 
     private void appendOutput(String text) {

@@ -8,6 +8,20 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+/**
+ * Vue console pour les interactions avec un joueur humain.
+ * 
+ * <p>Cette classe implémente l'interface IHumanView en utilisant la console
+ * pour permettre à un joueur humain de prendre ses décisions lors d'une partie.</p>
+ * 
+ * <p><b>Décisions gérées :</b></p>
+ * <ul>
+ *   <li>Sélection de 2 cartes pour créer une offre</li>
+ *   <li>Choix de la carte face visible</li>
+ *   <li>Sélection d'une offre adverse</li>
+ *   <li>Choix entre face visible ou cachée</li>
+ * </ul>
+ */
 public class HumanView extends PlayerView implements IHumanView {
     private final Scanner scanner;
 

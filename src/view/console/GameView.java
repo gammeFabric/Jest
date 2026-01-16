@@ -12,6 +12,21 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+/**
+ * Vue console pour la gestion globale d'une partie.
+ * 
+ * <p>Cette classe implémente l'interface IGameView en utilisant la console
+ * pour interagir avec l'utilisateur lors de la configuration et gestion
+ * d'une partie de Jest.</p>
+ * 
+ * <p><b>Fonctionnalités :</b></p>
+ * <ul>
+ *   <li>Configuration des joueurs (nombre, noms, types)</li>
+ *   <li>Sélection de la variante de jeu</li>
+ *   <li>Gestion des extensions</li>
+ *   <li>Affichage des résultats finaux</li>
+ * </ul>
+ */
 public class GameView implements IGameView {
 
     private final Scanner scanner;

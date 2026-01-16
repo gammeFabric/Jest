@@ -5,6 +5,21 @@ import model.players.Offer;
 import model.players.Player;
 import view.interfaces.IRoundView;
 
+/**
+ * Vue console pour l'affichage d'un tour de jeu.
+ * 
+ * <p>Cette classe implémente l'interface IRoundView en affichant
+ * les informations d'un tour via la console.</p>
+ * 
+ * <p><b>Informations affichées :</b></p>
+ * <ul>
+ *   <li>Début et fin du tour</li>
+ *   <li>Distribution des cartes</li>
+ *   <li>Offres des joueurs</li>
+ *   <li>Ordre de sélection des cartes</li>
+ *   <li>Cartes choisies</li>
+ * </ul>
+ */
 public class RoundView implements IRoundView {
 
     public void showRoundStart() {

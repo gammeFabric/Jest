@@ -11,6 +11,19 @@ import view.interfaces.IPlayerView;
 
 import javax.swing.*;
 
+/**
+ * Fabrique pour créer les vues des joueurs selon le mode de présentation.
+ * 
+ * <p>Cette classe implémente le pattern Factory pour créer les vues
+ * appropriées (console, GUI ou hybride) pour chaque joueur.</p>
+ * 
+ * <p><b>Modes disponibles :</b></p>
+ * <ul>
+ *   <li><b>CONSOLE</b> - Interface textuelle</li>
+ *   <li><b>GUI</b> - Interface graphique</li>
+ *   <li><b>HYBRID</b> - Mélange console et GUI</li>
+ * </ul>
+ */
 public class ViewFactory {
     public enum ViewMode {
         CONSOLE, GUI, HYBRID

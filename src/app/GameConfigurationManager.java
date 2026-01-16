@@ -7,7 +7,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-
+/**
+ * Gestionnaire de configuration de partie.
+ * 
+ * <p>Cette classe gère la persistance de la configuration initiale d'une partie
+ * (joueurs, variante, extensions) pour permettre le redémarrage avec les mêmes
+ * paramètres.</p>
+ * 
+ * <p><b>Responsabilités :</b></p>
+ * <ul>
+ *   <li>Sauvegarde de la configuration dans un fichier sérialisé</li>
+ *   <li>Chargement de la configuration depuis le fichier</li>
+ *   <li>Suppression de la configuration sauvegardée</li>
+ * </ul>
+ * 
+ * <p><b>Utilisation typique :</b></p>
+ * <pre>
+ * // Sauvegarde
+ * GameConfiguration config = new GameConfiguration(players, variant, extensions);
+ * GameConfigurationManager.saveConfiguration(config);
+ * 
+ * // Chargement
+ * GameConfiguration loaded = GameConfigurationManager.loadConfiguration();
+ * </pre>
+ * 
+ * @see model.game.GameConfiguration
+ */
 public class GameConfigurationManager {
     private static final String CONFIG_FILE = "game_config.ser";
     

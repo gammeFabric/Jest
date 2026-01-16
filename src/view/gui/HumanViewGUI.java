@@ -9,6 +9,21 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Vue GUI pour les interactions avec un joueur humain.
+ * 
+ * <p>Cette classe implémente l'interface IHumanView en fournissant
+ * une interface graphique pour que le joueur humain prenne ses décisions
+ * lors d'une partie.</p>
+ * 
+ * <p><b>Décisions gérées :</b></p>
+ * <ul>
+ *   <li>Sélection de cartes pour l'offre</li>
+ *   <li>Choix de la carte face visible</li>
+ *   <li>Sélection d'une offre adverse</li>
+ *   <li>Choix face up ou down</li>
+ * </ul>
+ */
 public class HumanViewGUI implements IHumanView {
     private final JTextArea outputArea;
     @SuppressWarnings("unused")
@@ -16,7 +31,9 @@ public class HumanViewGUI implements IHumanView {
     private final JPanel handPanel;
     private final InteractionPanel interactionPanel;
     private Offer selectedOffer;
+    @SuppressWarnings("unused")
     private final boolean isHybridMode;
+    @SuppressWarnings("unused")
     private boolean isInteractionPanelActive = false;
 
     
@@ -26,7 +43,10 @@ public class HumanViewGUI implements IHumanView {
     private final AtomicReference<CompletableFuture<int[]>> twoCardsFuture = new AtomicReference<>();
     
     
+    @SuppressWarnings("unused")
     private ArrayList<Integer> selectedCardIndices;
+    
+    
 
     public HumanViewGUI(JTextArea outputArea, JPanel cardPanel, JPanel handPanel, JPanel offersPanel, InteractionPanel interactionPanel) {
         this(outputArea, cardPanel, handPanel, offersPanel, interactionPanel, false);
@@ -82,9 +102,6 @@ public class HumanViewGUI implements IHumanView {
         }
     }
     
-    private boolean isHybridMode() {
-        return isHybridMode;
-    }
 
     @Override
     public int chooseFaceUpCard(String playerName, ArrayList<Card> hand) {

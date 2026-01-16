@@ -2,6 +2,19 @@ package view.console;
 
 import model.cards.Card;
 
+/**
+ * Vue console pour les joueurs virtuels (IA).
+ * 
+ * <p>Cette classe étend PlayerView pour afficher les messages
+ * et informations concernant les joueurs virtuels sans interaction.</p>
+ * 
+ * <p><b>Affichages :</b></p>
+ * <ul>
+ *   <li>Messages généraux du jeu</li>
+ *   <li>Notifications d'actions des IA</li>
+ *   <li>Erreurs de configuration</li>
+ * </ul>
+ */
 public class VirtualView extends PlayerView {
     
     @Override

@@ -1,0 +1,1 @@
+tagSearchIndex = [{"l":"Architecture principale","h":"Overview","d":"Section","u":"index.html#architecture-principale-heading"},{"l":"Jest Card Game","h":"Overview","d":"Section","u":"index.html#jest-card-game-heading"},{"l":"Serialized Form","h":"","u":"serialized-form.html"}];updateSearchResults();

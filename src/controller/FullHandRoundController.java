@@ -17,7 +17,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * Contrôleur spécialisé pour la variante "Full Hand".
+ * 
+ * <p>Cette classe gère la logique spécifique de la variante Full Hand où
+ * toutes les cartes sont distribuées en début de partie et les joueurs
+ * jouent jusqu'à n'avoir qu'une carte restante.</p>
+ * 
+ * <p><b>Différences avec le tour standard :</b></p>
+ * <ul>
+ *   <li>Distribution complète des cartes au début</li>
+ *   <li>Choix de 2 cartes parmi toute la main pour l'offre</li>
+ *   <li>Plusieurs tours d'offres jusqu'à la fin de la main</li>
+ *   <li>Dernière carte automatiquement ajoutée au Jest</li>
+ * </ul>
+ * 
+ * @see controller.RoundController
+ * @see model.game.FullHandRound
+ * @see model.game.variants.FullHandVariant
+ */
 public class FullHandRoundController {
     private final FullHandRound model;
     private final IRoundView view;
@@ -36,6 +54,13 @@ public class FullHandRoundController {
         initializePlayerControllers();
     }
 
+    /**
+     * Crée et enregistre les contrôleurs de joueurs nécessaires pour ce tour "Full Hand".
+     *
+     * <p>Cette méthode s'appuie sur {@link ViewFactory} pour construire la vue de chaque joueur,
+     * puis utilise {@link PlayerController#createController(Player, IPlayerView)} pour obtenir
+     * le contrôleur adapté (humain/virtuel).</p>
+     */
     public void initializePlayerControllers() {
         for (Player player: model.getPlayers()){
             IPlayerView playerView = viewFactory.createPlayerView(player);
@@ -49,6 +74,12 @@ public class FullHandRoundController {
     }
 
     
+    /**
+     * Déroule un tour complet pour la variante "Full Hand".
+     *
+     * <p>Distribue toutes les cartes au début, puis enchaîne des sous-tours (création des offres,
+     * détermination du joueur de départ et phase de choix) jusqu'à ce que la manche soit terminée.</p>
+     */
     public void playRound() {
         view.showRoundStart();
 
@@ -103,6 +134,11 @@ public class FullHandRoundController {
     }
 
     
+    /**
+     * Déroule la phase de choix des offres en respectant l'ordre de jeu (variante "Full Hand").
+     *
+     * @param startingPlayer joueur qui commence la phase de choix
+     */
     public void playChoosingPhase(Player startingPlayer) {
         view.showChoosingPhaseStart();
         Player currentPlayer = startingPlayer;
@@ -216,6 +252,13 @@ public class FullHandRoundController {
     }
 
     
+    /**
+     * Retourne le compteur de tour courant.
+     *
+     * <p>Le compteur est géré au niveau du modèle via un compteur statique dans {@link Round}.</p>
+     *
+     * @return numéro du tour courant
+     */
     public int getRoundCounter() {
         return Round.getRoundCounter();
     }

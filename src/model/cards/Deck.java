@@ -1,10 +1,37 @@
 package model.cards;
 
- import java.io.Serializable;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+/**
+ * Représente le paquet de cartes du jeu.
+ * 
+ * <p>Cette classe gère l'ensemble des cartes disponibles dans une partie,
+ * incluant le mélange, la distribution et l'ajout d'extensions.</p>
+ * 
+ * <p><b>Composition standard :</b></p>
+ * <ul>
+ *   <li>16 cartes à couleur (4 couleurs × 4 valeurs)</li>
+ *   <li>1 Joker</li>
+ *   <li>Total : 17 cartes de base</li>
+ * </ul>
+ * 
+ * <p><b>Fonctionnalités :</b></p>
+ * <ul>
+ *   <li>Initialisation et mélange automatique</li>
+ *   <li>Distribution de cartes (LIFO)</li>
+ *   <li>Ajout de cartes d'extension avec remélange</li>
+ *   <li>Retour de cartes au deck</li>
+ *   <li>Suivi du nombre de cartes restantes</li>
+ * </ul>
+ * 
+ * <p><b>Sérialisable</b> pour la sauvegarde de parties.</p>
+ * 
+ * @see model.cards.Card
+ * @see model.cards.ExtensionCard
+ */
 public class Deck implements Serializable {
     private static final long serialVersionUID = 1L;
     private final ArrayList<Card> cards;

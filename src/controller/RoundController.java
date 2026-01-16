@@ -12,6 +12,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Contrôleur pour un tour de jeu standard.
+ * 
+ * <p>Cette classe gère le déroulement complet d'un tour de jeu classique,
+ * depuis la distribution des cartes jusqu'au retour des cartes non choisies
+ * dans le deck.</p>
+ * 
+ * <p><b>Phases d'un tour :</b></p>
+ * <ol>
+ *   <li><b>Distribution</b> - Chaque joueur reçoit 2 cartes</li>
+ *   <li><b>Offres</b> - Chaque joueur crée une offre (1 carte visible, 1 cachée)</li>
+ *   <li><b>Détermination du premier joueur</b> - Selon la carte visible la plus forte</li>
+ *   <li><b>Phase de choix</b> - Tour par tour, chaque joueur choisit une carte</li>
+ *   <li><b>Retour des cartes</b> - Cartes non choisies retournent au deck</li>
+ * </ol>
+ * 
+ * <p><b>Gestion de l'ordre de jeu :</b></p>
+ * <ul>
+ *   <li>Le joueur qui prend une carte désigne le prochain joueur (propriétaire de l'offre choisie)</li>
+ *   <li>Si ce joueur a déjà joué, on passe au joueur avec la carte visible la plus forte</li>
+ * </ul>
+ * 
+ * @see model.game.Round
+ * @see view.interfaces.IRoundView
+ */
 public class RoundController {
     private Round model;
     private IRoundView view;
@@ -26,6 +51,13 @@ public class RoundController {
         initializePlayerControllers();
     }
 
+    /**
+     * Crée et enregistre les contrôleurs de joueurs nécessaires pour ce tour.
+     *
+     * <p>Cette méthode utilise {@link ViewFactory} pour construire la vue associée à chaque
+     * joueur, puis {@link PlayerController#createController(Player, view.interfaces.IPlayerView)}
+     * pour obtenir le contrôleur adapté (humain/virtuel).</p>
+     */
     public void initializePlayerControllers() {
         for (Player player: model.getPlayers()){
             view.interfaces.IPlayerView playerView = viewFactory.createPlayerView(player);
@@ -52,6 +84,12 @@ public class RoundController {
 
 
 
+    /**
+     * Déroule un tour standard complet.
+     *
+     * <p>Enchaîne : début de tour, distribution, création des offres, détermination du joueur
+     * de départ, phase de choix, puis fin de tour ou fin de partie si le deck est vide.</p>
+     */
     public void playRound(){
         view.showRoundStart();
 
@@ -79,6 +117,14 @@ public class RoundController {
     }
 
 
+    /**
+     * Déroule la phase de choix des offres en respectant l'ordre de jeu.
+     *
+     * <p>L'ordre du prochain joueur dépend généralement du propriétaire de l'offre choisie.
+     * Le modèle gère la logique de sélection du prochain joueur ({@link Round#getNextPlayer}).</p>
+     *
+     * @param startingPlayer joueur qui commence la phase de choix
+     */
     public void playChoosingPhase(Player startingPlayer){
         view.showChoosingPhaseStart();
         Player currentPlayer = startingPlayer;
@@ -132,6 +178,9 @@ public class RoundController {
     }
 
 
+    /**
+     * Termine le tour : remet les cartes non choisies dans le deck et notifie la vue.
+     */
     public void endRound(){
         model.returnRemainingCardsToDeck();
         model.setIsOver(true);

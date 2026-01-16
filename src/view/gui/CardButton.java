@@ -7,6 +7,21 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+/**
+ * Bouton GUI représentant une carte sélectionnable.
+ * 
+ * <p>Ce composant encapsule une {@link CardComponent} et ajoute des
+ * interactions souris pour permettre à l'utilisateur de sélectionner
+ * une carte avec feedback visuel.</p>
+ * 
+ * <p><b>Fonctionnalités :</b></p>
+ * <ul>
+ *   <li>Affichage d'une carte</li>
+ *   <li>Détection des clics souris</li>
+ *   <li>Feedback visuel au survol/sélection</li>
+ *   <li>Notification du listener lors de la sélection</li>
+ * </ul>
+ */
 public class CardButton extends JPanel {
     private final CardComponent cardComponent;
     @SuppressWarnings("unused") 

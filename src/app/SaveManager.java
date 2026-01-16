@@ -21,6 +21,41 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Gestionnaire de sauvegarde et chargement de parties.
+ * 
+ * <p>Cette classe gère la persistance complète de l'état d'une partie
+ * en cours, permettant de sauvegarder et reprendre une partie à tout moment.</p>
+ * 
+ * <p><b>Fonctionnalités :</b></p>
+ * <ul>
+ *   <li>Sauvegarde sérialisée de l'état complet du jeu</li>
+ *   <li>Chargement et restauration d'une partie sauvegardée</li>
+ *   <li>Listage des sauvegardes disponibles</li>
+ *   <li>Gestion automatique du répertoire de sauvegardes</li>
+ * </ul>
+ * 
+ * <p><b>Format de sauvegarde :</b></p>
+ * <ul>
+ *   <li>Répertoire : <code>./saves/</code></li>
+ *   <li>Extension : <code>.jest</code></li>
+ *   <li>Nommage : <code>game_[nom]_[timestamp].jest</code></li>
+ * </ul>
+ * 
+ * <p><b>Exemple d'utilisation :</b></p>
+ * <pre>
+ * // Sauvegarde
+ * SaveManager.save(game, "ma_partie");
+ * 
+ * // Liste des sauvegardes
+ * List&lt;String&gt; saves = SaveManager.listSaves();
+ * 
+ * // Chargement
+ * Game loadedGame = SaveManager.load("game_ma_partie_2025-01-16.jest");
+ * </pre>
+ * 
+ * @see model.game.Game
+ */
 public class SaveManager {
     private static final String SAVES_DIR_NAME = "saves";
     private static final String EXTENSION = ".jest";
@@ -35,6 +70,14 @@ public class SaveManager {
         return dir;
     }
 
+    /**
+     * Liste les fichiers de sauvegarde disponibles dans le répertoire de sauvegardes.
+     *
+     * <p>Les noms retournés sont des noms de fichiers (sans chemin). La liste est
+     * triée par ordre lexicographique.</p>
+     *
+     * @return liste des noms de fichiers de sauvegarde (éventuellement vide)
+     */
     public static List<String> listSaves() {
         Path dir = ensureSavesDir();
         File[] files = dir.toFile().listFiles((d, name) -> name.toLowerCase().endsWith(EXTENSION));
@@ -49,6 +92,17 @@ public class SaveManager {
         return result;
     }
 
+    /**
+     * Sauvegarde une partie sur disque en sérialisant l'objet {@link Game}.
+     *
+     * <p>Le compteur de tours ({@link Round#getRoundCounter()}) est stocké dans le modèle
+     * avant la sérialisation afin de pouvoir être restauré lors du chargement.</p>
+     *
+     * @param game partie à sauvegarder
+     * @param saveName nom logique de sauvegarde (peut être vide) ; sera normalisé et préfixé
+     * @throws IllegalArgumentException si {@code game} est {@code null}
+     * @throws RuntimeException si l'écriture échoue
+     */
     public static void save(Game game, String saveName) {
         if (game == null) {
             throw new IllegalArgumentException("game must not be null");
@@ -69,6 +123,17 @@ public class SaveManager {
         }
     }
 
+    /**
+     * Charge une partie depuis un fichier de sauvegarde.
+     *
+     * <p>Après désérialisation, le compteur de tours statique de {@link Round} est
+     * réinitialisé à la valeur stockée dans la sauvegarde.</p>
+     *
+     * @param fileName nom du fichier de sauvegarde (relatif au répertoire {@code saves})
+     * @return partie chargée
+     * @throws IllegalArgumentException si {@code fileName} est vide
+     * @throws RuntimeException si la lecture échoue ou si le fichier ne contient pas un {@link Game}
+     */
     public static Game load(String fileName) {
         if (fileName == null || fileName.trim().isEmpty()) {
             throw new IllegalArgumentException("fileName must not be empty");

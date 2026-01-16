@@ -9,6 +9,19 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Vue GUI non-bloquante pour les joueurs humains.
+ * 
+ * <p>Cette classe implémente l'interface IHumanView avec une approche
+ * asynchrone qui ne bloque pas le thread principal de l'interface.</p>
+ * 
+ * <p><b>Avantages :</b></p>
+ * <ul>
+ *   <li>Interface responsive lors des choix</li>
+ *   <li>Utilisation de CompletableFuture pour l'asynchrone</li>
+ *   <li>Support de multiples fenêtres/dialogues</li>
+ * </ul>
+ */
 public class NonBlockingHumanViewGUI implements IHumanView {
     private final JFrame mainFrame;
     private final JTextArea outputArea;
@@ -24,6 +37,7 @@ public class NonBlockingHumanViewGUI implements IHumanView {
     private final AtomicReference<CompletableFuture<int[]>> twoCardsFuture = new AtomicReference<>();
     
     
+    @SuppressWarnings("unused")
     private ArrayList<Integer> selectedCardIndices;
 
     public NonBlockingHumanViewGUI(JFrame mainFrame, JTextArea outputArea, JPanel cardPanel, 

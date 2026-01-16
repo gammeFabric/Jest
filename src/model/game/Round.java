@@ -4,10 +4,37 @@ import model.cards.Deck;
 import model.players.Offer;
 import model.players.Player;
 
- import java.io.Serializable;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+/**
+ * Représente un tour de jeu standard.
+ * 
+ * <p>Cette classe gère le déroulement d'un tour classique de Jest,
+ * depuis la distribution des cartes jusqu'au retour des cartes
+ * non sélectionnées au deck.</p>
+ * 
+ * <p><b>Phases d'un tour :</b></p>
+ * <ol>
+ *   <li><b>Distribution</b> : 2 cartes par joueur depuis le deck</li>
+ *   <li><b>Offres</b> : Chaque joueur choisit 1 carte visible, 1 cachée</li>
+ *   <li><b>Premier joueur</b> : Déterminé par la carte visible la plus forte</li>
+ *   <li><b>Choix séquentiel</b> : Chaque joueur prend une carte et désigne le suivant</li>
+ *   <li><b>Retour</b> : Cartes non choisies retournent au deck</li>
+ * </ol>
+ * 
+ * <p><b>Gestion de l'ordre :</b></p>
+ * <ul>
+ *   <li>Le joueur qui prend une carte appartenant à X désigne X comme suivant</li>
+ *   <li>Si X a déjà joué, on choisit celui avec la plus forte carte visible restante</li>
+ * </ul>
+ * 
+ * <p><b>Compteur statique :</b> Suit le numéro du tour en cours.</p>
+ * 
+ * @see model.game.FullHandRound
+ * @see controller.RoundController
+ */
 public class Round implements Serializable {
     private static final long serialVersionUID = 1L;
     private ArrayList<Offer> offers;
@@ -16,9 +43,7 @@ public class Round implements Serializable {
     private static int roundCounter = 0;
     private final Deck deck;
 
-    
     private ArrayList<Player> alreadyPlayed;
-
 
     public Round(ArrayList<Player> players, Deck deck) {
         this.players = players;
@@ -45,7 +70,7 @@ public class Round implements Serializable {
         return availableOffers;
     }
 
-    public Player getNextPlayer(ArrayList<Player> alreadyPlayed, Offer takenOffer){
+    public Player getNextPlayer(ArrayList<Player> alreadyPlayed, Offer takenOffer) {
         Player nextPlayer = takenOffer.getOwner();
         if (alreadyPlayed.contains(nextPlayer)) {
             nextPlayer = compareFaceUpCards();
@@ -53,11 +78,11 @@ public class Round implements Serializable {
         return nextPlayer;
     }
 
-    public boolean isOver(){
+    public boolean isOver() {
         return isOver;
     }
 
-    public Deck getDeck(){
+    public Deck getDeck() {
         return deck;
     }
 
@@ -81,8 +106,6 @@ public class Round implements Serializable {
         this.isOver = isOver;
     }
 
-
-
     public void dealCards() {
         for (Player player : players) {
             player.addToHand(deck.dealCard());
@@ -94,7 +117,7 @@ public class Round implements Serializable {
         offers.add(offer);
     }
 
-    public Player determineStartingPlayer(){
+    public Player determineStartingPlayer() {
         Offer bestOffer = findBestOffer(offers);
         if (bestOffer == null) {
             return players.getFirst();
@@ -102,14 +125,13 @@ public class Round implements Serializable {
         return bestOffer.getOwner();
     }
 
-    private Player compareFaceUpCards(){
+    private Player compareFaceUpCards() {
         ArrayList<Player> playersToCompare = new ArrayList<>(this.players);
         ArrayList<Offer> offersToCompare = new ArrayList<>();
         for (Player player : players) {
             if (this.alreadyPlayed.contains(player)) {
                 playersToCompare.remove(player);
-            }
-            else{
+            } else {
                 offersToCompare.add(player.getOffer());
             }
         }
@@ -118,18 +140,16 @@ public class Round implements Serializable {
 
     }
 
-
-    public Offer findBestOffer(ArrayList<Offer> offers){
+    public Offer findBestOffer(ArrayList<Offer> offers) {
         return offers.stream()
                 .filter(offer -> offer != null && offer.getFaceUpCard() != null)
                 .max(Comparator
                         .comparingInt((Offer o) -> o.getFaceUpCard().getFaceValue())
-                        .thenComparingInt(o -> o.getFaceUpCard().getSuitValue())
-                )
+                        .thenComparingInt(o -> o.getFaceUpCard().getSuitValue()))
                 .orElse(null);
     }
 
-    public void returnRemainingCardsToDeck(){
+    public void returnRemainingCardsToDeck() {
         for (Offer offer : offers) {
             if (offer.isComplete()) {
                 continue;
@@ -146,8 +166,3 @@ public class Round implements Serializable {
 
     }
 }
-
-
-
-
-

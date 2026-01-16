@@ -7,6 +7,20 @@ import model.cards.Suit;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Composant GUI pour afficher une carte trophée.
+ * 
+ * <p>Ce composant dessine visuellement une carte trophée avec ses informations
+ * spécifiques (type de trophée, couleur, valeur).</p>
+ * 
+ * <p><b>Types de trophées :</b></p>
+ * <ul>
+ *   <li>Plus haute/basse carte d'une couleur</li>
+ *   <li>Majorité de cartes d'une valeur</li>
+ *   <li>Possession du Joker</li>
+ *   <li>Meilleur Jest</li>
+ * </ul>
+ */
 public class TrophyCardComponent extends JPanel {
     private final Card trophy;
     private static final int CARD_WIDTH = 120;

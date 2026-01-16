@@ -8,7 +8,30 @@ import model.cards.Card;
 
 import java.util.ArrayList;
 
-
+/**
+ * Contrôleur pour les joueurs humains.
+ * 
+ * <p>Cette classe gère les interactions avec un joueur humain via
+ * l'interface utilisateur pour les décisions de jeu.</p>
+ * 
+ * <p><b>Actions gérées :</b></p>
+ * <ul>
+ *   <li>Sélection de 2 cartes pour créer une offre</li>
+ *   <li>Choix de la carte face visible</li>
+ *   <li>Sélection d'une offre adverse</li>
+ *   <li>Choix entre carte face visible ou cachée</li>
+ * </ul>
+ * 
+ * <p><b>Variantes supportées :</b></p>
+ * <ul>
+ *   <li>Tours standards (2 cartes en main)</li>
+ *   <li>Tours Full Hand (sélection parmi toute la main)</li>
+ * </ul>
+ * 
+ * @see controller.PlayerController
+ * @see model.players.HumanPlayer
+ * @see view.interfaces.IHumanView
+ */
 public class HumanPlayerController extends PlayerController {
     private final IHumanView humanView;
     

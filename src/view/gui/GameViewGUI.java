@@ -14,6 +14,22 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Vue GUI pour la gestion globale d'une partie.
+ * 
+ * <p>Cette classe implémente l'interface IGameView en fournissant une
+ * interface graphique complète pour la configuration et le déroulement
+ * d'une partie de Jest.</p>
+ * 
+ * <p><b>Éléments de l'interface :</b></p>
+ * <ul>
+ *   <li>Dialogues de configuration (joueurs, variante)</li>
+ *   <li>Affichage du statut de la partie</li>
+ *   <li>Affichage des résultats et du gagnant</li>
+ *   <li>Gestion des extensions</li>
+ * </ul>
+ */
+
 public class GameViewGUI implements IGameView {
     private final JFrame mainFrame;
     private final JTextArea outputArea;

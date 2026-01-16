@@ -9,6 +9,20 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
+/**
+ * Panneau GUI pour les interactions du joueur humain.
+ * 
+ * <p>Ce composant gère l'affichage dynamique des dialogues d'interaction
+ * et la capture des décisions du joueur humain pendant le jeu.</p>
+ * 
+ * <p><b>Types d'interactions :</b></p>
+ * <ul>
+ *   <li>Sélection de la carte face visible</li>
+ *   <li>Choix d'une offre adverse</li>
+ *   <li>Choix entre face up ou face down</li>
+ *   <li>Sélection de deux cartes pour l'offre</li>
+ * </ul>
+ */
 public class InteractionPanel extends JPanel {
     public enum InteractionType {
         CHOOSE_FACE_UP_CARD,

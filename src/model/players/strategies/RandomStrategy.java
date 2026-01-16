@@ -7,10 +7,23 @@ import model.players.Offer;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Stratégie aléatoire pour les joueurs virtuels.
+ * 
+ * <p>Cette stratégie prend des décisions complètement aléatoires,
+ * sans considération pour la qualité des cartes ou l'impact sur le score.</p>
+ * 
+ * <p><b>Comportement :</b></p>
+ * <ul>
+ *   <li>Sélection aléatoire des 2 cartes pour l'offre</li>
+ *   <li>Choix aléatoire de l'offre adverse</li>
+ *   <li>Aucune analyse tactique</li>
+ * </ul>
+ */
 public class RandomStrategy implements PlayStrategy {
     private Random random = new Random();
     private Jest playerJest;
-    private boolean isFullHandVariant = false; 
+    private boolean isFullHandVariant = false;
 
     @Override
     public Card[] setCardsToOffer(ArrayList<Card> hand) {

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Documentation Jest Card Game</title>
+  </head>
+  <body>
+    <h1>Jest Card Game</h1>
+
+    <p>
+      Application de jeu de cartes <strong>Jest</strong> implémentant le pattern
+      <strong>MVC (Model-View-Controller)</strong>. Le jeu supporte plusieurs
+      modes d'interface (console, GUI, hybride) et différentes variantes de
+      règles.
+    </p>
+
+    <p>Le projet est organisé en quatre packages principaux :</p>
+    <ul>
+      <li>
+        <b>app</b> : Gestion de l'application, du lancement et de la sauvegarde.
+      </li>
+      <li><b>controller</b> : Contrôleurs gérant la logique de jeu.</li>
+      <li><b>model</b> : Modèle de données (cartes, joueurs, parties).</li>
+      <li><b>view</b> : Interfaces utilisateur (console, GUI, hybride).</li>
+    </ul>
+
+    <h2>Architecture principale</h2>
+    <p>
+      Le développement repose sur plusieurs patrons de conception (design
+      patterns) pour assurer la flexibilité du code :
+    </p>
+    <ul>
+      <li>
+        <b>Pattern MVC</b> : Pour la séparation stricte entre les données, la
+        logique et l'affichage.
+      </li>
+      <li>
+        <b>Pattern Strategy</b> : Pour définir les comportements d'Intelligence
+        Artificielle des joueurs virtuels.
+      </li>
+      <li>
+        <b>Pattern Visitor</b> : Utilisé pour le calcul complexe des scores en
+        fonction des types de cartes.
+      </li>
+      <li>
+        <b>Pattern Factory</b> : Pour la création dynamique des différentes vues
+        (Console ou Swing).
+      </li>
+    </ul>
+
+    <hr />
+    <p>
+      <strong>Version :</strong> 1.0<br />
+      <strong>Depuis :</strong> 2025
+    </p>
+  </body>
+</html>

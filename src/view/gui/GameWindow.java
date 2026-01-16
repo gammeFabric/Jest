@@ -3,6 +3,22 @@ package view.gui;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Fenêtre principale de l'interface GUI.
+ * 
+ * <p>Cette classe crée et gère la fenêtre principale de la partie
+ * avec tous ses panneaux et composants d'affichage.</p>
+ * 
+ * <p><b>Panneaux principaux :</b></p>
+ * <ul>
+ *   <li>Zone de sortie texte (messages)</li>
+ *   <li>Zone des cartes</li>
+ *   <li>Zone des offres</li>
+ *   <li>Main du joueur</li>
+ *   <li>Zones des bots</li>
+ *   <li>Panneau des trophées</li>
+ * </ul>
+ */
 public class GameWindow {
     private final JFrame frame;
     private final JTextArea outputArea;

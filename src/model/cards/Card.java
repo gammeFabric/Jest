@@ -1,7 +1,33 @@
 package model.cards;
 
- import java.io.Serializable;
+import java.io.Serializable;
 
+/**
+ * Classe abstraite représentant une carte du jeu.
+ * 
+ * <p>Cette classe est la base de toutes les cartes du jeu Jest.
+ * Elle gère les propriétés communes comme le statut de trophée et
+ * les informations associées.</p>
+ * 
+ * <p><b>Propriétés communes :</b></p>
+ * <ul>
+ *   <li><code>isTrophy</code> - Indique si la carte est un trophée</li>
+ *   <li><code>trophyType</code> - Type de trophée (si applicable)</li>
+ *   <li><code>trophySuit/Face</code> - Critère du trophée</li>
+ * </ul>
+ * 
+ * <p><b>Méthodes abstraites :</b></p>
+ * <ul>
+ *   <li><code>getFaceValue()</code> - Valeur nominale de la carte</li>
+ *   <li><code>getSuitValue()</code> - Force de la couleur</li>
+ * </ul>
+ * 
+ * <p><b>Sérialisable</b> pour permettre la sauvegarde des parties.</p>
+ * 
+ * @see model.cards.SuitCard
+ * @see model.cards.Joker
+ * @see model.cards.ExtensionCard
+ */
 public abstract class Card implements Serializable {
     private static final long serialVersionUID = 1L;
     protected boolean isTrophy;

@@ -9,14 +9,45 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Stratégie agressive visant la maximisation du score.
+ * 
+ * <p>Cette IA cherche activement à maximiser son score en privilégiant
+ * les cartes positives et en poursuivant les bonus complexes.</p>
+ * 
+ * <p><b>Comportements clés :</b></p>
+ * <ul>
+ *   <li><b>Offres</b> : Garde la carte la plus précieuse en face cachée</li>
+ *   <li><b>Choix</b> : Sélectionne la carte avec le meilleur potentiel</li>
+ *   <li><b>Grand Chelem Cœur</b> : Tente d'obtenir Joker + 4 Cœurs si possible</li>
+ *   <li><b>Paires noires</b> : Priorité élevée pour compléter les paires</li>
+ *   <li><b>As solitaires</b> : Évite de prendre d'autres cartes de la même couleur</li>
+ * </ul>
+ * 
+ * <p><b>Gestion de mémoire :</b></p>
+ * <ul>
+ *   <li>Mémorise les cartes vues (offres, trophées)</li>
+ *   <li>Évalue la probabilité d'obtenir certaines combinaisons</li>
+ *   <li>Adapte sa stratégie selon le contexte de la partie</li>
+ * </ul>
+ * 
+ * <p><b>Adaptation Full Hand :</b></p>
+ * <ul>
+ *   <li>Sélection stratégique de la carte face visible</li>
+ *   <li>Ajustement des évaluations selon l'avancement</li>
+ * </ul>
+ * 
+ * @see model.players.strategies.PlayStrategy
+ * @see model.players.VirtualPlayer
+ */
 public class AggressiveStrategy implements PlayStrategy {
-    private Set<String> seenCards; 
+    private Set<String> seenCards;
     private boolean hasJoker;
     private boolean hasHearts;
     private Jest playerJest;
-    private boolean isFullHandVariant = false; 
+    private boolean isFullHandVariant = false;
     @SuppressWarnings("unused")
-    private List<Card> trophies; 
+    private List<Card> trophies;
 
     public AggressiveStrategy() {
         this.seenCards = new HashSet<>();
@@ -25,10 +56,9 @@ public class AggressiveStrategy implements PlayStrategy {
         this.trophies = new ArrayList<>();
     }
 
-    
     public void setTrophies(List<Card> trophies) {
         this.trophies = trophies;
-        
+
         for (Card c : trophies) {
             seenCards.add(getCardId(c));
         }
@@ -36,10 +66,9 @@ public class AggressiveStrategy implements PlayStrategy {
 
     @Override
     public Card[] setCardsToOffer(ArrayList<Card> hand) {
-        if (hand.isEmpty()) return null;
+        if (hand.isEmpty())
+            return null;
 
-        
-        
         isFullHandVariant = hand.size() > 4;
 
         Card bestCard = hand.get(0);
@@ -58,11 +87,10 @@ public class AggressiveStrategy implements PlayStrategy {
 
         Card faceUpCard;
         if (isFullHandVariant) {
-            
-            
+
             faceUpCard = selectFaceUpCardForFullHand(hand);
         } else {
-            
+
             faceUpCard = hand.get(0);
         }
         hand.remove(faceUpCard);
@@ -72,7 +100,8 @@ public class AggressiveStrategy implements PlayStrategy {
 
     @Override
     public Offer chooseCard(ArrayList<Offer> availableOffers) {
-        if (availableOffers.isEmpty()) return null;
+        if (availableOffers.isEmpty())
+            return null;
 
         updateMemory(availableOffers);
 
@@ -81,11 +110,11 @@ public class AggressiveStrategy implements PlayStrategy {
 
         for (Offer offer : availableOffers) {
             Card visible = offer.getFaceUpCard();
-            if (visible == null) continue;
+            if (visible == null)
+                continue;
 
             double score = evaluateCardPotential(visible);
-            
-            
+
             if (isFullHandVariant) {
                 score = adjustScoreForFullHandPhase(score, offer);
             }
@@ -96,9 +125,8 @@ public class AggressiveStrategy implements PlayStrategy {
             }
         }
 
-        
         if (bestOffer == null) {
-            for(Offer o : availableOffers) {
+            for (Offer o : availableOffers) {
                 if (o.getFaceUpCard() != null) {
                     bestOffer = o;
                     break;
@@ -119,10 +147,11 @@ public class AggressiveStrategy implements PlayStrategy {
         this.playerJest = jest;
         this.hasJoker = false;
         this.hasHearts = false;
-        
+
         for (Card card : jest.getCards()) {
             if (card instanceof SuitCard) {
-                if (((SuitCard) card).getSuit() == Suit.HEARTS) hasHearts = true;
+                if (((SuitCard) card).getSuit() == Suit.HEARTS)
+                    hasHearts = true;
             } else if (card instanceof Joker) {
                 hasJoker = true;
             }
@@ -131,16 +160,18 @@ public class AggressiveStrategy implements PlayStrategy {
 
     private int evaluateCardPotential(Card card) {
         if (card instanceof ExtensionCard) {
-            if (playerJest == null) return 0;
-            
+            if (playerJest == null)
+                return 0;
+
             return ((ExtensionCard) card).getAIValue(StrategyType.AGGRESSIVE, playerJest);
         }
 
-        
         if (card instanceof Joker) {
-            if (!hasHearts) return 20;
-            if (playerJest != null && isGrandSlamPossible()) return 15; 
-            return 0; 
+            if (!hasHearts)
+                return 20;
+            if (playerJest != null && isGrandSlamPossible())
+                return 15;
+            return 0;
         }
 
         if (card instanceof SuitCard) {
@@ -148,70 +179,63 @@ public class AggressiveStrategy implements PlayStrategy {
             int val = suitCard.getFaceValue();
             Suit suit = suitCard.getSuit();
 
-            
             if (suit == Suit.HEARTS) {
                 if (hasJoker && hasHearts) {
-                    
+
                     if (playerJest != null && isGrandSlamPossible()) {
-                        return 50; 
+                        return 50;
                     } else {
-                        return -20; 
+                        return -20;
                     }
                 }
-                if (hasJoker && !hasHearts) return -100;
+                if (hasJoker && !hasHearts)
+                    return -100;
                 return -5;
             }
 
-            
-            if (val == 1) { 
-                if (isOnlyOfSuitInJest(suit)) return 6; 
+            if (val == 1) {
+                if (isOnlyOfSuitInJest(suit))
+                    return 6;
                 return 2;
-            } 
-            
-            if ((suit == Suit.CLUBS || suit == Suit.SPADES) && canFormBlackPair(suitCard)) {
-                return val + 5; 
             }
-            
-            if (suit == Suit.DIAMONDS) return -val;
+
+            if ((suit == Suit.CLUBS || suit == Suit.SPADES) && canFormBlackPair(suitCard)) {
+                return val + 5;
+            }
+
+            if (suit == Suit.DIAMONDS)
+                return -val;
             return val;
         }
 
         return 0;
     }
 
-    
     private boolean isGrandSlamPossible() {
-        
-        
-        
+
         long trashCards = playerJest.getCards().stream()
                 .filter(c -> !(c instanceof Joker) && !isHeart(c))
                 .count();
-        
-        if (trashCards >= 1) return false; 
 
-        
-        int[] heartFaces = {1, 2, 3, 4};
+        if (trashCards >= 1)
+            return false;
+
+        int[] heartFaces = { 1, 2, 3, 4 };
         for (int face : heartFaces) {
             String cardId = "HEARTS-" + face;
-            
-            
-            boolean iHaveIt = playerJest.getCards().stream().anyMatch(c -> 
-                c instanceof SuitCard && ((SuitCard)c).getSuit() == Suit.HEARTS && ((SuitCard)c).getFaceValue() == face
-            );
-            if (iHaveIt) continue;
 
-            
-            
+            boolean iHaveIt = playerJest.getCards().stream().anyMatch(c -> c instanceof SuitCard
+                    && ((SuitCard) c).getSuit() == Suit.HEARTS && ((SuitCard) c).getFaceValue() == face);
+            if (iHaveIt)
+                continue;
+
             if (seenCards.contains(cardId)) {
-                return false; 
+                return false;
             }
         }
 
         return true;
     }
-
-    
 
     private boolean isHeart(Card c) {
         return c instanceof SuitCard && ((SuitCard) c).getSuit() == Suit.HEARTS;
@@ -226,18 +250,20 @@ public class AggressiveStrategy implements PlayStrategy {
     }
 
     private String getCardId(Card c) {
-        if (c instanceof ExtensionCard) return ((ExtensionCard)c).getName();
-        if (c instanceof Joker) return "JOKER";
+        if (c instanceof ExtensionCard)
+            return ((ExtensionCard) c).getName();
+        if (c instanceof Joker)
+            return "JOKER";
         SuitCard sc = (SuitCard) c;
         return sc.getSuit().toString() + "-" + sc.getFaceValue();
     }
-    
-    private boolean canFormBlackPair(SuitCard card) {
-        if (playerJest == null) return false; 
 
-        
+    private boolean canFormBlackPair(SuitCard card) {
+        if (playerJest == null)
+            return false;
+
         Suit targetSuit = (card.getSuit() == Suit.SPADES) ? Suit.CLUBS : Suit.SPADES;
-        
+
         for (Card c : playerJest.getCards()) {
             if (c instanceof SuitCard) {
                 SuitCard existing = (SuitCard) c;
@@ -250,83 +276,79 @@ public class AggressiveStrategy implements PlayStrategy {
     }
 
     private boolean isOnlyOfSuitInJest(Suit suit) {
-        if (playerJest == null) return true; 
+        if (playerJest == null)
+            return true;
 
-        
         for (Card c : playerJest.getCards()) {
             if (c instanceof SuitCard && ((SuitCard) c).getSuit() == suit) {
-                return false; 
+                return false;
             }
         }
-        return true; 
+        return true;
     }
-    
-    
+
     private Card selectFaceUpCardForFullHand(ArrayList<Card> hand) {
-        if (hand.isEmpty()) return null;
-        
+        if (hand.isEmpty())
+            return null;
+
         Card bestCard = hand.get(0);
         int bestScore = Integer.MIN_VALUE;
-        
+
         for (Card c : hand) {
-            
+
             int score = evaluateCardForFaceUp(c);
             if (score > bestScore) {
                 bestScore = score;
                 bestCard = c;
             }
         }
-        
+
         return bestCard;
     }
-    
-    
+
     private int evaluateCardForFaceUp(Card card) {
         if (card instanceof ExtensionCard) {
             return ((ExtensionCard) card).getAIValue(StrategyType.AGGRESSIVE, playerJest) / 2;
         }
-        
+
         if (card instanceof Joker) {
-            return 5; 
+            return 5;
         }
-        
+
         if (card instanceof SuitCard) {
             SuitCard suitCard = (SuitCard) card;
             int val = suitCard.getFaceValue();
             Suit suit = suitCard.getSuit();
-            
-            
+
             if (suit == Suit.HEARTS) {
-                if (hasJoker) return 8; 
-                return 3; 
+                if (hasJoker)
+                    return 8;
+                return 3;
             }
-            
-            if (suit == Suit.DIAMONDS) return -val / 2; 
-            
-            
-            if (val >= 3) return val - 2; 
+
+            if (suit == Suit.DIAMONDS)
+                return -val / 2;
+
+            if (val >= 3)
+                return val - 2;
             return val;
         }
-        
+
         return 0;
     }
-    
-    
+
     private double adjustScoreForFullHandPhase(double baseScore, Offer offer) {
-        
+
         int handSize = playerJest.getCards().size();
-        
-        
+
         if (handSize <= 2) {
-            return baseScore * 1.5; 
+            return baseScore * 1.5;
         }
-        
-        
+
         if (handSize >= 4) {
-            return baseScore * 0.8; 
+            return baseScore * 0.8;
         }
-        
-        
+
         return baseScore;
     }
 }

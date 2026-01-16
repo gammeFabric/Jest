@@ -5,7 +5,30 @@ import model.players.Player;
 
 import java.util.ArrayList;
 
-
+/**
+ * Extension de Round pour la variante "Full Hand".
+ * 
+ * <p>Cette classe modifie le comportement standard d'un tour pour implémenter
+ * la variante où toutes les cartes sont distribuées au début.</p>
+ * 
+ * <p><b>Différences avec Round standard :</b></p>
+ * <ul>
+ *   <li>Distribution : Toutes les cartes au lieu de 2 par joueur</li>
+ *   <li>Tours multiples : Plusieurs cycles d'offres et de choix</li>
+ *   <li>Fin de partie : Quand chaque joueur n'a plus qu'1 carte</li>
+ *   <li>Dernière carte : Ajoutée automatiquement au Jest</li>
+ * </ul>
+ * 
+ * <p><b>Méthodes spécifiques :</b></p>
+ * <ul>
+ *   <li><code>distributeAllCards()</code> - Distribution équitable de toutes les cartes</li>
+ *   <li><code>finalizeRound()</code> - Traitement des dernières cartes</li>
+ *   <li><code>isOver()</code> - Vérifie si tous ont ≤1 carte</li>
+ * </ul>
+ * 
+ * @see model.game.Round
+ * @see model.game.variants.FullHandVariant
+ */
 public class FullHandRound extends Round {
     private static final long serialVersionUID = 1L;
     private boolean initialDistributionDone = false;

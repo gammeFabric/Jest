@@ -21,6 +21,36 @@ import view.ViewFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contrôleur principal de la partie.
+ * 
+ * <p>Ce contrôleur orchestre l'ensemble d'une partie de Jest, de la
+ * configuration initiale jusqu'au calcul des scores finaux.</p>
+ * 
+ * <p><b>Responsabilités principales :</b></p>
+ * <ul>
+ *   <li>Configuration de la partie (joueurs, variante, extensions)</li>
+ *   <li>Sélection et validation de la variante de jeu</li>
+ *   <li>Gestion de la séquence des tours</li>
+ *   <li>Attribution des trophées et calcul des scores</li>
+ *   <li>Coordination avec les vues pour l'affichage</li>
+ * </ul>
+ * 
+ * <p><b>Flux d'exécution :</b></p>
+ * <ol>
+ *   <li>Sélection de la variante</li>
+ *   <li>Ajout des joueurs</li>
+ *   <li>Sélection des extensions (optionnel)</li>
+ *   <li>Tirage des trophées</li>
+ *   <li>Déroulement de la partie (tours successifs)</li>
+ *   <li>Calcul final des scores et attribution des trophées</li>
+ *   <li>Annonce du/des gagnant(s)</li>
+ * </ol>
+ * 
+ * @see model.game.Game
+ * @see model.game.GameVariant
+ * @see view.interfaces.IGameView
+ */
 public class GameController {
     private final Game model;
     private final IGameView gameView;
@@ -36,11 +66,18 @@ public class GameController {
         this.viewFactory = viewFactory;
     }
 
+    /**
+     * Configure la liste des joueurs à partir des informations collectées via la vue.
+     *
+     * <p>Pour chaque joueur, la vue décide s'il s'agit d'un humain ou d'un joueur virtuel,
+     * et, dans ce dernier cas, la stratégie à utiliser.</p>
+     */
     public void addPlayers(){
         int playerCount = gameView.askNumberOfPlayers();
         for (int i = 1; i <= playerCount; i++) {
             String name = gameView.askPlayerName(i);
             boolean isHuman = gameView.isHumanPlayer(name);
+
             if (isHuman) {
                 model.addHumanPlayer(name);
             } else {
@@ -51,6 +88,16 @@ public class GameController {
         gameView.showPlayers(model.getPlayers());
     }
 
+    /**
+     * Démarre une partie.
+     *
+     * <p>Si la partie n'est pas encore configurée (aucun joueur), cette méthode orchestre
+     * la sélection de la variante, l'ajout des joueurs, la sélection des extensions, puis le
+     * tirage des trophées. Elle déclenche ensuite le déroulement de la partie.</p>
+     *
+     * @throws IllegalStateException si le nombre de joueurs ne correspond pas aux contraintes
+     *                               de la variante choisie
+     */
     public void startGame(){
         if (model.getPlayers() == null || model.getPlayers().isEmpty()) {
             
@@ -144,6 +191,14 @@ public class GameController {
         }
     }
 
+    /**
+     * Lance la boucle principale de jeu en fonction de la variante choisie.
+     *
+     * <p>Le déroulement diffère selon la variante :
+     * {@link FullHandVariant} déclenche un tour spécifique (distribution initiale complète),
+     * alors que les autres variantes s'enchaînent sur des tours standards jusqu'à épuisement
+     * du deck.</p>
+     */
     public void playGame() {
         GameVariant variant = model.getVariant();
         
@@ -256,7 +311,11 @@ public class GameController {
         endGame();
     }
 
-    
+    /**
+     * Sauvegarde la configuration de la partie.
+     *
+     * <p>La configuration inclut les joueurs, la variante et les extensions sélectionnées.</p>
+     */
     public void saveGameConfiguration() {
         
         ArrayList<ExtensionCard> extensionsToSave = selectedExtensions != null ? selectedExtensions : new ArrayList<>();
@@ -273,6 +332,13 @@ public class GameController {
         return gameConfiguration;
     }
 
+    /**
+     * Termine la partie : finalise les dernières cartes, attribue les trophées, calcule les scores
+     * et affiche les résultats via la vue.
+     *
+     * <p>Si une configuration a été mémorisée, elle est également sauvegardée afin de permettre
+     * un redémarrage avec les mêmes paramètres.</p>
+     */
     public void endGame() {
         for (Player player : model.getPlayers()) {
             if (player.getOffer() != null) {

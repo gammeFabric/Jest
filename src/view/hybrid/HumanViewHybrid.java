@@ -11,6 +11,23 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * Vue hybride (console + GUI) pour les joueurs humains.
+ * 
+ * <p>
+ * Cette classe implémente l'interface IHumanView en combinant une vue
+ * console et une vue GUI, permettant au joueur de choisir son interface.
+ * </p>
+ * 
+ * <p>
+ * <b>Approche hybride :</b>
+ * </p>
+ * <ul>
+ * <li>Offre un choix à chaque décision (console ou GUI)</li>
+ * <li>Permet de basculer entre les deux interfaces</li>
+ * <li>Combine les avantages des deux modes</li>
+ * </ul>
+ */
 public class HumanViewHybrid implements IHumanView {
     private final HumanView consoleView;
     private final HumanViewGUI guiView;
@@ -73,7 +90,7 @@ public class HumanViewHybrid implements IHumanView {
             if (choice.isResolved()) {
                 return null;
             }
-            
+
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
@@ -243,7 +260,7 @@ public class HumanViewHybrid implements IHumanView {
         consoleView.thankForChoosing(faceUpCard, faceDownCard);
         guiView.thankForChoosing(faceUpCard, faceDownCard);
     }
-    
+
     @Override
     public int[] chooseTwoCardsForOffer(String playerName, ArrayList<Card> hand) {
         consoleView.showMessage(playerName + " has " + hand.size() + " cards to make an offer");
@@ -254,7 +271,6 @@ public class HumanViewHybrid implements IHumanView {
 
         Choice<int[]> choice = new Choice<>();
 
-        
         runGuiAsync("Hybrid-GUI-ChooseTwoCards", () -> {
             int[] result = guiView.chooseTwoCardsForOffer(playerName, hand);
             choice.resolve(result);
@@ -263,12 +279,12 @@ public class HumanViewHybrid implements IHumanView {
         runConsoleAsync("Hybrid-Console-ChooseTwoCards", () -> {
             while (!choice.isResolved()) {
                 int[] selectedIndices = new int[2];
-                
-                
+
                 selectedIndices[0] = -1;
                 while (!choice.isResolved() && (selectedIndices[0] < 0 || selectedIndices[0] >= hand.size())) {
                     String line = readLineNonBlocking(choice, "Choose the number of the first card: ");
-                    if (line == null) return;
+                    if (line == null)
+                        return;
                     try {
                         selectedIndices[0] = Integer.parseInt(line.trim()) - 1;
                     } catch (NumberFormatException ignored) {
@@ -276,12 +292,14 @@ public class HumanViewHybrid implements IHumanView {
                         continue;
                     }
                 }
-                
-                
+
                 selectedIndices[1] = -1;
-                while (!choice.isResolved() && (selectedIndices[1] < 0 || selectedIndices[1] >= hand.size() || selectedIndices[1] == selectedIndices[0])) {
-                    String line = readLineNonBlocking(choice, "Choose the number of the second card (different from first): ");
-                    if (line == null) return;
+                while (!choice.isResolved() && (selectedIndices[1] < 0 || selectedIndices[1] >= hand.size()
+                        || selectedIndices[1] == selectedIndices[0])) {
+                    String line = readLineNonBlocking(choice,
+                            "Choose the number of the second card (different from first): ");
+                    if (line == null)
+                        return;
                     try {
                         selectedIndices[1] = Integer.parseInt(line.trim()) - 1;
                         if (selectedIndices[1] == selectedIndices[0]) {
@@ -294,14 +312,13 @@ public class HumanViewHybrid implements IHumanView {
                         continue;
                     }
                 }
-                
+
                 choice.resolve(selectedIndices);
                 guiView.cancelActiveDialog();
             }
         });
 
         int[] resolved = choice.await();
-        return resolved != null ? resolved : new int[]{0, 1};
+        return resolved != null ? resolved : new int[] { 0, 1 };
     }
 }
-

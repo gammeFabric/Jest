@@ -13,6 +13,20 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
+
+/**
+ * Vue hybride (console + GUI) pour la gestion globale d'une partie.
+ * 
+ * <p>Cette classe implémente l'interface IGameView en combinant les vues
+ * console et GUI pour offrir une expérience mixte utilisateur.</p>
+ * 
+ * <p><b>Comportement hybride :</b></p>
+ * <ul>
+ *   <li>Certaines interactions via console</li>
+ *   <li>Affichage principal via GUI</li>
+ *   <li>Flexibilité du choix par l'utilisateur</li>
+ * </ul>
+ */
 import java.util.List;
 
 public class GameViewHybrid implements IGameView {

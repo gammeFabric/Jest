@@ -1,0 +1,13 @@
+app
+controller
+model
+model.cards
+model.game
+model.game.variants
+model.players
+model.players.strategies
+view
+view.console
+view.gui
+view.hybrid
+view.interfaces

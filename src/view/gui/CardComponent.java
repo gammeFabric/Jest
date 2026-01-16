@@ -12,6 +12,19 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
+/**
+ * Composant GUI pour afficher une carte.
+ * 
+ * <p>Ce composant dessine visuellement une carte du jeu Jest avec
+ * tous ses détails (couleur, valeur, trophée, extension).</p>
+ * 
+ * <p><b>Types de cartes gérées :</b></p>
+ * <ul>
+ *   <li>SuitCard - Cartes standards avec couleur et valeur</li>
+ *   <li>Joker - Carte spéciale Joker</li>
+ *   <li>ExtensionCard - Cartes d'extension personnalisées</li>
+ * </ul>
+ */
 public class CardComponent extends JPanel {
     private final Card card;
     private final boolean faceUp;

@@ -6,6 +6,18 @@ import model.players.Player;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Composant GUI affichant la zone d'un joueur bot (IA).
+ * 
+ * <p>Ce composant affiche les informations visuelles du joueur bot,
+ * notamment son offre actuelle lors d'un tour.</p>
+ * 
+ * <p><b>Informations affichées :</b></p>
+ * <ul>
+ *   <li>Nom du joueur bot</li>
+ *   <li>Cartes de l'offre (face up et face down)</li>
+ * </ul>
+ */
 public class BotAreaComponent extends JPanel {
     private final Player bot;
     private final Offer offer;
