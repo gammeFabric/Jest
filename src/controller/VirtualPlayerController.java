@@ -18,7 +18,7 @@ public class VirtualPlayerController extends PlayerController {
         VirtualPlayer virtualPlayer = (VirtualPlayer) player;
         Offer offer = virtualPlayer.makeOffer();
 
-        // Optional: Virtual view can display what the virtual player did
+        
         if (offer != null) {
             view.showMessage(virtualPlayer.getName() + " has made an offer: Face up: " + offer.getFaceUpCard());
         } else {
@@ -31,10 +31,10 @@ public class VirtualPlayerController extends PlayerController {
     @Override
     public Offer chooseCard(ArrayList<Offer> availableOffers) {
         VirtualPlayer virtualPlayer = (VirtualPlayer) player;
-        // Delegate card choice to the VirtualPlayer model (which uses its strategy)
+        
         Offer chosenOffer = virtualPlayer.chooseCard(availableOffers);
 
-        // Optional: Virtual view can display what the virtual player chose
+        
         if (chosenOffer != null) {
             view.showMessage(virtualPlayer.getName() + " has chosen a card from " + chosenOffer.getOwner().getName() + "'s offer.");
         }

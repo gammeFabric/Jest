@@ -123,9 +123,9 @@ public class GameViewHybrid implements IGameView {
 
         runGuiAsync("Hybrid-GUI-AskNumberOfPlayers", () -> {
             int result = guiView.askNumberOfPlayers();
-            // guiView.askNumberOfPlayers() returns -1 when the dialog was closed
-            // programmatically (we shouldn't exit the JVM in that case). Only
-            // resolve the choice when the GUI provides a valid player count.
+            
+            
+            
             if (result >= 3 && result <= 4) {
                 choice.resolve(result);
             }
@@ -449,7 +449,7 @@ public class GameViewHybrid implements IGameView {
                 }
                 String input = line.trim();
                 if (input.isEmpty()) {
-                    choiceIdx = 1; // default to first
+                    choiceIdx = 1; 
                 } else {
                     try {
                         choiceIdx = Integer.parseInt(input);

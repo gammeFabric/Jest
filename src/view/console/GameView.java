@@ -20,7 +20,7 @@ public class GameView implements IGameView {
         this.scanner = new Scanner(System.in);
     }
 
-    // Ask for number of players
+    
     public int askNumberOfPlayers() {
         while (true) {
             System.out.print("Enter the number of players (3-4): ");
@@ -38,7 +38,7 @@ public class GameView implements IGameView {
         }
     }
 
-    // Ask for a player's name
+    
     public String askPlayerName(int playerNumber) {
         System.out.print("Enter name for player " + playerNumber + ": ");
         String name = scanner.hasNextLine() ? scanner.nextLine().trim() : "Player" + playerNumber;
@@ -48,7 +48,7 @@ public class GameView implements IGameView {
         return name;
     }
 
-    // Ask for extensions to add
+    
     @Override
     public ArrayList<Integer> askForExtensions(ArrayList<ExtensionCard> availableExtensions) {
         System.out.println("\n--- MENU EXTENSIONS ---");
@@ -57,12 +57,12 @@ public class GameView implements IGameView {
         for (int i = 0; i < availableExtensions.size(); i++) {
             ExtensionCard ext = availableExtensions.get(i);
             
-            // Ligne 1 : Nom et Valeur Faciale uniquement (Le bonus est expliqué dans la description)
+            
             System.out.println((i + 1) + ". " + ext.getName() + " [Val: " + ext.getFaceValue() + "]");
             
-            // Ligne 2 : Description de l'effet
+            
             System.out.println("   Description: " + ext.getDescription());
-            System.out.println(); // Ligne vide pour aérer
+            System.out.println(); 
         }
         
         System.out.println("Enter the numbers of the extensions you want to add, separated by spaces (e.g., '1 3').");
@@ -102,7 +102,7 @@ public class GameView implements IGameView {
         System.out.println("========================================\n");
     }
 
-    // Ask Strategy type for VirtualPlayer
+    
     public StrategyType askStrategy(String name) {
         System.out.println("Choose strategy for " + name + ":");
         for (StrategyType strategy : StrategyType.values()) {
@@ -114,18 +114,18 @@ public class GameView implements IGameView {
             System.out.print("Choose the number of the strategy: ");
             try {
                 choice = scanner.nextInt();
-                // IMPORTANT : Consommer le retour à la ligne restant après nextInt()
-                // Sinon la prochaine méthode nextLine() (comme extensions) sera sautée.
+                
+                
                 scanner.nextLine(); 
             } catch (InputMismatchException e) {
-                scanner.nextLine(); // clear invalid input
+                scanner.nextLine(); 
                 System.out.println("Please enter a valid number.");
             }
         }
         return StrategyType.values()[choice - 1];
     }
 
-    // Ask for player type
+    
     public boolean isHumanPlayer(String name) {
         while (true) {
             System.out.print("Is " + name + " a Human or Virtual player? (H/V): ");
@@ -136,7 +136,7 @@ public class GameView implements IGameView {
         }
     }
 
-    // Show list of players
+    
     public void showPlayers(List<Player> players) {
         System.out.println("Players added: " + players.size());
         for (Player player : players) {
@@ -144,25 +144,25 @@ public class GameView implements IGameView {
         }
     }
 
-    // Show round info
+    
     public void showRound(int roundNumber) {
         System.out.println("\n=========================");
         System.out.println("      ROUND " + roundNumber);
         System.out.println("=========================");
     }
 
-    // Show trophies
+    
     public void showTrophies(String trophiesInfo) {
         System.out.println("Trophies selected: ");
         System.out.println(trophiesInfo);
     }
 
-    // Show player score
+    
     public void showScore(Player player) {
         System.out.println(player.getName() + " has " + player.getScore() + " points.");
     }
 
-    // Show winner
+    
     public void showWinner(Player winner) {
         if (winner != null) {
             System.out.println("Winner is " + winner.getName());
@@ -203,8 +203,8 @@ public class GameView implements IGameView {
                 if (input.equals("N")) return false;
                 System.out.println("Please enter 'Y' or 'N'.");
             } catch (NoSuchElementException | IllegalStateException e) {
-                // Handle cases where scanner is closed or input is not available
-                // During restart, default to not saving
+                
+                
                 return false;
             }
         }
@@ -219,7 +219,7 @@ public class GameView implements IGameView {
     @Override
     public GameVariant askForVariant(List<GameVariant> availableVariants) {
         if (availableVariants == null || availableVariants.isEmpty()) {
-            // Fallback: return Standard variant if no variants available
+            
             return new model.game.variants.StandardVariant();
         }
 
@@ -240,7 +240,7 @@ public class GameView implements IGameView {
             try {
                 String input = scanner.hasNextLine() ? scanner.nextLine().trim() : "";
                 if (input.isEmpty()) {
-                    // Default to first variant if no input
+                    
                     choice = 1;
                     break;
                 }

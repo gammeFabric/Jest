@@ -53,12 +53,12 @@ public class GameController {
 
     public void startGame(){
         if (model.getPlayers() == null || model.getPlayers().isEmpty()) {
-            // Select variant before adding players (variant may affect player limits)
+            
             selectVariant();
 
             addPlayers();
 
-            // Validation: Use variant's player limits
+            
             GameVariant variant = model.getVariant();
             int playerCount = model.getPlayers().size();
             if (playerCount < variant.getMinPlayers() || playerCount > variant.getMaxPlayers()) {
@@ -68,37 +68,32 @@ public class GameController {
                 );
             }
 
-            // Handle extensions before choosing trophies
+            
             handleExtensions();
 
             model.chooseTrophies(model.getPlayers().size());
             gameView.showTrophies(model.trophiesInfo());
             
-            // Save the game configuration for restart functionality
+            
             saveGameConfiguration();
         }
 
         playGame();
     }
 
-    /**
-     * Selects a game variant and sets it on the Game model.
-     */
+    
     private void selectVariant() {
-        // Get available variants
+        
         List<GameVariant> availableVariants = getAvailableVariants();
         
-        // Ask view to select a variant
+        
         GameVariant selectedVariant = gameView.askForVariant(availableVariants);
         
-        // Set the variant on the game model
+        
         model.setVariant(selectedVariant);
     }
 
-    /**
-     * Returns the list of available game variants.
-     * @return list of available variants
-     */
+    
     private List<GameVariant> getAvailableVariants() {
         List<GameVariant> variants = new ArrayList<>();
         variants.add(new StandardVariant());
@@ -107,28 +102,25 @@ public class GameController {
         return variants;
     }
 
-    /**
-     * Handles the logic for proposing and adding extensions.
-     * Separated into its own method for clarity.
-     */
+    
     private void handleExtensions() {
         ArrayList<ExtensionCard> availableExtensions = ExtensionManager.getAvailableExtensions();
         boolean validSelection = false;
 
         while (!validSelection) {
-            // 1. Ask the view for user selection
+            
             ArrayList<Integer> selectedIndices = gameView.askForExtensions(availableExtensions);
 
-            // 2. Validate the selection
+            
             int playerCount = model.getPlayers().size();
 
             if (ExtensionManager.isValidSelection(selectedIndices, playerCount)) {
                 validSelection = true;
 
-                // Track selected extensions for configuration
+                
                 selectedExtensions = new ArrayList<>();
 
-                // 3. Add selected extensions to the deck
+                
                 if (!selectedIndices.isEmpty()) {
                     ArrayList<ExtensionCard> cardsToAdd = new ArrayList<>();
                     System.out.println("Validation OK. Adding cards to the deck:");
@@ -136,7 +128,7 @@ public class GameController {
                     for (int index : selectedIndices) {
                         ExtensionCard card = availableExtensions.get(index);
                         cardsToAdd.add(card);
-                        selectedExtensions.add(card); // Track for configuration
+                        selectedExtensions.add(card); 
                         System.out.println(" [+] " + card.getName());
                     }
 
@@ -145,7 +137,7 @@ public class GameController {
                     System.out.println("No extensions selected. Standard game.");
                 }
             } else {
-                // Show error and retry
+                
                 String errorMsg = ExtensionManager.getInvalidSelectionMessage(selectedIndices, playerCount);
                 gameView.showInvalidExtensionMessage(errorMsg);
             }
@@ -162,11 +154,9 @@ public class GameController {
         }
     }
     
-    /**
-     * Plays the game using the Full Hand variant rules.
-     */
+    
     private void playFullHandGame() {
-        // Create a single FullHandRound that manages the entire game
+        
         FullHandRound fullHandRound = new FullHandRound(model.getPlayers(), model.getDeck());
         FullHandRoundController roundController = new FullHandRoundController(
             fullHandRound,
@@ -179,12 +169,12 @@ public class GameController {
         int roundNumber = roundController.getRoundCounter();
         gameView.showRound(roundNumber);
         
-        // Update header with round and variant info
+        
         if (gameView instanceof view.gui.GameViewGUI) {
             ((view.gui.GameViewGUI) gameView).updateHeader(roundNumber, model.getVariant().getName());
         }
 
-        // Display initial game state in GUI (support RoundViewGUI and RoundViewHybrid)
+        
         ArrayList<Player> bots = new ArrayList<>();
         for (Player p : model.getPlayers()) {
             if (!(p instanceof model.players.HumanPlayer)) {
@@ -204,10 +194,10 @@ public class GameController {
             hybrid.displayDeck(fullHandRound.getDeck().getRemainingCount());
         }
         
-        // Play the entire Full Hand game in one round
+        
         roundController.playRound();
         
-        // Ask to save after the game
+        
         if (gameView.askSaveAfterRound()) {
             String saveName = gameView.askSaveName();
             SaveManager.save(model, saveName);
@@ -216,9 +206,7 @@ public class GameController {
         endGame();
     }
     
-    /**
-     * Plays the game using standard variant rules.
-     */
+    
     private void playStandardGame() {
         while (!model.getDeck().isEmpty()) {
             RoundController roundController = new RoundController(
@@ -230,12 +218,12 @@ public class GameController {
             int roundNumber = roundController.getRoundCounter();
             gameView.showRound(roundNumber);
             
-            // Update header with round and variant info
+            
             if (gameView instanceof view.gui.GameViewGUI) {
                 ((view.gui.GameViewGUI) gameView).updateHeader(roundNumber, model.getVariant().getName());
             }
             
-            // Display initial game state in GUI (support RoundViewGUI and RoundViewHybrid)
+            
             ArrayList<Player> bots = new ArrayList<>();
             for (Player p : model.getPlayers()) {
                 if (!(p instanceof model.players.HumanPlayer)) {
@@ -268,12 +256,9 @@ public class GameController {
         endGame();
     }
 
-    /**
-     * Saves current game configuration for restart functionality.
-     * This should be called after all game setup is complete.
-     */
+    
     public void saveGameConfiguration() {
-        // Use the tracked selected extensions
+        
         ArrayList<ExtensionCard> extensionsToSave = selectedExtensions != null ? selectedExtensions : new ArrayList<>();
         
         this.gameConfiguration = new GameConfiguration(
@@ -283,10 +268,7 @@ public class GameController {
         );
     }
     
-    /**
-     * Gets the saved game configuration.
-     * @return the game configuration, or null if not saved
-     */
+    
     public GameConfiguration getGameConfiguration() {
         return gameConfiguration;
     }
@@ -306,7 +288,7 @@ public class GameController {
             gameView.showScore(player);
         }
 
-        // Save configuration for restart before showing winners
+        
         if (gameConfiguration != null) {
             GameConfigurationManager.saveConfiguration(gameConfiguration);
         }

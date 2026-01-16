@@ -13,7 +13,7 @@ public class ScoreVisitorImpl implements ScoreVisitor {
     private int heartCount;
     private Map<Suit, List<Face>> suitMap;
     
-    // Système de Flags générique (remplace les booleans spécifiques comme hasShield)
+    
     private Map<String, Boolean> flags; 
 
     public ScoreVisitorImpl() {
@@ -25,13 +25,13 @@ public class ScoreVisitorImpl implements ScoreVisitor {
         hasJoker = false;
         heartCount = 0;
         suitMap = new HashMap<>();
-        flags = new HashMap<>(); // Reset des flags
+        flags = new HashMap<>(); 
         for (Suit suit : Suit.values()) {
             suitMap.put(suit, new ArrayList<>());
         }
     }
 
-    // --- Méthodes pour les effets (API publique pour CardEffect) ---
+    
     
     public void setFlag(String flagName, boolean active) {
         flags.put(flagName, active);
@@ -43,7 +43,7 @@ public class ScoreVisitorImpl implements ScoreVisitor {
     
     public boolean hasJoker() { return hasJoker; }
     public int getHeartCount() { return heartCount; }
-    // -------------------------------------------------------------
+    
 
     @Override
     public int visit(Card card) {
@@ -56,7 +56,7 @@ public class ScoreVisitorImpl implements ScoreVisitor {
             if (suitCard.getSuit() == Suit.HEARTS) heartCount++;
             return suitCard.getFaceValue();
         } else if (card instanceof ExtensionCard) {
-            // EXTENSIBILITÉ : On délègue la logique à la carte !
+            
             ((ExtensionCard) card).getEffect().applyOnVisit(this);
             return ((ExtensionCard) card).getFaceValue();
         }
@@ -66,12 +66,12 @@ public class ScoreVisitorImpl implements ScoreVisitor {
     public void countJestScore(Jest jest) {
         resetScore();
 
-        // 1. Recensement (active les flags via applyOnVisit)
+        
         for (Card card : jest.getCards()) {
             visit(card);
         }
 
-        // 2. Calcul standard
+        
         for (Card card : jest.getCards()) {
             if (card instanceof SuitCard) {
                 SuitCard sc = (SuitCard) card;
@@ -82,10 +82,10 @@ public class ScoreVisitorImpl implements ScoreVisitor {
                 applyColorRule(sc, effectiveValue);
             } 
             else if (card instanceof ExtensionCard) {
-                // Ajout de la valeur faciale de base
+                
                 totalScore += ((ExtensionCard) card).getFaceValue();
                 
-                // EXTENSIBILITÉ : Calcul des bonus spécifiques
+                
                 totalScore += ((ExtensionCard) card).getEffect().calculateBonus(this);
             }
         }
@@ -108,7 +108,7 @@ public class ScoreVisitorImpl implements ScoreVisitor {
         if (suit == Suit.SPADES || suit == Suit.CLUBS) {
             totalScore += value;
         } else if (suit == Suit.DIAMONDS) {
-            // Vérification générique : Est-ce qu'un flag interdit les carreaux négatifs ?
+            
             if (!hasFlag("NO_NEGATIVE_DIAMONDS")) { 
                 totalScore -= value;
             }
@@ -123,7 +123,7 @@ public class ScoreVisitorImpl implements ScoreVisitor {
         if (heartCount == 4) {
             return value;
         } else {
-            // Vérification générique : Est-ce qu'un flag interdit les coeurs négatifs ?
+            
             if (hasFlag("NO_NEGATIVE_HEARTS")) return 0;
             return -value;
         }

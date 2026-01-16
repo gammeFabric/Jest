@@ -22,7 +22,7 @@ public class Deck implements Serializable {
         }
     }
 
-    // Initialization of our deck (we add all 17 cards including 1 Joker)
+    
     private void deckInit(){
         cards.clear();
         for  (Suit suit : Suit.values()) {
@@ -34,19 +34,16 @@ public class Deck implements Serializable {
         shuffle();
     }
 
-    /**
-     * Méthode pour ajouter les cartes de l'extension au deck existant.
-     * Cette méthode doit être appelée par le contrôleur si le joueur choisit l'option.
-     */
+    
     public void addExtensions(ArrayList<ExtensionCard> selectedExtensions) {
         if (selectedExtensions == null || selectedExtensions.isEmpty()) {
             return;
         }
 
-        // Ajout des cartes choisies
+        
         this.cards.addAll(selectedExtensions);
         
-        // Remélanger pour les intégrer au jeu
+        
         shuffle();
         
         System.out.println(selectedExtensions.size() + " cartes d'extension ajoutées au paquet.");
@@ -77,7 +74,7 @@ public class Deck implements Serializable {
         }
     }
 
-    // test for cards
+    
     public ArrayList<Card> getCards(){
         return cards;
     }

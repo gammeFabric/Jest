@@ -24,11 +24,11 @@ public class Offer implements Serializable {
     public Card takeCard(boolean takeFaceUp) {
         if (takeFaceUp) {
             Card takenCard = faceUpCard;
-            faceUpCard = null; // Face-up card is taken
+            faceUpCard = null; 
             return takenCard;
         } else {
             Card takenCard = faceDownCard;
-            faceDownCard = null; // Face-down card is taken
+            faceDownCard = null; 
             return takenCard;
         }
     }
@@ -52,7 +52,7 @@ public class Offer implements Serializable {
 
     public ArrayList<Card> getOfferedCard(){
         ArrayList<Card> cards = new ArrayList<>();
-        // test for get offered cards
+        
         if (faceUpCard != null) cards.add(faceUpCard);
         if (faceDownCard != null) cards.add(faceDownCard);
         return cards;

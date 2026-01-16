@@ -26,14 +26,14 @@ public class GameLauncher {
         CONSOLE, GUI, HYBRID
     }
 
-    // Store current game mode for restart
+    
     private static GameMode currentMode;
     private static GameWindow currentGameWindow;
 
     public static void main(String[] args) {
         boolean isRestart = args.length > 0 && "--restart".equals(args[0]);
         GameMode mode = selectMode();
-        currentMode = mode; // Store current mode for restart
+        currentMode = mode; 
         
         System.out.println("--- Jest Card Game ---");
         if (mode == GameMode.GUI || mode == GameMode.HYBRID) {
@@ -53,7 +53,7 @@ public class GameLauncher {
                 break;
             case GUI:
                 gameWindow = new GameWindow();
-                currentGameWindow = gameWindow; // Store for restart
+                currentGameWindow = gameWindow; 
                 gameWindow.show();
                 gameView = new GameViewGUI(gameWindow.getFrame(), gameWindow.getOutputArea(), gameWindow.getCardPanel(), gameWindow);
                 roundView = new RoundViewGUI(gameWindow.getOutputArea(), gameWindow.getOffersPanel(), gameWindow.getHandPanel(),
@@ -67,7 +67,7 @@ public class GameLauncher {
                 break;
             case HYBRID:
                 gameWindow = new GameWindow();
-                currentGameWindow = gameWindow; // Store for restart
+                currentGameWindow = gameWindow; 
                 gameWindow.show();
                 GameView consoleGameView = new GameView();
                 GameViewGUI guiGameView = new GameViewGUI(gameWindow.getFrame(), gameWindow.getOutputArea(), gameWindow.getCardPanel(), gameWindow);
@@ -94,24 +94,20 @@ public class GameLauncher {
         GameController controller = new GameController(model, gameView, roundView, viewFactory);
         controller.startGame();
         
-        // Clean up configuration file after game ends (if not restart)
+        
         if (!isRestart) {
             GameConfigurationManager.deleteConfiguration();
         }
     }
 
-    /**
-     * Creates a new Game instance from a saved configuration.
-     * @param config the saved game configuration
-     * @return a new Game instance configured with the saved parameters
-     */
+    
     private static Game createGameFromConfiguration(GameConfiguration config) {
         Game game = new Game();
         
-        // Set the variant
+        
         game.setVariant(config.getVariant());
         
-        // Add players according to the configuration
+        
         for (GameConfiguration.PlayerConfiguration playerConfig : config.getPlayerConfigs()) {
             if (playerConfig.isHuman()) {
                 game.addHumanPlayer(playerConfig.getName());
@@ -120,12 +116,12 @@ public class GameLauncher {
             }
         }
         
-        // Add extensions to the deck
+        
         if (!config.getSelectedExtensions().isEmpty()) {
             game.getDeck().addExtensions(config.getSelectedExtensions());
         }
         
-        // Choose trophies based on player count
+        
         game.chooseTrophies(config.getPlayerCount());
         
         return game;
@@ -133,12 +129,12 @@ public class GameLauncher {
 
     private static Game selectNewOrLoadGame(GameMode mode, GameWindow gameWindow, boolean isRestart) {
         if (isRestart) {
-            // Try to load saved configuration for restart
+            
             GameConfiguration config = GameConfigurationManager.loadConfiguration();
             if (config != null) {
                 return createGameFromConfiguration(config);
             } else {
-                // Fallback to new game if no configuration found
+                
                 System.out.println("No saved configuration found. Starting new game.");
                 return new Game();
             }
@@ -164,18 +160,18 @@ public class GameLauncher {
 
         if (mode == GameMode.HYBRID) {
             if (isRestart) {
-                // Try to load saved configuration for restart
+                
                 GameConfiguration config = GameConfigurationManager.loadConfiguration();
                 if (config != null) {
                     return createGameFromConfiguration(config);
                 } else {
-                    // Fallback to new game if no configuration found
+                    
                     System.out.println("No saved configuration found. Starting new game.");
                     return new Game();
                 }
             }
             
-            // HYBRID mode: complex logic with both GUI and console input
+            
             final class Choice<T> {
                 private final Object lock = new Object();
                 private boolean resolved;
@@ -303,26 +299,26 @@ public class GameLauncher {
 
             Integer resolved = startChoice.await();
             if (resolved != null && resolved == 1) {
-                // Load game (still offers both inputs via GUI selection of file list)
+                
                 return loadGameGui(gameWindow);
             }
             return new Game();
         }
 
-        // CONSOLE: keep it simple and use console prompts
+        
         if (isRestart) {
-            // Try to load saved configuration for restart
+            
             GameConfiguration config = GameConfigurationManager.loadConfiguration();
             if (config != null) {
                 return createGameFromConfiguration(config);
             } else {
-                // Fallback to new game if no configuration found
+                
                 System.out.println("No saved configuration found. Starting new game.");
                 return new Game();
             }
         }
         
-        // Only execute this logic when NOT restarting
+        
         int choice;
         try {
             System.out.println("1. Start new game");
@@ -406,7 +402,7 @@ public class GameLauncher {
 
     private static GameMode selectMode() {
         if (System.console() == null) {
-            // No console available, use GUI mode selection
+            
             String[] options = {"Console", "GUI", "Hybrid"};
             int choice = JOptionPane.showOptionDialog(
                 null,
@@ -425,7 +421,7 @@ public class GameLauncher {
                 default -> GameMode.CONSOLE;
             };
         } else {
-            // Console available, ask via console
+            
             try {
                 System.out.println("Select game mode:");
                 System.out.println("1. Console");
@@ -453,18 +449,15 @@ public class GameLauncher {
         }
     }
 
-    /**
-     * Restarts the game with the same mode and window (for GUI/HYBRID modes).
-     * This method is called from GameViewGUI to restart without closing the window.
-     */
+    
     public static void restartGame() {
         if (currentMode == null) {
-            // Fallback to original behavior if no current mode is stored
+            
             main(new String[]{"--restart"});
             return;
         }
 
-        // Load the saved configuration
+        
         GameConfiguration config = GameConfigurationManager.loadConfiguration();
         Game model;
         if (config != null) {
@@ -474,7 +467,7 @@ public class GameLauncher {
             model = new Game();
         }
 
-        // Create new views and controller using the same mode and window
+        
         IGameView gameView;
         IRoundView roundView;
         ViewFactory viewFactory;
@@ -486,7 +479,7 @@ public class GameLauncher {
                 viewFactory = new ViewFactory(ViewFactory.ViewMode.CONSOLE);
                 break;
             case GUI:
-                // Reuse the existing window
+                
                 GameWindow gameWindow = currentGameWindow;
                 gameView = new GameViewGUI(gameWindow.getFrame(), gameWindow.getOutputArea(), gameWindow.getCardPanel(), gameWindow);
                 roundView = new RoundViewGUI(gameWindow.getOutputArea(), gameWindow.getOffersPanel(), gameWindow.getHandPanel(),
@@ -499,7 +492,7 @@ public class GameLauncher {
                                              gameWindow.getInteractionPanel());
                 break;
             case HYBRID:
-                // Reuse the existing window
+                
                 GameWindow hybridWindow = currentGameWindow;
                 GameView consoleGameView = new GameView();
                 GameViewGUI guiGameView = new GameViewGUI(hybridWindow.getFrame(), hybridWindow.getOutputArea(), hybridWindow.getCardPanel(), hybridWindow);
@@ -521,7 +514,7 @@ public class GameLauncher {
                 viewFactory = new ViewFactory(ViewFactory.ViewMode.CONSOLE);
         }
 
-        // Start the new game
+        
         GameController controller = new GameController(model, gameView, roundView, viewFactory);
         controller.startGame();
     }

@@ -8,7 +8,7 @@ import java.awt.*;
 public class OfferComponent extends JPanel {
     private final Offer offer;
     @SuppressWarnings("unused")
-    private final boolean selectable; // Kept for potential future use
+    private final boolean selectable; 
     private boolean selected;
     private CardButton faceUpButton;
     private CardButton faceDownButton;
@@ -26,17 +26,17 @@ public class OfferComponent extends JPanel {
         setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // Player name label
+        
         JLabel playerLabel = new JLabel(offer.getOwner().getName(), SwingConstants.CENTER);
         playerLabel.setFont(new Font("Arial", Font.BOLD, 12));
         playerLabel.setForeground(Color.WHITE);
         add(playerLabel, BorderLayout.NORTH);
 
-        // Cards panel
+        
         JPanel cardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         cardsPanel.setOpaque(false);
 
-        // Face up card
+        
         if (offer.getFaceUpCard() != null) {
             CardButton.CardSelectionListener cardListener = selectable && listener != null ? 
                 index -> listener.onOfferSelected(offer) : null;
@@ -44,7 +44,7 @@ public class OfferComponent extends JPanel {
             cardsPanel.add(faceUpButton);
         }
 
-        // Face down card
+        
         if (offer.getFaceDownCard() != null) {
             faceDownButton = new CardButton(offer.getFaceDownCard(), false, 1, null);
             cardsPanel.add(faceDownButton);

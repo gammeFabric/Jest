@@ -27,7 +27,7 @@ public abstract class Player implements Serializable {
         this.score = 0;
     }
 
-    // getters
+    
     public String getName() {
         return name;
     }
@@ -57,7 +57,7 @@ public abstract class Player implements Serializable {
         return this.jest.getCards().getLast();
     }
 
-    // setters
+    
     public void setScore(int score) {
         this.score = score;
     }
@@ -92,7 +92,7 @@ public abstract class Player implements Serializable {
         }
     }
 
-    // abstract methods
+    
     public abstract Offer makeOffer(int faceUpIndex, int faceDownIndex);
     public abstract Offer chooseCard(ArrayList<Offer> availableOffers, Offer chosenOffer, boolean isFaceUp);
     public abstract Offer makeOffer();

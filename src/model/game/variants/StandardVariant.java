@@ -5,10 +5,7 @@ import model.game.GameVariant;
 import model.players.ScoreVisitor;
 import model.players.ScoreVisitorImpl;
 
-/**
- * Standard variant of the Jest card game.
- * This variant uses the classic Jest scoring rules and supports 3-4 players.
- */
+
 public class StandardVariant implements GameVariant {
     
     private static final String NAME = "Standard";
@@ -31,8 +28,8 @@ public class StandardVariant implements GameVariant {
 
     @Override
     public void setup(Game game) {
-        // Standard variant doesn't require any special setup
-        // The game uses default rules and deck configuration
+        
+        
     }
 
     @Override
@@ -42,7 +39,7 @@ public class StandardVariant implements GameVariant {
 
     @Override
     public ScoreVisitor createScoreVisitor() {
-        // Return the standard scoring implementation
+        
         return new ScoreVisitorImpl();
     }
 

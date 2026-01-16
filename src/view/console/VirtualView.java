@@ -3,7 +3,7 @@ package view.console;
 import model.cards.Card;
 
 public class VirtualView extends PlayerView {
-    // Show a message
+    
     @Override
     public void showMessage(String message) {
         System.out.println(message);

@@ -14,9 +14,9 @@ public class AggressiveStrategy implements PlayStrategy {
     private boolean hasJoker;
     private boolean hasHearts;
     private Jest playerJest;
-    private boolean isFullHandVariant = false; // Track if playing Full Hand variant
+    private boolean isFullHandVariant = false; 
     @SuppressWarnings("unused")
-    private List<Card> trophies; // Kept for potential future use in strategy decisions
+    private List<Card> trophies; 
 
     public AggressiveStrategy() {
         this.seenCards = new HashSet<>();
@@ -25,10 +25,10 @@ public class AggressiveStrategy implements PlayStrategy {
         this.trophies = new ArrayList<>();
     }
 
-    // Méthode pour permettre au contrôleur de donner l'info des trophées au bot
+    
     public void setTrophies(List<Card> trophies) {
         this.trophies = trophies;
-        // On considère les trophées comme des cartes "vues" et inaccessibles
+        
         for (Card c : trophies) {
             seenCards.add(getCardId(c));
         }
@@ -38,8 +38,8 @@ public class AggressiveStrategy implements PlayStrategy {
     public Card[] setCardsToOffer(ArrayList<Card> hand) {
         if (hand.isEmpty()) return null;
 
-        // Detect if we're in Full Hand variant by checking hand size
-        // In Full Hand, players start with many cards (6-8) vs 2 in standard
+        
+        
         isFullHandVariant = hand.size() > 4;
 
         Card bestCard = hand.get(0);
@@ -58,11 +58,11 @@ public class AggressiveStrategy implements PlayStrategy {
 
         Card faceUpCard;
         if (isFullHandVariant) {
-            // In Full Hand variant, be more strategic about face-up card
-            // Consider remaining hand size and game phase
+            
+            
             faceUpCard = selectFaceUpCardForFullHand(hand);
         } else {
-            // Standard variant: just take the next card
+            
             faceUpCard = hand.get(0);
         }
         hand.remove(faceUpCard);
@@ -85,7 +85,7 @@ public class AggressiveStrategy implements PlayStrategy {
 
             double score = evaluateCardPotential(visible);
             
-            // In Full Hand variant, consider game phase more carefully
+            
             if (isFullHandVariant) {
                 score = adjustScoreForFullHandPhase(score, offer);
             }
@@ -96,7 +96,7 @@ public class AggressiveStrategy implements PlayStrategy {
             }
         }
 
-        // Sécurité
+        
         if (bestOffer == null) {
             for(Offer o : availableOffers) {
                 if (o.getFaceUpCard() != null) {
@@ -136,7 +136,7 @@ public class AggressiveStrategy implements PlayStrategy {
             return ((ExtensionCard) card).getAIValue(StrategyType.AGGRESSIVE, playerJest);
         }
 
-        // --- 2. LOGIQUE JOKER ---
+        
         if (card instanceof Joker) {
             if (!hasHearts) return 20;
             if (playerJest != null && isGrandSlamPossible()) return 15; 
@@ -148,10 +148,10 @@ public class AggressiveStrategy implements PlayStrategy {
             int val = suitCard.getFaceValue();
             Suit suit = suitCard.getSuit();
 
-            // --- 3. LOGIQUE COEURS ---
+            
             if (suit == Suit.HEARTS) {
                 if (hasJoker && hasHearts) {
-                    // CORRECTION : Appel sécurisé
+                    
                     if (playerJest != null && isGrandSlamPossible()) {
                         return 50; 
                     } else {
@@ -162,7 +162,7 @@ public class AggressiveStrategy implements PlayStrategy {
                 return -5;
             }
 
-            // --- 4. AUTRES COULEURS ---
+            
             if (val == 1) { 
                 if (isOnlyOfSuitInJest(suit)) return 6; 
                 return 2;
@@ -179,41 +179,39 @@ public class AggressiveStrategy implements PlayStrategy {
         return 0;
     }
 
-    /**
-     * Vérifie si l'objectif "Joker + Tous les Cœurs" est encore réalisable.
-     */
+    
     private boolean isGrandSlamPossible() {
-        // A. Vérifier si on a trop de "déchets" (cartes qui ne sont ni Joker ni Cœur)
-        // Dans une partie standard à 3-4 joueurs, on a environ 4 à 6 tours.
-        // Si on a déjà récupéré 2 cartes inutiles, il sera dur d'avoir les 5 cartes requises (Joker + 4 Cœurs).
+        
+        
+        
         long trashCards = playerJest.getCards().stream()
                 .filter(c -> !(c instanceof Joker) && !isHeart(c))
                 .count();
         
-        if (trashCards >= 1) return false; // Trop de pollution dans la main
+        if (trashCards >= 1) return false; 
 
-        // B. Vérifier disponibilité des 4 Cœurs (As, 2, 3, 4)
+        
         int[] heartFaces = {1, 2, 3, 4};
         for (int face : heartFaces) {
             String cardId = "HEARTS-" + face;
             
-            // 1. Est-ce que je l'ai déjà ?
+            
             boolean iHaveIt = playerJest.getCards().stream().anyMatch(c -> 
                 c instanceof SuitCard && ((SuitCard)c).getSuit() == Suit.HEARTS && ((SuitCard)c).getFaceValue() == face
             );
             if (iHaveIt) continue;
 
-            // 2. Si je ne l'ai pas, est-ce qu'il a été vu ailleurs (Adversaire ou Trophée) ?
-            // Si 'seenCards' le contient et que je ne l'ai pas, c'est qu'il est inaccessible.
+            
+            
             if (seenCards.contains(cardId)) {
-                return false; // Impossible, quelqu'un d'autre l'a ou c'est un trophée.
+                return false; 
             }
         }
 
         return true;
     }
 
-    // --- Méthodes Utilitaires ---
+    
 
     private boolean isHeart(Card c) {
         return c instanceof SuitCard && ((SuitCard) c).getSuit() == Suit.HEARTS;
@@ -237,7 +235,7 @@ public class AggressiveStrategy implements PlayStrategy {
     private boolean canFormBlackPair(SuitCard card) {
         if (playerJest == null) return false; 
 
-        // Cherche la carte complémentaire (Pique <-> Trèfle)
+        
         Suit targetSuit = (card.getSuit() == Suit.SPADES) ? Suit.CLUBS : Suit.SPADES;
         
         for (Card c : playerJest.getCards()) {
@@ -254,7 +252,7 @@ public class AggressiveStrategy implements PlayStrategy {
     private boolean isOnlyOfSuitInJest(Suit suit) {
         if (playerJest == null) return true; 
 
-        // Vérifie si on n'a AUCUNE carte de cette couleur dans le Jest pour l'instant
+        
         for (Card c : playerJest.getCards()) {
             if (c instanceof SuitCard && ((SuitCard) c).getSuit() == suit) {
                 return false; 
@@ -263,10 +261,7 @@ public class AggressiveStrategy implements PlayStrategy {
         return true; 
     }
     
-    /**
-     * Selects the best face-up card for Full Hand variant considering strategy.
-     * In Full Hand, we need to be more strategic about which card to show face-up.
-     */
+    
     private Card selectFaceUpCardForFullHand(ArrayList<Card> hand) {
         if (hand.isEmpty()) return null;
         
@@ -274,7 +269,7 @@ public class AggressiveStrategy implements PlayStrategy {
         int bestScore = Integer.MIN_VALUE;
         
         for (Card c : hand) {
-            // For face-up, we want a card that's decent but not our best
+            
             int score = evaluateCardForFaceUp(c);
             if (score > bestScore) {
                 bestScore = score;
@@ -285,16 +280,14 @@ public class AggressiveStrategy implements PlayStrategy {
         return bestCard;
     }
     
-    /**
-     * Evaluates a card specifically for face-up display in Full Hand variant.
-     */
+    
     private int evaluateCardForFaceUp(Card card) {
         if (card instanceof ExtensionCard) {
             return ((ExtensionCard) card).getAIValue(StrategyType.AGGRESSIVE, playerJest) / 2;
         }
         
         if (card instanceof Joker) {
-            return 5; // Show Joker to intimidate, but not too high
+            return 5; 
         }
         
         if (card instanceof SuitCard) {
@@ -302,40 +295,38 @@ public class AggressiveStrategy implements PlayStrategy {
             int val = suitCard.getFaceValue();
             Suit suit = suitCard.getSuit();
             
-            // For face-up, we want to show decent cards but not our best
+            
             if (suit == Suit.HEARTS) {
-                if (hasJoker) return 8; // Show hearts if we have joker
-                return 3; // Otherwise, low value
+                if (hasJoker) return 8; 
+                return 3; 
             }
             
-            if (suit == Suit.DIAMONDS) return -val / 2; // Less negative for face-up
+            if (suit == Suit.DIAMONDS) return -val / 2; 
             
-            // Black cards are good to show face-up
-            if (val >= 3) return val - 2; // High value but not the best
+            
+            if (val >= 3) return val - 2; 
             return val;
         }
         
         return 0;
     }
     
-    /**
-     * Adjusts the score based on Full Hand variant game phase.
-     */
+    
     private double adjustScoreForFullHandPhase(double baseScore, Offer offer) {
-        // Consider how many cards we have left
+        
         int handSize = playerJest.getCards().size();
         
-        // Early game: be more aggressive
+        
         if (handSize <= 2) {
-            return baseScore * 1.5; // More aggressive when we have few cards
+            return baseScore * 1.5; 
         }
         
-        // Late game: be more conservative
+        
         if (handSize >= 4) {
-            return baseScore * 0.8; // More conservative when we have many cards
+            return baseScore * 0.8; 
         }
         
-        // Mid game: normal strategy
+        
         return baseScore;
     }
 }

@@ -106,7 +106,7 @@ public class RoundController {
                     } else {
                         gui.highlightChosenOffer(takenOffer);
                     }
-                    // Reset interaction flag after the choice is complete
+                    
                     gui.resetInteractionFlag();
                 } else if (view instanceof RoundViewHybrid hybrid) {
                     if (isBotTurn) {

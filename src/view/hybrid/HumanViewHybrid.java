@@ -254,7 +254,7 @@ public class HumanViewHybrid implements IHumanView {
 
         Choice<int[]> choice = new Choice<>();
 
-        // GUI Thread
+        
         runGuiAsync("Hybrid-GUI-ChooseTwoCards", () -> {
             int[] result = guiView.chooseTwoCardsForOffer(playerName, hand);
             choice.resolve(result);
@@ -264,7 +264,7 @@ public class HumanViewHybrid implements IHumanView {
             while (!choice.isResolved()) {
                 int[] selectedIndices = new int[2];
                 
-                // Choose first card
+                
                 selectedIndices[0] = -1;
                 while (!choice.isResolved() && (selectedIndices[0] < 0 || selectedIndices[0] >= hand.size())) {
                     String line = readLineNonBlocking(choice, "Choose the number of the first card: ");
@@ -277,7 +277,7 @@ public class HumanViewHybrid implements IHumanView {
                     }
                 }
                 
-                // Choose second card
+                
                 selectedIndices[1] = -1;
                 while (!choice.isResolved() && (selectedIndices[1] < 0 || selectedIndices[1] >= hand.size() || selectedIndices[1] == selectedIndices[0])) {
                     String line = readLineNonBlocking(choice, "Choose the number of the second card (different from first): ");

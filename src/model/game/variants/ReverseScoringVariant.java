@@ -5,11 +5,7 @@ import model.game.GameVariant;
 import model.players.ScoreVisitor;
 import model.players.ReverseScoreVisitor;
 
-/**
- * Variant that reverses scoring: positive totals become negative
- * and negative totals become positive, while using the same
- * underlying card scoring rules as the standard variant.
- */
+
 public class ReverseScoringVariant implements GameVariant {
 
     private static final String NAME = "Reverse Scoring";
@@ -29,7 +25,7 @@ public class ReverseScoringVariant implements GameVariant {
 
     @Override
     public void setup(Game game) {
-        // No special setup; only scoring is changed via the visitor.
+        
     }
 
     @Override
@@ -39,7 +35,7 @@ public class ReverseScoringVariant implements GameVariant {
 
     @Override
     public ScoreVisitor createScoreVisitor() {
-        // Use the reverse scoring visitor
+        
         return new ReverseScoreVisitor();
     }
 

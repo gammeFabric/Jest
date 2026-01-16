@@ -14,14 +14,14 @@ public class HumanPlayer extends Player {
             return null;
         }
 
-        // Use the indices provided by the controller
+        
         Card faceUpCard = hand.get(faceUpIndex);
         Card faceDownCard = hand.get(faceDownIndex);
 
         Offer playerOffer = new Offer(this, faceUpCard, faceDownCard);
         offer = playerOffer;
         
-        // Remove both selected cards from hand (remove higher index first)
+        
         int higherIndex = Math.max(faceUpIndex, faceDownIndex);
         int lowerIndex = Math.min(faceUpIndex, faceDownIndex);
         
@@ -36,17 +36,17 @@ public class HumanPlayer extends Player {
             return null;
         }
 
-        // Use the two indices provided by the controller
+        
         Card faceUpCard = hand.get(selectedIndices[0]);
         Card faceDownCard = hand.get(selectedIndices[1]);
 
         Offer playerOffer = new Offer(this, faceUpCard, faceDownCard);
         offer = playerOffer;
         
-        // Remove both selected cards from hand
+        
         hand.remove(selectedIndices[0]);
         if (selectedIndices[1] > selectedIndices[0]) {
-            hand.remove(selectedIndices[1] - 1); // Adjust index after first removal
+            hand.remove(selectedIndices[1] - 1); 
         } else {
             hand.remove(selectedIndices[1]);
         }

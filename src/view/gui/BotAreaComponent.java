@@ -22,30 +22,30 @@ public class BotAreaComponent extends JPanel {
         ));
         setPreferredSize(new Dimension(250, 180));
 
-        // Bot name label at top
+        
         JLabel nameLabel = new JLabel(bot.getName(), SwingConstants.CENTER);
         nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
         nameLabel.setForeground(Color.BLACK);
         add(nameLabel, BorderLayout.NORTH);
 
-        // Cards panel (2 face-up + 2 face-down)
+        
         JPanel cardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         cardsPanel.setOpaque(false);
 
         if (offer != null) {
-            // Face-up card
+            
             if (offer.getFaceUpCard() != null) {
                 CardComponent faceUpCard = new CardComponent(offer.getFaceUpCard(), true, false);
                 cardsPanel.add(faceUpCard);
             }
             
-            // Face-down card
+            
             if (offer.getFaceDownCard() != null) {
                 CardComponent faceDownCard = new CardComponent(offer.getFaceDownCard(), false, false);
                 cardsPanel.add(faceDownCard);
             }
         } else {
-            // Show placeholder cards if no offer yet
+            
             cardsPanel.add(new CardComponent(null, true, false));
             cardsPanel.add(new CardComponent(null, false, false));
         }

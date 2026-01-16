@@ -17,15 +17,15 @@ public class Game implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Deck deck;
     private final ArrayList<Player> players;
-    // Note: rounds field removed as it was not being used
-    // saving rounds has no logic here because they reference the same object each time so we capture not info this way
+    
+    
 
     private int savedRoundCounter;
 
-    // test that Game knows about cards
+    
     private ArrayList<Card> trophies;
 
-    // Game variant for different rule sets
+    
     private GameVariant variant;
 
 
@@ -34,7 +34,7 @@ public class Game implements Serializable {
         this.players = new ArrayList<>();
         this.trophies = new ArrayList<>();
         this.savedRoundCounter = 0;
-        // Default to Standard variant
+        
         this.variant = new StandardVariant();
         this.variant.setup(this);
     }
@@ -47,7 +47,7 @@ public class Game implements Serializable {
         this.savedRoundCounter = savedRoundCounter;
     }
 
-    // add players
+    
     public void addHumanPlayer(String name) {
         players.add(new HumanPlayer(name, false));
     }
@@ -64,7 +64,7 @@ public class Game implements Serializable {
         int maxScore = Integer.MIN_VALUE;
         ArrayList<Player> winners = new ArrayList<>();
 
-        // Find the max score
+        
         for (Player player : players) {
             int score = player.getScore();
             if (score > maxScore) {
@@ -72,7 +72,7 @@ public class Game implements Serializable {
             }
         }
 
-        // Collect all players with the max score
+        
         for (Player player : players) {
             if (player.getScore() == maxScore) {
                 winners.add(player);
@@ -84,7 +84,7 @@ public class Game implements Serializable {
 
     public void calculateAllScores() {
         ScoreVisitor visitor = variant.createScoreVisitor();
-        // Reset score for each player calculation
+        
         if (visitor instanceof ScoreVisitorImpl) {
             ScoreVisitorImpl scoreVisitor = (ScoreVisitorImpl) visitor;
             for (Player player : players) {
@@ -92,7 +92,7 @@ public class Game implements Serializable {
                 player.calculateScore(scoreVisitor);
             }
         } else {
-            // Fallback: create a new visitor for each player if not ScoreVisitorImpl
+            
             for (Player player : players) {
                 ScoreVisitor newVisitor = variant.createScoreVisitor();
                 player.calculateScore(newVisitor);
@@ -100,7 +100,7 @@ public class Game implements Serializable {
         }
     }
 
-    // test assigning Trophies and choose best players
+    
 
     public void assignTrophies() {
         if (this.trophies == null || this.trophies.isEmpty()) return;
@@ -126,14 +126,14 @@ public class Game implements Serializable {
         };
     }
 
-    // test to check who is trophy winner
+    
 
     private Player evaluateHighestFace(Suit suit) {
         int bestFaceValue = 0;
         ArrayList<Player> ties = new ArrayList<>();
         for (Player player : players) {
             for (Card card: player.getJest().getCards()){
-                // МОЖЕТ БЫТЬ ОШИБКА + функционал если у нас будет больше карт
+                
                 if (suit.getStrength() == card.getSuitValue()){
                     int val = card.getFaceValue();
                     if (val > bestFaceValue) {
@@ -152,12 +152,12 @@ public class Game implements Serializable {
         if (ties.isEmpty()) return null;
         if (ties.size() == 1) return ties.getFirst();
 
-        // can be enhanced by adding more functionalities to break ties
+        
         return ties.getFirst();
     }
 
     private Player evaluateLowestFace(Suit suit) {
-        // 4 because it's max in faceValues in Faces enum
+        
         int lowestFaceValue = 4;
         ArrayList<Player> ties = new ArrayList<>();
         for (Player player : players) {
@@ -180,7 +180,7 @@ public class Game implements Serializable {
         if (ties.isEmpty()) return null;
         if (ties.size() == 1) return ties.getFirst();
 
-        // can be enhanced by adding more functionalities to break ties
+        
         return ties.getFirst();
     }
 
@@ -247,7 +247,7 @@ public class Game implements Serializable {
     }
 
     private Player evaluateBestJestWithoutJoker(){
-        // test method maybe after add flag to check if player has a Joker or not
+        
         ArrayList<Player> ties = new ArrayList<>();
         ArrayList<Player> candidates = new ArrayList<>(players);
         calculateAllScores();
@@ -318,7 +318,7 @@ public class Game implements Serializable {
                 best = player;
                 bestStrength = playerBestRank;
             }
-            // maybe if we have the same suits we can check for this
+            
             else if (playerBestRank == bestStrength) {
                 continue;
             }
@@ -337,84 +337,84 @@ public class Game implements Serializable {
                 trophy.setTrophyType(TrophyType.BEST_JEST);
             }
             if (trophy instanceof SuitCard) {
-                // Сердечки
+                
                 if (((SuitCard) trophy).getSuit() == Suit.HEARTS) {
                     trophy.setTrophyType(TrophyType.JOKER);
                 }
-                // Червы
+                
                 else if (((SuitCard) trophy).getSuit() == Suit.CLUBS) {
                     if (((SuitCard) trophy).getFace() != Face.TWO && ((SuitCard) trophy).getFace() != Face.THREE) {
                         if (((SuitCard) trophy).getFace() == Face.FOUR) {
                             TrophyType type = TrophyType.LOWEST_FACE;
                             trophy.setTrophySuit(Suit.SPADES);
-//                            type.setSuit(Suit.SPADES);
+
                             trophy.setTrophyType(type);
                         } else {
                             TrophyType type = TrophyType.HIGHEST_FACE;
                             trophy.setTrophySuit(Suit.SPADES);
-//                            type.setSuit(Suit.SPADES);
+
                             trophy.setTrophyType(type);
                         }
                     } else {
                         if (((SuitCard) trophy).getFace() == Face.THREE) {
                             TrophyType type = TrophyType.HIGHEST_FACE;
                             trophy.setTrophySuit(Suit.HEARTS);
-//                            type.setSuit(Suit.HEARTS);
+
                             trophy.setTrophyType(type);
                         } else {
                             TrophyType type = TrophyType.LOWEST_FACE;
                             trophy.setTrophySuit(Suit.HEARTS);
-//                            type.setSuit(Suit.HEARTS);
+
                             trophy.setTrophyType(type);
                         }
                     }
-                    // Пики
+                    
                 } else if (((SuitCard) trophy).getSuit() == Suit.SPADES) {
                     if (((SuitCard) trophy).getFace() != Face.THREE && ((SuitCard) trophy).getFace() != Face.TWO) {
                         if (((SuitCard) trophy).getFace() == Face.FOUR) {
                             TrophyType type = TrophyType.LOWEST_FACE;
                             trophy.setTrophySuit(Suit.CLUBS);
-//                            type.setSuit(Suit.CLUBS);
+
                             trophy.setTrophyType(type);
                         } else {
                             TrophyType type = TrophyType.HIGHEST_FACE;
                             trophy.setTrophySuit(Suit.CLUBS);
-//                            type.setSuit(Suit.CLUBS);
+
                             trophy.setTrophyType(type);
                         }
                     } else {
                         if (((SuitCard) trophy).getFace() == Face.THREE) {
                             TrophyType type = TrophyType.MAJORITY_FACE_VALUE;
                             trophy.setTrophyFace(Face.TWO);
-//                            type.setFace(Faces.TWO);
+
                             trophy.setTrophyType(type);
                         } else {
                             TrophyType type = TrophyType.MAJORITY_FACE_VALUE;
                             trophy.setTrophyFace(Face.THREE);
-//                            type.setFace(Faces.THREE);
+
                             trophy.setTrophyType(type);
                         }
                     }
                 }
-                // Бубна
+                
                 else {
                     if (((SuitCard) trophy).getFace() == Face.FOUR) {
                         trophy.setTrophyType(TrophyType.BEST_JEST_NO_JOKER);
                     } else if (((SuitCard) trophy).getFace() == Face.ACE) {
                         TrophyType type = TrophyType.MAJORITY_FACE_VALUE;
                         trophy.setTrophyFace(Face.FOUR);
-//                        type.setFace(Faces.FOUR);
+
                         trophy.setTrophyType(type);
                     } else {
                         if (((SuitCard) trophy).getFace() == Face.TWO) {
                             TrophyType type = TrophyType.HIGHEST_FACE;
                             trophy.setTrophySuit(Suit.DIAMONDS);
-//                            type.setSuit(Suit.DIAMONDS);
+
                             trophy.setTrophyType(type);
                         } else {
                             TrophyType type = TrophyType.LOWEST_FACE;
                             trophy.setTrophySuit(Suit.DIAMONDS);
-//                            type.setSuit(Suit.DIAMONDS);
+
                             trophy.setTrophyType(type);
                         }
                     }
@@ -447,10 +447,7 @@ public class Game implements Serializable {
         return trophies;
     }
 
-    /**
-     * Sets the game variant and calls its setup method.
-     * @param variant the game variant to use
-     */
+    
     public void setVariant(GameVariant variant) {
         this.variant = variant;
         if (variant != null) {
@@ -458,10 +455,7 @@ public class Game implements Serializable {
         }
     }
 
-    /**
-     * Gets the current game variant.
-     * @return the current game variant
-     */
+    
     public GameVariant getVariant() {
         return variant;
     }

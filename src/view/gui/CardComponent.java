@@ -16,7 +16,7 @@ public class CardComponent extends JPanel {
     private final Card card;
     private final boolean faceUp;
     @SuppressWarnings("unused")
-    private final boolean selectable; // Kept for potential future use
+    private final boolean selectable; 
     private boolean selected;
     private static final int CARD_WIDTH = 100;
     private static final int CARD_HEIGHT = 140;
@@ -65,7 +65,7 @@ public class CardComponent extends JPanel {
     }
 
     private void drawFaceUpCard(Graphics2D g) {
-        // Draw card background
+        
         g.setColor(Color.WHITE);
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
         g.setColor(Color.BLACK);
@@ -82,11 +82,11 @@ public class CardComponent extends JPanel {
     }
 
     private void drawExtensionCard(Graphics2D g, ExtensionCard extCard) {
-        // Subtle background to distinguish extension cards
+        
         g.setColor(new Color(245, 245, 255));
         g.fillRoundRect(3, 3, getWidth() - 6, getHeight() - 6, 10, 10);
 
-        // Header band
+        
         g.setColor(new Color(70, 70, 160));
         g.fillRoundRect(6, 6, getWidth() - 12, 26, 8, 8);
 
@@ -103,7 +103,7 @@ public class CardComponent extends JPanel {
         }
         g.drawString(title, 10, 24);
 
-        // Value badge (top-right)
+        
         int badgeW = 26;
         int badgeH = 18;
         int badgeX = getWidth() - badgeW - 8;
@@ -116,12 +116,12 @@ public class CardComponent extends JPanel {
         FontMetrics fmVal = g.getFontMetrics();
         g.drawString(val, badgeX + (badgeW - fmVal.stringWidth(val)) / 2, badgeY + 13);
 
-        // Label
+        
         g.setColor(new Color(70, 70, 160));
         g.setFont(new Font("Arial", Font.BOLD, 10));
         g.drawString("EXT", 10, 52);
 
-        // Description (wrapped to a few lines)
+        
         g.setColor(Color.DARK_GRAY);
         g.setFont(new Font("Arial", Font.PLAIN, 10));
         String desc = extCard.getDescription();
@@ -167,10 +167,10 @@ public class CardComponent extends JPanel {
         g.setColor(suitColor);
         g.setFont(new Font("Arial", Font.BOLD, 20));
 
-        // Draw face value in top-left
+        
         g.drawString(face, 8, 25);
 
-        // Draw suit symbol
+        
         String suitSymbol = getSuitSymbol(suit);
         Font symbolFont = new Font("Arial", Font.BOLD, 30);
         g.setFont(symbolFont);
@@ -183,11 +183,11 @@ public class CardComponent extends JPanel {
         
         g.drawString(suitSymbol, centerX - symbolWidth / 2, centerY + symbolHeight / 2);
 
-        // Draw face value in bottom-right (rotated)
+        
         g.setFont(new Font("Arial", Font.BOLD, 20));
-//        g.rotate(Math.PI, centerX, centerY);
-//        g.drawString(face, 8, -getHeight() + 25);
-//        g.rotate(-Math.PI, centerX, centerY);
+
+
+
 
 
         g.rotate(Math.PI, centerX, centerY);
@@ -199,11 +199,11 @@ public class CardComponent extends JPanel {
         int cardWidth = getWidth();
         int cardHeight = getHeight();
 
-        // Enable better text rendering
+        
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // Draw "JOKER" label at top
+        
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, cardHeight / 10));
 
@@ -212,21 +212,21 @@ public class CardComponent extends JPanel {
         int textWidth = fm.stringWidth(text);
         g.drawString(text, (cardWidth - textWidth) / 2, fm.getAscent() + 10);
 
-        // Joker symbol
+        
         String jokerSymbol = "🃏";
 
-        // Start with a large font size
+        
         Font baseFont = new Font("Segoe UI Emoji", Font.PLAIN, 1000);
 
-        // We can have a problem here with Joker, for diff systems we would need to provide fix
-        // MacOS works great, need tests on windows
-//        if (!baseFont.canDisplay('\uD83C\uDCCF')) {
-//            baseFont = new Font("Noto Color Emoji", Font.PLAIN, 1000);
-//        }
+        
+        
+
+
+
         FontRenderContext frc = g.getFontRenderContext();
         Rectangle2D bounds = baseFont.getStringBounds(jokerSymbol, frc);
 
-        // Calculate scale to fit card
+        
         double scaleX = (cardWidth * 0.8) / bounds.getWidth();
         double scaleY = (cardHeight * 0.8) / bounds.getHeight();
         double scale = Math.min(scaleX, scaleY);
@@ -234,7 +234,7 @@ public class CardComponent extends JPanel {
         Font scaledFont = baseFont.deriveFont(AffineTransform.getScaleInstance(scale, scale));
         g.setFont(scaledFont);
 
-        // Recalculate bounds after scaling
+        
         bounds = scaledFont.getStringBounds(jokerSymbol, frc);
 
         int x = (int) ((cardWidth - bounds.getWidth()) / 2);
@@ -245,14 +245,14 @@ public class CardComponent extends JPanel {
 
 
     private void drawFaceDownCard(Graphics2D g) {
-        // Draw card back
-        g.setColor(new Color(0, 0, 139)); // Dark blue
+        
+        g.setColor(new Color(0, 0, 139)); 
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
         g.setColor(Color.BLACK);
         g.setStroke(new BasicStroke(2));
         g.drawRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
 
-        // Draw pattern
+        
         g.setColor(new Color(0, 0, 200));
         for (int i = 0; i < getWidth(); i += 10) {
             for (int j = 0; j < getHeight(); j += 10) {

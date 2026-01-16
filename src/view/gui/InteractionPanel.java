@@ -21,18 +21,18 @@ public class InteractionPanel extends JPanel {
     private InteractionType currentInteraction = InteractionType.NONE;
     private final GameWindow gameWindow;
     
-    // Callbacks for different interaction types
+    
     private Consumer<Integer> onCardSelected;
     private Consumer<Offer> onOfferSelected;
     private Consumer<Boolean> onFaceUpChoice;
     private Consumer<int[]> onTwoCardsSelected;
-    private Runnable onInteractionHidden; // Callback when interaction is hidden
+    private Runnable onInteractionHidden; 
     
-    // Current interaction data
+    
     private ArrayList<Offer> currentOffers;
     private ArrayList<Card> currentCards;
     
-    // UI Components
+    
     private final JLabel instructionLabel;
     private final JPanel contentPanel;
     private final JButton cancelButton;
@@ -43,13 +43,13 @@ public class InteractionPanel extends JPanel {
         setBackground(new Color(255, 255, 240));
         setBorder(BorderFactory.createTitledBorder("Player Action"));
         
-        // Instruction label at top
+        
         instructionLabel = new JLabel(" ", SwingConstants.CENTER);
         instructionLabel.setFont(new Font("Arial", Font.BOLD, 14));
         instructionLabel.setForeground(Color.BLACK);
         add(instructionLabel, BorderLayout.NORTH);
         
-        // Main content area
+        
         contentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         contentPanel.setBackground(new Color(255, 255, 240));
         JScrollPane scrollPane = new JScrollPane(contentPanel);
@@ -57,7 +57,7 @@ public class InteractionPanel extends JPanel {
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, BorderLayout.CENTER);
         
-        // Cancel button at bottom
+        
         cancelButton = new JButton("Cancel");
         cancelButton.setFont(new Font("Arial", Font.BOLD, 12));
         cancelButton.addActionListener(this::onCancel);
@@ -81,7 +81,7 @@ public class InteractionPanel extends JPanel {
                 Card card = hand.get(i);
                 int finalIndex = i;
                 CardButton cardButton = new CardButton(card, true, i, index -> {
-                        // Use the local callback parameter to avoid NPE if the field is cleared
+                        
                         callback.accept(finalIndex);
                     hideInteraction();
                 });
@@ -107,7 +107,7 @@ public class InteractionPanel extends JPanel {
             
             for (Offer offer : offers) {
                 OfferComponent offerComp = new OfferComponent(offer, true, selectedOffer -> {
-                    // Use the local callback parameter to avoid NPE if the field is cleared
+                    
                     callback.accept(selectedOffer);
                     hideInteraction();
                 });
@@ -130,7 +130,7 @@ public class InteractionPanel extends JPanel {
             instructionLabel.setText("Take face-up or face-down card?");
             contentPanel.removeAll();
             
-            // Face-up card option
+            
             if (offer.getFaceUpCard() != null) {
                 JPanel faceUpPanel = new JPanel(new BorderLayout());
                 faceUpPanel.setOpaque(false);
@@ -140,7 +140,7 @@ public class InteractionPanel extends JPanel {
                 faceUpPanel.add(faceUpLabel, BorderLayout.NORTH);
                 
                 CardButton faceUpBtn = new CardButton(offer.getFaceUpCard(), true, 0, index -> {
-                    // Call the provided callback directly
+                    
                     callback.accept(true);
                     hideInteraction();
                 });
@@ -148,7 +148,7 @@ public class InteractionPanel extends JPanel {
                 contentPanel.add(faceUpPanel);
             }
             
-            // Face-down card option
+            
             if (offer.getFaceDownCard() != null) {
                 JPanel faceDownPanel = new JPanel(new BorderLayout());
                 faceDownPanel.setOpaque(false);
@@ -158,7 +158,7 @@ public class InteractionPanel extends JPanel {
                 faceDownPanel.add(faceDownLabel, BorderLayout.NORTH);
                 
                 CardButton faceDownBtn = new CardButton(offer.getFaceDownCard(), false, 1, index -> {
-                    // Call the provided callback directly
+                    
                     callback.accept(false);
                     hideInteraction();
                 });
@@ -185,9 +185,9 @@ public class InteractionPanel extends JPanel {
             
             ArrayList<Integer> selectedIndices = new ArrayList<>();
             
-            CardButton[] cardButtonRef = new CardButton[hand.size()]; // Pre-allocate array
+            CardButton[] cardButtonRef = new CardButton[hand.size()]; 
             for (int i = 0; i < hand.size(); i++) {
-                final int cardIndex = i; // Make final for lambda
+                final int cardIndex = i; 
                 Card card = hand.get(cardIndex);
                 cardButtonRef[cardIndex] = new CardButton(card, true, cardIndex, index -> {
                     if (selectedIndices.contains(cardIndex)) {
@@ -198,7 +198,7 @@ public class InteractionPanel extends JPanel {
                         cardButtonRef[cardIndex].setSelected(true);
                         
                         if (selectedIndices.size() == 2) {
-                            // Auto-submit when 2 cards selected
+                            
                             int[] result = selectedIndices.stream().mapToInt(Integer::intValue).toArray();
                             callback.accept(result);
                             hideInteraction();
@@ -233,7 +233,7 @@ public class InteractionPanel extends JPanel {
             onFaceUpChoice = null;
             onTwoCardsSelected = null;
             
-            // Notify when interaction is hidden
+            
             if (onInteractionHidden != null) {
                 onInteractionHidden.run();
             }
@@ -247,22 +247,22 @@ public class InteractionPanel extends JPanel {
         switch (currentInteraction) {
             case CHOOSE_FACE_UP_CARD:
                 if (onCardSelected != null) {
-                    onCardSelected.accept(0); // Default to first card
+                    onCardSelected.accept(0); 
                 }
                 break;
             case CHOOSE_OFFER:
                 if (onOfferSelected != null && currentOffers != null && !currentOffers.isEmpty()) {
-                    onOfferSelected.accept(currentOffers.get(0)); // Default to first offer
+                    onOfferSelected.accept(currentOffers.get(0)); 
                 }
                 break;
             case CHOOSE_FACE_UP_DOWN:
                 if (onFaceUpChoice != null) {
-                    onFaceUpChoice.accept(true); // Default to face-up
+                    onFaceUpChoice.accept(true); 
                 }
                 break;
             case CHOOSE_TWO_CARDS:
                 if (onTwoCardsSelected != null && currentCards != null) {
-                    // Default to first two cards
+                    
                     onTwoCardsSelected.accept(new int[]{0, 1});
                 }
                 break;

@@ -26,23 +26,23 @@ public class HumanPlayerController extends PlayerController {
             return null;
         }
 
-        // Check if this is Full Hand variant (more than 2 cards)
+        
         if (humanPlayer.getHand().size() > 2) {
-            // Full Hand variant: choose two cards from many
+            
             int[] selectedIndices = humanView.chooseTwoCardsForOffer(humanPlayer.getName(), humanPlayer.getHand());
             if (selectedIndices != null && selectedIndices.length >= 2) {
-                // Store the cards before making the offer (cards will be removed from hand)
+                
                 Card card1 = humanPlayer.getHand().get(selectedIndices[0]);
                 Card card2 = humanPlayer.getHand().get(selectedIndices[1]);
                 
-                // Let player decide which card should be face-up
+                
                 int faceUpChoice = humanView.chooseFaceUpCard(humanPlayer.getName(),
                         new ArrayList<Card>() {{
                             add(card1);
                             add(card2);
                         }});
 
-                // Determine which card is face-up based on player choice
+                
                 Card faceUpCard, faceDownCard;
                 if (faceUpChoice == 0) {
                     faceUpCard = card1;
@@ -52,25 +52,25 @@ public class HumanPlayerController extends PlayerController {
                     faceDownCard = card1;
                 }
 
-                // Create offer with the two selected cards
+                
                 Offer offer = humanPlayer.makeOffer(new int[]{selectedIndices[0], selectedIndices[1]});
                 humanView.thankForChoosing(faceUpCard, faceDownCard);
                 return offer;
             }
         } else {
-            // Standard variant: choose one card to show face-up
+            
             int faceUpIndex = humanView.chooseFaceUpCard(humanPlayer.getName(), humanPlayer.getHand());
 
-            // Simple logic for second card (face down) - it's the other card
+            
             int faceDownIndex = (faceUpIndex == 0) ? 1 : 0;
 
             Card faceUpCard = humanPlayer.getHand().get(faceUpIndex);
             Card faceDownCard = humanPlayer.getHand().get(faceDownIndex);
 
-            // 2. Controller calls View to display feedback
+            
             humanView.thankForChoosing(faceUpCard, faceDownCard);
 
-            // 3. Controller calls Model to execute action
+            
             return humanPlayer.makeOffer(faceUpIndex, faceDownIndex);
         }
         return null;
@@ -82,7 +82,7 @@ public class HumanPlayerController extends PlayerController {
 
         humanView.showMessage(humanPlayer.getName() + ", please choose a card from players' offers!");
 
-        // Logic to filter available offers (moved from HumanPlayer)
+        
         ArrayList<Offer> selectableOffers = new ArrayList<>();
         ArrayList<Offer> completeOffers = new ArrayList<>();
 
@@ -118,17 +118,17 @@ public class HumanPlayerController extends PlayerController {
             return null;
         }
 
-        // 1. Controller calls View to get input (which offer)
+        
         Offer chosenOffer = humanView.chooseOffer(humanPlayer.getName(), selectableOffers);
 
-        // 2. Controller calls View to get input (face-up or face-down)
+        
         boolean isFaceUp = humanView.chooseFaceUpOrDown();
 
-        // 3. Controller calls Model to execute the action
-        // The model method is simplified to only perform the final action.
+        
+        
         Offer result = humanPlayer.chooseCard(availableOffers, chosenOffer, isFaceUp);
 
-        // Optional: Controller handles "No such card" message if model returns null
+        
         if (result == null) {
             humanView.showMessage("No such card available.");
         }

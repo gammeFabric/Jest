@@ -12,20 +12,20 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HumanViewGUI implements IHumanView {
     private final JTextArea outputArea;
     @SuppressWarnings("unused")
-    private final JPanel cardPanel; // Kept for potential future use
+    private final JPanel cardPanel; 
     private final JPanel handPanel;
     private final InteractionPanel interactionPanel;
     private Offer selectedOffer;
     private final boolean isHybridMode;
     private boolean isInteractionPanelActive = false;
 
-    // Async result holders
+    
     private final AtomicReference<CompletableFuture<Integer>> cardChoiceFuture = new AtomicReference<>();
     private final AtomicReference<CompletableFuture<Offer>> offerChoiceFuture = new AtomicReference<>();
     private final AtomicReference<CompletableFuture<Boolean>> faceUpDownFuture = new AtomicReference<>();
     private final AtomicReference<CompletableFuture<int[]>> twoCardsFuture = new AtomicReference<>();
     
-    // Selection tracking for Full Hand variant
+    
     private ArrayList<Integer> selectedCardIndices;
 
     public HumanViewGUI(JTextArea outputArea, JPanel cardPanel, JPanel handPanel, JPanel offersPanel, InteractionPanel interactionPanel) {
@@ -39,7 +39,7 @@ public class HumanViewGUI implements IHumanView {
         this.interactionPanel = interactionPanel;
         this.isHybridMode = isHybridMode;
         
-        // Set up callback to reset interaction flag when interaction panel is hidden
+        
         if (interactionPanel != null) {
             interactionPanel.setOnInteractionHidden(() -> {
                 isInteractionPanelActive = false;
@@ -58,9 +58,9 @@ public class HumanViewGUI implements IHumanView {
         cancelInteractions();
     }
 
-    // Method to cancel any ongoing interactions
+    
     public void cancelInteractions() {
-        isInteractionPanelActive = false; // Reset flag when cancelling interactions
+        isInteractionPanelActive = false; 
         
         if (interactionPanel != null) {
             interactionPanel.hideInteraction();
@@ -91,8 +91,8 @@ public class HumanViewGUI implements IHumanView {
         appendOutput(playerName + " has " + hand.size() + " cards to make an offer");
         appendOutput("These are your cards:");
 
-        // Clear the hand panel before showing the interaction panel to avoid
-        // duplicated card components between the main area and the interaction panel.
+        
+        
         if (handPanel != null) {
             SwingUtilities.invokeLater(() -> {
                 handPanel.removeAll();
@@ -103,18 +103,18 @@ public class HumanViewGUI implements IHumanView {
         
         isInteractionPanelActive = true;
 
-        // Create future for async result
+        
         CompletableFuture<Integer> future = new CompletableFuture<>();
         cardChoiceFuture.set(future);
 
-        // Show interaction panel
+        
         interactionPanel.showChooseFaceUpCard(playerName, hand, choice -> {
-            isInteractionPanelActive = false; // Reset flag when interaction is complete
+            isInteractionPanelActive = false; 
             future.complete(choice);
         });
 
         try {
-            return future.get(); // This will block, but the GUI remains responsive
+            return future.get(); 
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             return 0;
@@ -130,19 +130,19 @@ public class HumanViewGUI implements IHumanView {
                          " - Face up: " + offer.getFaceUpCard() + ", Face down: [hidden]");
         }
 
-        // Create future for async result
+        
         CompletableFuture<Offer> future = new CompletableFuture<>();
         offerChoiceFuture.set(future);
 
-        // Show interaction panel
+        
         interactionPanel.showChooseOffer(playerName, selectableOffers, choice -> {
             selectedOffer = choice;
-            isInteractionPanelActive = false; // Reset flag when interaction is complete
+            isInteractionPanelActive = false; 
             future.complete(choice);
         });
 
         try {
-            return future.get(); // This will block, but the GUI remains responsive
+            return future.get(); 
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             return selectableOffers.get(0);
@@ -155,18 +155,18 @@ public class HumanViewGUI implements IHumanView {
             return true;
         }
 
-        // Create future for async result
+        
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         faceUpDownFuture.set(future);
 
-        // Show interaction panel
+        
         interactionPanel.showChooseFaceUpDown(selectedOffer, choice -> {
-            isInteractionPanelActive = false; // Reset flag when interaction is complete
+            isInteractionPanelActive = false; 
             future.complete(choice);
         });
 
         try {
-            return future.get(); // This will block, but the GUI remains responsive
+            return future.get(); 
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             return true;
@@ -188,8 +188,8 @@ public class HumanViewGUI implements IHumanView {
         appendOutput(playerName + " has " + hand.size() + " cards to make an offer");
         appendOutput("Choose two cards from your hand:");
 
-        // Clear the hand panel before showing the interaction panel to avoid
-        // duplicated card components between the main area and the interaction panel.
+        
+        
         if (handPanel != null) {
             SwingUtilities.invokeLater(() -> {
                 handPanel.removeAll();
@@ -204,19 +204,19 @@ public class HumanViewGUI implements IHumanView {
         CompletableFuture<int[]> future = new CompletableFuture<>();
         twoCardsFuture.set(future);
 
-        // Show interaction panel for card selection
+        
         SwingUtilities.invokeLater(() -> {
             interactionPanel.showChooseTwoCards(hand, selectedIndices -> {
-                isInteractionPanelActive = false; // Reset flag when interaction is complete
+                isInteractionPanelActive = false; 
                 future.complete(selectedIndices);
             });
         });
 
         try {
-            return future.get(); // This will block, but the GUI remains responsive
+            return future.get(); 
         } catch (Exception e) {
             Thread.currentThread().interrupt();
-            return new int[]{0, 1}; // Default fallback
+            return new int[]{0, 1}; 
         }
     }
 

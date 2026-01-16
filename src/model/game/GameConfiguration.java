@@ -7,10 +7,7 @@ import model.players.strategies.StrategyType;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
- * Stores the complete configuration of a game to enable restart functionality.
- * This includes player information, variant, extensions, and all game parameters.
- */
+
 public class GameConfiguration implements Serializable {
     private static final long serialVersionUID = 1L;
     
@@ -26,7 +23,7 @@ public class GameConfiguration implements Serializable {
         this.selectedExtensions = new ArrayList<>(selectedExtensions);
         this.playerCount = players.size();
         
-        // Extract player configurations
+        
         for (Player player : players) {
             boolean isHuman = player instanceof model.players.HumanPlayer;
             StrategyType strategy = null;
@@ -55,9 +52,7 @@ public class GameConfiguration implements Serializable {
         return playerCount;
     }
     
-    /**
-     * Configuration for a single player
-     */
+    
     public static class PlayerConfiguration implements Serializable {
         private static final long serialVersionUID = 1L;
         

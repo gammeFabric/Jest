@@ -55,7 +55,7 @@ public class GameDisplayManager {
         SwingUtilities.invokeLater(() -> {
             botAreasPanel.removeAll();
             for (Player bot : bots) {
-                // Find offer for this bot
+                
                 Offer botOffer = null;
                 if (offers != null) {
                     for (Offer offer : offers) {
@@ -95,11 +95,11 @@ public class GameDisplayManager {
         SwingUtilities.invokeLater(() -> {
             deckPanel.removeAll();
             
-            // Show deck as face-down cards
-            int cardsToShow = Math.min(deckSize, 10); // Show max 10 cards visually
+            
+            int cardsToShow = Math.min(deckSize, 10); 
             for (int i = 0; i < cardsToShow; i++) {
                 CardComponent card = new CardComponent(null, false, false);
-                // Offset cards slightly to show stack effect
+                
                 card.setBorder(BorderFactory.createEmptyBorder(0, 0, i * 2, 0));
                 deckPanel.add(card);
             }
@@ -110,8 +110,8 @@ public class GameDisplayManager {
     }
 
     public void displayPlayerHand(Player player, ArrayList<Card> hand) {
-        // In hybrid mode, don't display cards in hand panel to avoid duplication
-        // Cards will only be shown in the interaction panel for selection
+        
+        
         if (isHybridMode) {
             return;
         }
@@ -119,11 +119,11 @@ public class GameDisplayManager {
         SwingUtilities.invokeLater(() -> {
             handPanel.removeAll();
             if (hand != null) {
-                // Display cards with slight rotation/fan effect
+                
                 for (int i = 0; i < hand.size(); i++) {
                     Card card = hand.get(i);
                     CardComponent cardComp = new CardComponent(card, true, false);
-                    // Add slight offset for fan effect
+                    
                     int offset = (i - hand.size() / 2) * 3;
                     cardComp.setBorder(BorderFactory.createEmptyBorder(0, Math.max(0, offset), 0, Math.max(0, -offset)));
                     handPanel.add(cardComp);

@@ -8,41 +8,41 @@ import java.util.ArrayList;
 
 public class CautiousStrategy implements PlayStrategy {
     private Jest playerJest;
-    private boolean isFullHandVariant = false; // Track if playing Full Hand variant
+    private boolean isFullHandVariant = false; 
 
-    // ... setCardsToOffer reste inchangé (logique de base) ...
+    
     @Override
     public Card[] setCardsToOffer(ArrayList<Card> hand) {
         if (hand.isEmpty()) {
             return null;
         }
         
-        // Detect if we're in Full Hand variant by checking hand size
+        
         isFullHandVariant = hand.size() > 4;
         
-        // On garde la logique de base : offrir la carte la plus "faible" face visible.
-        // On sécurise juste les comparaisons pour éviter les crashs avec les Extensions.
+        
+        
         
         Card minCard = hand.get(0);
         Card otherCard = hand.get(1);
 
-        // Compare suit values (Extension = 0, SuitCards = 1-4)
+        
         if (minCard.getSuitValue() > otherCard.getSuitValue()) {
             minCard = otherCard;
         } 
         else if (minCard.getSuitValue() == otherCard.getSuitValue()) {
-            // Si même "couleur" (ex: 2 Extensions ou 2 Trèfles)
-            // On regarde la valeur faciale
+            
+            
             if (minCard instanceof SuitCard && otherCard instanceof SuitCard) {
                 Suit s = ((SuitCard) minCard).getSuit();
-                // Inversion pour les rouges (Carreau/Cœur) car "faible" = "grande valeur négative"
+                
                 if (s == Suit.DIAMONDS || s == Suit.HEARTS) {
                      if (minCard.getFaceValue() < otherCard.getFaceValue()) minCard = otherCard;
                 } else {
                      if (minCard.getFaceValue() > otherCard.getFaceValue()) minCard = otherCard;
                 }
             } else {
-                // Comparaison simple pour les extensions
+                
                 if (minCard.getFaceValue() > otherCard.getFaceValue()) {
                     minCard = otherCard;
                 }
@@ -53,7 +53,7 @@ public class CautiousStrategy implements PlayStrategy {
 
         Card faceUpCard = minCard;
         hand.remove(faceUpCard);
-        Card faceDownCard = hand.get(0); // La carte restante
+        Card faceDownCard = hand.get(0); 
         hand.remove(faceDownCard);
         
         return new Card[] { faceUpCard, faceDownCard };
@@ -72,7 +72,7 @@ public class CautiousStrategy implements PlayStrategy {
 
             int score = evaluateCard(faceUp);
             
-            // In Full Hand variant, be more cautious about game phase
+            
             if (isFullHandVariant) {
                 score = adjustScoreForFullHandPhase(score, offer);
             }
@@ -83,7 +83,7 @@ public class CautiousStrategy implements PlayStrategy {
             }
         }
         
-        // Action
+        
         if (bestOffer != null && bestOffer.getFaceUpCard() != null) {
             playerJest.addCard(bestOffer.getFaceUpCard());
             bestOffer.setFaceUpCard(null);
@@ -92,18 +92,18 @@ public class CautiousStrategy implements PlayStrategy {
     }
 
     private int evaluateCard(Card c) {
-        // EXTENSIBILITÉ : On demande à la carte sa valeur pour une stratégie PRUDENTE
+        
         if (c instanceof ExtensionCard) {
             return ((ExtensionCard) c).getAIValue(StrategyType.CAUTIOUS, playerJest);
         }
 
-        // Logique classique pour les cartes standards
-        if (c instanceof Joker) return -1000; // Le prudent déteste le Joker
+        
+        if (c instanceof Joker) return -1000; 
         
         if (c instanceof SuitCard) {
             SuitCard sc = (SuitCard) c;
             int val = sc.getFaceValue();
-            // Prudent : Pique/Trèfle (+) sont bons, Carreau/Cœur (-) sont mauvais
+            
             if (sc.getSuit() == Suit.DIAMONDS || sc.getSuit() == Suit.HEARTS) return -val;
             return val;
         }
@@ -115,24 +115,22 @@ public class CautiousStrategy implements PlayStrategy {
         this.playerJest = jest; 
     }
     
-    /**
-     * Adjusts the score based on Full Hand variant game phase for cautious strategy.
-     */
+    
     private int adjustScoreForFullHandPhase(int baseScore, Offer offer) {
-        // Cautious strategy becomes even more conservative in Full Hand
+        
         int handSize = playerJest.getCards().size();
         
-        // Early game: be very cautious
+        
         if (handSize <= 2) {
-            return (int)(baseScore * 0.7); // Very conservative when we have few cards
+            return (int)(baseScore * 0.7); 
         }
         
-        // Late game: be extremely cautious
+        
         if (handSize >= 4) {
-            return (int)(baseScore * 0.5); // Extremely conservative when we have many cards
+            return (int)(baseScore * 0.5); 
         }
         
-        // Mid game: normal cautious strategy
+        
         return baseScore;
     }
 }

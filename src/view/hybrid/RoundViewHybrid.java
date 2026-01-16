@@ -104,8 +104,8 @@ public class RoundViewHybrid implements IRoundView {
         guiView.flashChosenOffer(chosenOffer);
     }
 
-    // Expose some GUI-only display helpers so controllers using a hybrid
-    // round view can still request GUI-only rendering (bots, trophies, deck)
+    
+    
     public void displayBots(List<Player> bots, List<Offer> offers) {
         guiView.displayBots(bots, offers);
     }

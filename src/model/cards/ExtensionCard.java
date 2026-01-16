@@ -14,10 +14,10 @@ public class ExtensionCard extends Card {
     private int faceValue;
     private String description;
     
-    private transient CardEffect effect; // Pour le score
+    private transient CardEffect effect; 
     
-    // NOUVEAU : La logique pour les Bots
-    // Fonction qui prend (StrategyType, Jest) et retourne un Integer (score d'intérêt)
+    
+    
     private transient BiFunction<StrategyType, Jest, Integer> aiHeuristic;
 
     public ExtensionCard(String name, int faceValue, String description,

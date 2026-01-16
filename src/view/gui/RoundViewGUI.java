@@ -15,11 +15,11 @@ public class RoundViewGUI implements IRoundView {
 
     private final JPanel offersPanel;
     private final JPanel handPanel;
-    @SuppressWarnings("unused") // Used via displayManager
+    @SuppressWarnings("unused") 
     private final JPanel botAreasPanel;
-    @SuppressWarnings("unused") // Used via displayManager
+    @SuppressWarnings("unused") 
     private final JPanel deckPanel;
-    @SuppressWarnings("unused") // Used via displayManager
+    @SuppressWarnings("unused") 
     private final JPanel trophiesPanel;
     private final GameDisplayManager displayManager;
     private final boolean isHybridMode;
@@ -127,14 +127,14 @@ public class RoundViewGUI implements IRoundView {
             return;
         }
 
-        isInteractionPanelActive = true; // Set flag when interaction starts
+        isInteractionPanelActive = true; 
 
         Runnable render = () -> {
-            // Always clear the hand panel when entering the choosing context to avoid
-            // duplicated card components between the main game area and the interaction panel.
+            
+            
             if (handPanel != null) {
                 handPanel.removeAll();
-                // Only re-populate the hand panel when interaction is NOT active
+                
                 if (!isInteractionPanelActive) {
                     if (choosingPlayer.getHand() != null) {
                         for (model.cards.Card card : choosingPlayer.getHand()) {
@@ -152,7 +152,7 @@ public class RoundViewGUI implements IRoundView {
             JPanel container = new JPanel(new BorderLayout(10, 10));
             container.setOpaque(false);
 
-            // Choosing player's jest (only their own)
+            
             JPanel jestPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
             jestPanel.setOpaque(false);
             javax.swing.border.TitledBorder jestBorder = BorderFactory.createTitledBorder(
@@ -170,7 +170,7 @@ public class RoundViewGUI implements IRoundView {
                 }
             }
 
-            // Available offers
+            
             JPanel offersList = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
             offersList.setOpaque(false);
             javax.swing.border.TitledBorder offersBorder = BorderFactory.createTitledBorder(
